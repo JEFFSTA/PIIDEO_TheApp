@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="15dp"
+    android:paddingLeft="15dp"
+    android:paddingRight="15dp"
+    android:paddingTop="15dp"
+    tools:context=".piideo.PhotoActivity">
+
+    <SurfaceView
+        android:id="@+id/surfaceView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:id="@+id/btnTakePicture"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal|bottom"
+
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="10dp"
+        android:onClick="onClickPicture"
+        android:text="@string/ph_take_picture" />
+
+    <!--<Button-->
+    <!--android:id="@+id/btnStartRecord"-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:layout_alignTop="@id/btnTakePicture"-->
+    <!--android:layout_toRightOf="@id/btnTakePicture"-->
+    <!--android:onClick="onClickStartRecord"-->
+    <!--android:text="@string/start_record"/>-->
+
+    <!--<Button-->
+    <!--android:id="@+id/btnStopRecord"-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:layout_alignTop="@id/btnStartRecord"-->
+    <!--android:layout_toRightOf="@id/btnStartRecord"-->
+    <!--android:onClick="onClickStopRecord"-->
+    <!--android:text="@string/stop_record"/>-->
+</FrameLayout>
