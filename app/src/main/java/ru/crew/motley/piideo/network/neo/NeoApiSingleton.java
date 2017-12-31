@@ -9,13 +9,7 @@ import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import com.google.gson.TypeAdapter;
-import com.google.gson.TypeAdapterFactory;
-import com.google.gson.reflect.TypeToken;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
 
-import java.io.IOException;
 import java.lang.reflect.Type;
 
 import io.reactivex.schedulers.Schedulers;
@@ -25,7 +19,6 @@ import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
-import ru.crew.motley.piideo.network.Member;
 import ru.crew.motley.piideo.network.neo.transaction.Row;
 
 /**
@@ -36,6 +29,12 @@ public class NeoApiSingleton {
 
     private static final String USERNAME = "neo4j";
     private static final String PASSWORD = "aeknyy";
+
+    private static final String GRAPHENE_USERNAME = "test-user";
+    private static final String GRAPHENE_PASSWORD = "b.IhmmnQZyAIH3.CWInrHqxppVio9oF";
+
+    private static final String AWS_USERNAME = "neo4j";
+    private static final String AWS_PASSWORD = "piideo_test";
 
     private static NeoApi sInstance;
 
@@ -55,7 +54,7 @@ public class NeoApiSingleton {
                     okhttp3.Request originalRequest = chain.request();
 
                     okhttp3.Request.Builder builder = originalRequest.newBuilder()
-                            .header("Authorization", Credentials.basic(USERNAME, PASSWORD))
+                            .header("Authorization", Credentials.basic(AWS_USERNAME, AWS_PASSWORD))
                             .header("Content-Type", "application/json;")
                             .header("Accept", "application/json;charset=UTF-8");
 
@@ -73,7 +72,7 @@ public class NeoApiSingleton {
 
         Retrofit retrofit = new Retrofit.Builder()
                 .client(okHttpClient)
-                .baseUrl(NeoApi.BASE_URL)
+                .baseUrl(NeoApi.AWS_INSTANCE_TEST)
                 .addCallAdapterFactory(rxAdapter)
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .build();

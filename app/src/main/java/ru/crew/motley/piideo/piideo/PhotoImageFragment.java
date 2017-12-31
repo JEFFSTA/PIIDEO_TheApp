@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.media.ExifInterface;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -21,10 +23,14 @@ import android.widget.ImageView;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 
 import butterknife.BindView;
 import ru.crew.motley.piideo.ButterFragment;
 import ru.crew.motley.piideo.R;
+import ru.crew.motley.piideo.chat.ChatActivity;
+import ru.crew.motley.piideo.chat.db.ChatLab;
+import ru.crew.motley.piideo.chat.db.PiideoRow;
 import ru.crew.motley.piideo.piideo.service.Recorder;
 
 /**
@@ -75,13 +81,15 @@ public class PhotoImageFragment extends ButterFragment {
         View root = super.onCreateView(inflater, container, savedInstanceState);
         File pictures = new File(Recorder.HOME_PATH);
         File photoFile = new File(pictures, mPiideoName + ".jpg");
+//        mImageView.setRotation(90);
         if (photoFile.exists()) {
             Bitmap myBitmap = decodeFile(photoFile);
+            int rotationAngle = rotation(photoFile);
+            myBitmap = rotateImage(myBitmap, rotationAngle);
             mImageView.setImageBitmap(myBitmap);
         }
         mShutter.setOnLongClickListener(v -> {
             Log.d(TAG, "onTouch: Long");
-//            mRecrodName = UUID.randomUUID().toString();
             startRecord(Recorder.getIntent(getActivity(), mPiideoName));
             mLongPressOn = true;
             return true;
@@ -110,7 +118,17 @@ public class PhotoImageFragment extends ButterFragment {
         mShutterFiller.setVisibility(View.GONE);
         getActivity().stopService(intent);
         getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        Intent i = ChatActivity.getIntent(getActivity());
+        getActivity().startActivity(i);
         getActivity().finish();
+        savePiideoToDb();
+    }
+
+    private void savePiideoToDb() {
+        ChatLab lab = ChatLab.get(getActivity().getApplicationContext());
+        PiideoRow row = new PiideoRow();
+        row.setPiideoFileName(mPiideoName);
+        lab.addPiideo(row);
     }
 
     private Bitmap decodeFile(File photoFile) {
@@ -125,9 +143,8 @@ public class PhotoImageFragment extends ButterFragment {
             int stageWidth = display.getWidth();
             int stageHeight = display.getHeight();
 
-
             final int REQUIRED_SIZE = stageHeight * stageWidth;
-            int width_tmp = o.outHeight, height_tmp = o.outWidth;
+            int height_tmp = o.outHeight, width_tmp = o.outWidth;
             int scale = 1;
             while (true) {
                 if (width_tmp / 2 < REQUIRED_SIZE || height_tmp / 2 < REQUIRED_SIZE)
@@ -171,12 +188,33 @@ public class PhotoImageFragment extends ButterFragment {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
-    //    @Override
-//    public void onDestroyView() {
-//        super.onDestroyView();
-//        if (myBitmap != null) {
-//            myBitmap.recycle();
-//            myBitmap = null;
-//        }
-//    }
+    private int rotation(File photoFile) {
+        try {
+            ExifInterface ei = new ExifInterface(photoFile.getAbsolutePath());
+            int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION,
+                    ExifInterface.ORIENTATION_UNDEFINED);
+            switch (orientation) {
+                case ExifInterface.ORIENTATION_ROTATE_90:
+                    return 90;
+                case ExifInterface.ORIENTATION_ROTATE_180:
+                    return 180;
+                case ExifInterface.ORIENTATION_ROTATE_270:
+                    return 270;
+                case ExifInterface.ORIENTATION_NORMAL:
+                default:
+                    return 0;
+
+            }
+        } catch (IOException ex) {
+            Log.e(TAG, "Exif couldn't be loaded from file");
+            throw new RuntimeException(ex);
+        }
+    }
+
+    private Bitmap rotateImage(Bitmap source, float angle) {
+        Matrix matrix = new Matrix();
+        matrix.postRotate(angle);
+        return Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getHeight(),
+                matrix, true);
+    }
 }

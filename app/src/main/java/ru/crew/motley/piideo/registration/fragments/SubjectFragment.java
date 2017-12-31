@@ -19,7 +19,6 @@ import android.widget.Toast;
 import org.parceler.Parcels;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import butterknife.BindView;
@@ -51,7 +50,7 @@ public class SubjectFragment extends ButterFragment {
     @BindView(R.id.next_btn)
     Button next;
     @BindView(R.id.subject)
-    EditText editText;
+    EditText mSubject;
 
     private Member mMember;
     private Set<String> mPhones;
@@ -84,12 +83,13 @@ public class SubjectFragment extends ButterFragment {
 
     @OnClick(R.id.next_btn)
     public void finishRegistration() {
-        if (editText.getText().toString().isEmpty()) {
+        String subject = mSubject.getText().toString().trim();
+        if (subject.isEmpty()) {
             Toast.makeText(getActivity(), R.string.sch_subject_violation, Toast.LENGTH_SHORT)
                     .show();
             return;
         }
-        SharedPrefs.memberSubject(editText.getText().toString(), getActivity());
+        SharedPrefs.memberSubject(subject, getActivity());
         createNewMember();
         mRegistrationListener.onNextStep(mMember);
     }
@@ -111,6 +111,7 @@ public class SubjectFragment extends ButterFragment {
                                                 Log.e(TAG, "Error!: " + error1.getLocalizedMessage());
                                                 Toast.makeText(getActivity(), R.string.ex_network, Toast.LENGTH_SHORT)
                                                         .show();
+                                                throw new RuntimeException(error1);
                                             });
                             Log.d(TAG, "" + transaction.getResults().size());
                         },
@@ -118,6 +119,7 @@ public class SubjectFragment extends ButterFragment {
                             Log.e(TAG, "Error!: " + error.getLocalizedMessage());
                             Toast.makeText(getActivity(), R.string.ex_network, Toast.LENGTH_SHORT)
                                     .show();
+                            throw new RuntimeException(error);
                         });
     }
 
@@ -146,6 +148,17 @@ public class SubjectFragment extends ButterFragment {
                 managedCursor.moveToFirst();
                 while (!managedCursor.isAfterLast()) {
                     String phone = managedCursor.getString(managedCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+                    phone = phone.replaceAll("\\D", "");
+                    if (phone.startsWith("33")) {
+                        phone = phone.replaceFirst("33", "");
+                    } else if (phone.startsWith("7")) {
+                        phone = phone.replaceFirst("7", "");
+                    } else if (phone.startsWith("8")) {
+                        phone = phone.replaceFirst("8", "");
+                    }
+//                    if (phone.startsWith("0")) {
+//                        phone = phone.replaceFirst("0", "");
+//                    }
                     mPhones.add(phone);
                     managedCursor.moveToNext();
                 }
@@ -212,7 +225,7 @@ public class SubjectFragment extends ButterFragment {
         Statement subject = new Statement();
         subject.setStatement(Request.NEW_SUBJECT);
         Parameters parameters = new Parameters();
-        parameters.getProps().put(Request.Var.NAME, editText.getText().toString());
+        parameters.getProps().put(Request.Var.NAME, mSubject.getText().toString().trim());
         subject.setParameters(parameters);
         return subject;
     }
@@ -222,7 +235,7 @@ public class SubjectFragment extends ButterFragment {
         studies.setStatement(Request.STUDIES);
         Parameters parameters = new Parameters();
         parameters.getProps().put(Request.Var.PHONE, mMember.getPhoneNumber());
-        parameters.getProps().put(Request.Var.NAME, editText.getText().toString());
+        parameters.getProps().put(Request.Var.NAME, mSubject.getText().toString().trim());
         studies.setParameters(parameters);
         return studies;
     }

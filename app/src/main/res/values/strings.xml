@@ -16,5 +16,8 @@
 
     <string name="ph_take_picture">Photo</string>
 
-    <string name="ex_network">Something went wrong while to the Internet.</string>
+    <string name="ex_network">Something went wrong while connecting to the Internet.</string>
+
+
+    <string name="resToastText">New bug\'s been found</string>
 </resources>

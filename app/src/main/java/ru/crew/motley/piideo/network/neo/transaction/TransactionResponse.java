@@ -31,4 +31,16 @@ public class TransactionResponse {
         this.errors = errors;
     }
 
+    @Override
+    public String toString() {
+        if (getResults() == null || getResults().isEmpty()) {
+            return "Results is empty";
+        }
+        StringBuilder builder = new StringBuilder();
+        for (Result result : getResults()) {
+            builder.append(result.toString());
+            builder.append("\n");
+        }
+        return builder.toString();
+    }
 }

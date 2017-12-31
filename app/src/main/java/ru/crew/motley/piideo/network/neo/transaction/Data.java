@@ -32,4 +32,16 @@ public class Data {
         this.meta = meta;
     }
 
+    @Override
+    public String toString() {
+        if (row == null || row.isEmpty()) {
+            return "Row is empty";
+        }
+        StringBuilder builder = new StringBuilder();
+        for (Row row: row) {
+            builder.append(row.toString());
+            builder.append("\n");
+        }
+        return builder.toString();
+    }
 }

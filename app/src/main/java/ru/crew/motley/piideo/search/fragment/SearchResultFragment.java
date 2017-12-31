@@ -2,13 +2,15 @@ package ru.crew.motley.piideo.search.fragment;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -23,6 +25,7 @@ import ru.crew.motley.piideo.network.neo.Request;
 import ru.crew.motley.piideo.network.neo.Statement;
 import ru.crew.motley.piideo.network.neo.Statements;
 import ru.crew.motley.piideo.network.neo.transaction.Data;
+import ru.crew.motley.piideo.search.adapter.SearchAdapter;
 
 /**
  * Created by vas on 12/18/17.
@@ -30,8 +33,15 @@ import ru.crew.motley.piideo.network.neo.transaction.Data;
 
 public class SearchResultFragment extends ButterFragment {
 
-    @BindView(R.id.debug_result)
-    TextView mDebugText;
+//    @BindView(R.id.debug_result)
+//    TextView mDebugText;
+
+    @BindView(R.id.searchRecycler)
+    RecyclerView mSearchRecycler;
+
+    private SearchAdapter mSearchAdapter;
+
+    private List<String> mPhoneNumbers = new ArrayList<>();
 
     public static SearchResultFragment newInstance() {
         Bundle args = new Bundle();
@@ -43,6 +53,7 @@ public class SearchResultFragment extends ButterFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mSearchAdapter = new SearchAdapter(mPhoneNumbers);
         startSearch();
     }
 
@@ -50,7 +61,10 @@ public class SearchResultFragment extends ButterFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         fragmentLayout = R.layout.fragment_search_result;
-        return super.onCreateView(inflater, container, savedInstanceState);
+        View v = super.onCreateView(inflater, container, savedInstanceState);
+        mSearchRecycler.setLayoutManager(new LinearLayoutManager(getActivity()));
+        mSearchRecycler.setAdapter(mSearchAdapter);
+        return v;
     }
 
     private void startSearch() {
@@ -69,21 +83,23 @@ public class SearchResultFragment extends ButterFragment {
                                         .show();
                                 return;
                             }
-                            String response = responseData
-                                    .get(0)
-                                    .getRow()
-                                    .get(0)
-                                    .getValue();
-                            mDebugText.setText(response);
+                            for (Data item : responseData) {
+                                String response = item
+                                        .getRow()
+                                        .get(0)
+                                        .getValue();
+                                mPhoneNumbers.add(response);
+                            }
+                            mSearchAdapter.notifyDataSetChanged();
                         },
                         error -> {
-
+                            throw new RuntimeException(error);
                         });
     }
 
     private Statement searchRequest(String searchSubject, String phoneNumber) {
         if (TextUtils.isEmpty(searchSubject)) {
-            throw new IllegalStateException("Search subject can't be null or empty");
+            throw new IllegalStateException("Search mSubject can't be null or empty");
         }
         if (TextUtils.isEmpty(phoneNumber)) {
             throw new IllegalArgumentException("Phone number can't be null or empty");

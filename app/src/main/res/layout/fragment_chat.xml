@@ -5,89 +5,91 @@
 
     <LinearLayout
 
-        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
         <LinearLayout
-            android:background="@color/colorPrimary"
-            android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:background="@color/colorPrimary"
+            android:orientation="horizontal">
 
             <Button
-                android:text="Back"
-                android:layout_weight="1"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Back" />
 
             <TextView
-                android:gravity="center_horizontal"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:text="[Author]"
                 android:layout_weight="9"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content" />
+                android:gravity="center_horizontal"
+                android:text="[Author]" />
 
             <Button
-                android:text="watch"
-                android:layout_weight="1"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="watch" />
 
             <Button
-                android:text="menu"
-                android:layout_weight="1"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="menu" />
 
         </LinearLayout>
 
         <TextView
-            android:layout_margin="32dp"
-            android:layout_gravity="right"
-            android:text="Stub message"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:layout_margin="32dp"
+            android:text="Stub message" />
+
+        <android.support.v7.widget.RecyclerView
+            android:layout_gravity="center_horizontal"
+            android:id="@+id/chat_recycler"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent" />
 
     </LinearLayout>
-
-
-
 
 
     <LinearLayout
-        android:layout_gravity="bottom"
-        android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:orientation="horizontal">
 
         <Button
-            android:text="emj"
-            android:layout_weight="2"
             android:layout_width="0dp"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:text="emj" />
 
         <EditText
-            android:layout_weight="9"
             android:layout_width="0dp"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:layout_weight="9" />
+
         <Button
-            android:text="attach"
-            android:layout_weight="2"
             android:layout_width="0dp"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:text="attach" />
+
         <Button
             android:id="@+id/piideo"
-            android:text="piideo"
-            android:layout_weight="2"
             android:layout_width="0dp"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:text="piideo" />
 
     </LinearLayout>
-
-
-
 
 
 </FrameLayout>

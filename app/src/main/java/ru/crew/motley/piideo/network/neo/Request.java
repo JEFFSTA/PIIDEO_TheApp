@@ -58,15 +58,16 @@ public class Request {
                     " { " + PersonNode.PHONE + ": {props}." + Var.PHONE + " }) " +
                     "RETURN p";
 
-//    public static final String FIND_CONTACTS =
-//            "WITH [1026, 1207] AS phones " +
-//                    "MATCH (p" + PersonNode.LABEL+ ") where p." + PersonNode.PHONE + " in phones" +
-//                    " return p";
-
     public static final String NEW_CONTACT =
             "MERGE (p" + PersonNode.LABEL +
                     " { " + PersonNode.PHONE + ": {props}." + Var.PHONE + "})" +
                     " ON CREATE SET p.registered = FALSE";
+
+    public static final String DELETE_CONTACT =
+            "MATCH (p" + PersonNode.LABEL +
+                    " { " + PersonNode.PHONE + ": {props}." + Var.PHONE +"})" +
+                    "<-[rs" + KnowsRelation.LABEL + "]-(p0:Person) " +
+                    " WHERE NOT p0." + PersonNode.PHONE + " IN ";
 
     public static final String NEW_SUBJECT =
             "MERGE (s" + SubjectNode.LABEL +
@@ -75,20 +76,15 @@ public class Request {
     public static final String FIND_SUBJECTS =
             "MATCH (s:" + SubjectNode.LABEL + ") RETURN s";
 
-//    public static final String FIND_QUESTION_TARGET =
-//            "MATCH (" + SubjectNode.LABEL + " {" + SubjectNode.NAME + " : { props }." + Var.NAME + " })" +
-//                    "<-[" + StudiesRelation.LABEL + "]-(me" + PersonNode.LABEL + " {" + PersonNode.PHONE + " : { props }." + Var.PHONE + " })" +
-//                    "<-[" + KnowsRelation.LABEL + "*1..]-" +
-//                    "(friendOfFriend" + PersonNode.LABEL + ")" +
-//                    "-[" + StudiesRelation.LABEL + "]->" +
-//                    "(" + SubjectNode.LABEL + " {" + SubjectNode.NAME + " : { subjectName }) " +
-//                    "RETURN friendOfFriend LIMIT 7";
-
     public static final String FIND_QUESTION_TARGET =
             "MATCH (me" + PersonNode.LABEL + " {" + PersonNode.PHONE + " : { props }." + Var.PHONE + " })" +
                     "<-[" + KnowsRelation.LABEL + "*1..]-" +
                     "(friendOfFriend" + PersonNode.LABEL + ")" +
                     "-[" + StudiesRelation.LABEL + "]->" +
                     "(" + SubjectNode.LABEL + " {" + SubjectNode.NAME + " : { props }." + Var.NAME + " }) " +
-                    "RETURN friendOfFriend LIMIT 7";
+                    " WHERE friendOfFriend." + PersonNode.PHONE + " <> { props }." + Var.PHONE +
+                    " RETURN DISTINCT friendOfFriend LIMIT 7";
+
+    public static final String FIND_ALL_SUBJECTS =
+            "MATCH (s" + SubjectNode.LABEL + ") RETURN s ORDER BY s.name";
 }

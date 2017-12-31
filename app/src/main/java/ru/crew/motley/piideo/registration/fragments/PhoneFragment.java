@@ -66,14 +66,15 @@ public class PhoneFragment extends ButterFragment {
     @OnClick(R.id.next_btn)
     public void nextStep() {
         if (validatePhone()) {
-            String phoneNumber = mCCP.getFullNumber();
-            SharedPrefs.memberPhone(mCCP.getFullNumber(), getActivity());
+            String phoneNumber = mPhoneNumber.getText().toString().trim().replaceAll("\\D", "");
+//            String phoneNumber = mCCP.getFullNumber().trim().replaceAll("\\D", "");
+            SharedPrefs.memberPhone(phoneNumber, getActivity());
             loadMember(phoneNumber);
         }
     }
 
     private boolean validatePhone() {
-        if (mPhoneNumber.getText().toString().isEmpty()) {
+        if (mPhoneNumber.getText().toString().trim().replaceAll("\\D", "").isEmpty()) {
             Toast.makeText(getActivity(), R.string.reg_phone_toast, Toast.LENGTH_SHORT).show();
             return false;
         }
@@ -113,6 +114,7 @@ public class PhoneFragment extends ButterFragment {
                             Log.e(TAG, "Error!: " + throwable.getLocalizedMessage());
                             Toast.makeText(getActivity(), R.string.ex_network, Toast.LENGTH_SHORT)
                                     .show();
+                            throw new RuntimeException(throwable);
                         });
     }
 
@@ -134,6 +136,7 @@ public class PhoneFragment extends ButterFragment {
                             Log.e(TAG, "Error!: " + throwable.getLocalizedMessage());
                             Toast.makeText(getActivity(), R.string.ex_network, Toast.LENGTH_SHORT)
                                     .show();
+                            throw new RuntimeException(throwable);
                         });
     }
 

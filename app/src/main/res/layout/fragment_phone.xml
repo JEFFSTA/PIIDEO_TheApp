@@ -15,13 +15,14 @@
         android:layout_marginTop="32dp"
         android:gravity="center_horizontal"
         app:ccp_textSize="18sp"
+        app:ccp_autoDetectCountry="true"
         app:layout_constraintBottom_toTopOf="@+id/phone_number"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.4"
         app:layout_constraintVertical_chainStyle="packed"
-        app:layout_constraintWidth_default="spread" />
+        app:layout_constraintWidth_default="spread"/>
 
     <EditText
         android:id="@+id/phone_number"

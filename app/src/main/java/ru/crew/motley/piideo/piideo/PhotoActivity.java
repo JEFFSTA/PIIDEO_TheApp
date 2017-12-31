@@ -4,14 +4,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Matrix;
+import android.graphics.Point;
 import android.graphics.RectF;
 import android.hardware.Camera;
+import android.hardware.Camera.Size;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.view.Display;
+import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -22,6 +24,7 @@ import android.view.WindowManager;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 
 import ru.crew.motley.piideo.R;
@@ -78,7 +81,6 @@ public class PhotoActivity extends AppCompatActivity {
 
     private void prepareCamera() {
         camera = Camera.open(CAMERA_ID);
-        setPreviewSize(false);
 
         Camera.Parameters params = camera.getParameters();
         if (params.getSupportedFocusModes().contains(
@@ -87,7 +89,8 @@ public class PhotoActivity extends AppCompatActivity {
         }
         params.setRotation(90);
         camera.setParameters(params);
-
+        setCameraDisplayOrientation(CAMERA_ID);
+        setPreviewSize();
 
         holder.addCallback(holderCallback);
     }
@@ -132,11 +135,31 @@ public class PhotoActivity extends AppCompatActivity {
 
     }
 
+    void setPreviewSize() {
+        Camera.Parameters p = camera.getParameters();
+        List<Camera.Size> previewsizes = p.getSupportedPreviewSizes();
+        List<Camera.Size> videosizes = p.getSupportedVideoSizes();
+        Point displaySize = new Point();
+        getWindowManager().getDefaultDisplay().getSize(displaySize);
+        int maxPreviewWidth = displaySize.x;
+        int maxPreviewHeight = displaySize.y;
+
+        Size size = getOptimalPreviewSize(previewsizes, maxPreviewWidth, maxPreviewHeight);
+        p.setPreviewSize(size.width, size.height);
+        camera.setParameters(p);
+    }
+
     void setPreviewSize(boolean fullScreen) {
 
+        Point displaySize = new Point();
+        getWindowManager().getDefaultDisplay().getSize(displaySize);
+        int maxPreviewWidth = displaySize.x;
+        int maxPreviewHeight = displaySize.y;
+
+
         // получаем размеры экрана
-        Display display = getWindowManager().getDefaultDisplay();
-        boolean widthIsMax = display.getWidth() > display.getHeight();
+//        Display display = getWindowManager().getDefaultDisplay();
+        boolean widthIsMax = maxPreviewWidth > maxPreviewHeight;
 
         // определяем размеры превью камеры
         Camera.Size size = camera.getParameters().getPreviewSize();
@@ -145,7 +168,7 @@ public class PhotoActivity extends AppCompatActivity {
         RectF rectPreview = new RectF();
 
         // RectF экрана, соотвествует размерам экрана
-        rectDisplay.set(0, 0, display.getWidth(), display.getHeight());
+        rectDisplay.set(0, 0, displaySize.x, displaySize.y);
 
         // RectF первью
         if (widthIsMax) {
@@ -260,4 +283,54 @@ public class PhotoActivity extends AppCompatActivity {
             }
         });
     }
+
+    private Size getOptimalPreviewSize(List<Size> sizes, int w, int h) {
+        final double ASPECT_TOLERANCE = 0.2;
+        double targetRatio = (double) 4/ (double) 3;
+        if (sizes == null)
+            return null;
+
+        Size optimalSize = null;
+        double minDiff = Double.MAX_VALUE;
+
+        int targetWidth = w;
+
+//        if (  you want ratio as closed to what i asked for) {
+        for (Size size : sizes) {
+            Log.d("Camera", "Checking size " + size.width + "w " + size.height
+                    + "h");
+            double ratio = (double) size.width / size.height;
+            Log.d("Camera", "Checking size " + (Math.abs(ratio - targetRatio)));
+            if (Math.abs(ratio - targetRatio) > ASPECT_TOLERANCE)
+                continue;
+            if (Math.abs(size.height - targetWidth) < minDiff) {
+                optimalSize = size;
+                Log.d("Camera", " + + " + optimalSize.width + " " + optimalSize.height);
+                minDiff = Math.abs(size.height - targetWidth);
+            }
+        }
+//        }
+
+//        if (you want height as closed to what i asked for) { //you can do other for width
+//            minDiff = Double.MAX_VALUE;
+//            for (Size size : sizes) {
+//                if (Math.abs(size.height - targetHeight) < minDiff) {
+//                    optimalSize = size;
+//                    minDiff = Math.abs(size.height - targetHeight);
+//                }
+//            }
+//        }
+
+//        if (you want the bigest one) {
+//            minDiff = 0;
+//            for (Size size : sizes) {
+//                if (  size.height * size.width > minDiff ) {
+//                    optimalSize = size;
+//                    minDiff = size.height * size.width ;
+//                }
+//            }
+//        }
+        return optimalSize;
+    }
+
 }

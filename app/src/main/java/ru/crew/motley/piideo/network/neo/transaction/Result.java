@@ -30,4 +30,17 @@ public class Result {
     public void setData(List<Data> data) {
         this.data = data;
     }
+
+    @Override
+    public String toString() {
+        if (data == null || data.isEmpty()) {
+            return "Data is empty";
+        }
+        StringBuilder builder = new StringBuilder();
+        for (Data data: data) {
+            builder.append(data.toString());
+            builder.append("\n");
+        }
+        return builder.toString();
+    }
 }

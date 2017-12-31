@@ -80,7 +80,7 @@ public class UserSetupActivity extends AppCompatActivity implements Registration
                 currentStep = Page.COMPLETE;
                 return;
             default:
-                throw new IllegalStateException("Page you want to show is unsupported");
+                throw new IllegalStateException("Page you want to showChat is unsupported");
         }
         showNextStep();
     }
@@ -106,7 +106,7 @@ public class UserSetupActivity extends AppCompatActivity implements Registration
                     showSearch();
                 }
             default:
-                throw new IllegalStateException("Page you want to show is unsupported");
+                throw new IllegalStateException("Page you want to showChat is unsupported");
         }
     }
 
@@ -139,7 +139,7 @@ public class UserSetupActivity extends AppCompatActivity implements Registration
 
 
     private void showResponseDialog(String string) {
-//        Snackbar.make(view, string, Snackbar.LENGTH_SHORT).show();
+//        Snackbar.make(view, string, Snackbar.LENGTH_SHORT).showChat();
     }
 
 

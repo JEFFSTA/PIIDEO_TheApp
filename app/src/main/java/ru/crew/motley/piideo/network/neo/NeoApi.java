@@ -11,7 +11,10 @@ import ru.crew.motley.piideo.network.neo.transaction.TransactionResponse;
 
 public interface NeoApi {
 
-    String BASE_URL = "http://172.16.206.101:7474";
+
+    String LOCAL_URL = "http://172.16.206.101:7474";
+    String GRAPHENE_TEST = "http://hobby-gkpaichbhigjgbkefmjegkal.dbs.graphenedb.com:24789/db/data/";
+    String AWS_INSTANCE_TEST = "http://ec2-54-93-246-79.eu-central-1.compute.amazonaws.com:7474/db/data/";
 
     @POST("/db/data/transaction/commit")
     Single<TransactionResponse> executeStatement(@Body Statements statements);
