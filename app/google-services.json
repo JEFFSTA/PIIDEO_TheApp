@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "997788763495",
+    "firebase_url": "https://piideo-e0fc2.firebaseio.com",
+    "project_id": "piideo-e0fc2",
+    "storage_bucket": "piideo-e0fc2.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:997788763495:android:d70e012b39b04f00",
+        "android_client_info": {
+          "package_name": "ru.crew.motley.piideo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "997788763495-c7d73ckkjqpvafkqm1ghjfog7195v1f5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC2ZcpAdznX9f1RhA12jMODPyHhqe2UjCk"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

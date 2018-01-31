@@ -10,5 +10,5 @@ public interface RegistrationListener {
 
     void onNextStep(Member member);
 
-    void onComplete();
+    void onComplete(Member member);
 }

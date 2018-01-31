@@ -8,16 +8,16 @@ import java.util.Map;
  */
 
 public class Parameters {
-    private Map<String, String> props;
+    private Map<String, Object> props;
 
-    public Map<String, String> getProps() {
+    public Map<String, Object> getProps() {
         if (props == null) {
             props = new HashMap<>();
         }
         return props;
     }
 
-    public void setProps(Map<String, String> props) {
+    public void setProps(Map<String, Object> props) {
         this.props = props;
     }
 }

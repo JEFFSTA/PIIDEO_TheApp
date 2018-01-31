@@ -3,35 +3,100 @@ package ru.crew.motley.piideo.search.activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcelable;
+import android.support.annotation.IntDef;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.iid.FirebaseInstanceId;
+
+import org.parceler.Parcels;
+
 import ru.crew.motley.piideo.R;
-import ru.crew.motley.piideo.chat.ChatActivity;
+import ru.crew.motley.piideo.chat.activity.ChatActivity;
+import ru.crew.motley.piideo.chat.db.ChatLab;
+import ru.crew.motley.piideo.fcm.RequestReceivedDialog;
+import ru.crew.motley.piideo.fcm.User;
+import ru.crew.motley.piideo.handshake.activity.RequestListenerActivity;
+import ru.crew.motley.piideo.network.Member;
+import ru.crew.motley.piideo.registration.activity.UserSetupActivity;
 import ru.crew.motley.piideo.search.SearchListener;
 import ru.crew.motley.piideo.search.fragment.SearchResultFragment;
 import ru.crew.motley.piideo.search.fragment.SearchSubjectFragment;
+import ru.crew.motley.piideo.search.fragment.UselessFragment;
+import ru.crew.motley.piideo.splash.SplashActivity;
 
 /**
  * Created by vas on 12/18/17.
  */
 
-public class SearchActivity extends AppCompatActivity implements SearchListener{
+public class SearchActivity extends RequestListenerActivity implements SearchListener {
 
-    public static Intent getIntent(Context context) {
-        return new Intent(context, SearchActivity.class);
+    private static final String EXTRA_MEMBER = "member";
+
+    private Member mMember;
+
+    private FirebaseAuth mAuth;
+    private FirebaseAuth.AuthStateListener mAuthListener;
+    private DatabaseReference mDatabase;
+
+//    private ShowDialogReceiver mDialogReceiver;
+
+    /**
+     * Page order
+     */
+    @IntDef({Page.SUBJECT_PAGE, Page.BUTTON_PAGE, Page.SEARCH_PAGE, Page.COMPLETE})
+    private @interface Page {
+        int BUTTON_PAGE = 0;
+        int SUBJECT_PAGE = 1;
+        int SEARCH_PAGE = 2;
+        int COMPLETE = 10;
     }
+
+    @Page
+    private int currentStep = Page.BUTTON_PAGE;
+
+    public static Intent getIntent(Parcelable member, Context context) {
+        Intent i = new Intent(context, SearchActivity.class);
+        i.putExtra(EXTRA_MEMBER, member);
+        return i;
+    }
+
+//    @Override
+//    protected void onResume() {
+//        super.onResume();
+//        ((Appp) getApplication()).activityResumed();
+//        if (mDialogReceiver == null) {
+//            mDialogReceiver = new ShowDialogReceiver(this);
+//        }
+//        IntentFilter filter = new IntentFilter(ShowDialogReceiver.Companion.getBROADCAST_ACTION());
+//        registerReceiver(mDialogReceiver, filter);
+//    }
+//
+//    @Override
+//    protected void onPause() {
+//        unregisterReceiver(mDialogReceiver);
+//        ((Appp) getApplication()).activityPaused();
+//        super.onPause();
+//    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_search);
-        Fragment fragment = SearchSubjectFragment.newInstance(this);
-        showFragment(fragment);
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+        initializeFirebaseAuthListener();
+        Parcelable member = getIntent().getParcelableExtra(EXTRA_MEMBER);
+        mMember = Parcels.unwrap(member);
+//        Fragment fragment = SearchSubjectFragment.newInstance(member, this);
+        showNextStep();
     }
 
     @Override
@@ -43,10 +108,19 @@ public class SearchActivity extends AppCompatActivity implements SearchListener{
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()){
-            case R.id.chat:
-                Intent i = ChatActivity.getIntent(this);
-                startActivity(i);
+        switch (item.getItemId()) {
+//            case R.id.chat:
+//                // TODO: 1/20/18 remove null from get intent
+//                Intent chatIntent = ChatActivity.getIntent(null, this);
+//                startActivity(chatIntent);
+//                break;
+            case R.id.logout:
+                FirebaseAuth.getInstance().signOut();
+                ChatLab lab = ChatLab.get(this);
+                lab.deleteMember();
+                Intent i = UserSetupActivity.getIntent(this);
+                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                finish();
                 break;
             default:
                 return super.onOptionsItemSelected(item);
@@ -62,7 +136,57 @@ public class SearchActivity extends AppCompatActivity implements SearchListener{
 
     @Override
     public void onNext() {
-        Fragment fragment = SearchResultFragment.newInstance();
+        Parcelable member = Parcels.wrap(mMember);
+        nextStep();
+//        Fragment fragment = SearchResultFragment.newInstance(member);
+//        showFragment(fragment);
+    }
+
+    private void nextStep() {
+        switch (currentStep) {
+            case Page.BUTTON_PAGE:
+                currentStep = Page.SUBJECT_PAGE;
+                break;
+            case Page.SUBJECT_PAGE:
+                currentStep = Page.SEARCH_PAGE;
+                break;
+            case Page.SEARCH_PAGE:
+                currentStep = Page.COMPLETE;
+                break;
+            case Page.COMPLETE:
+                throw new IllegalStateException("Page you want to go out is final, just use onComplete.");
+//                currentStep = Page.COMPLETE;
+//                return;
+            default:
+                throw new IllegalStateException("Page you want to showChat is unsupported. Current step is " + currentStep);
+        }
+        showNextStep();
+    }
+
+    private void showNextStep() {
+        Fragment fragment;
+        switch (currentStep) {
+            case Page.BUTTON_PAGE:
+                fragment = UselessFragment.Companion.newInstance(this);
+                break;
+            case Page.SUBJECT_PAGE:
+                Parcelable memberForVerification = Parcels.wrap(mMember);
+                fragment = SearchSubjectFragment.newInstance(memberForVerification, this);
+                break;
+            case Page.SEARCH_PAGE:
+                Parcelable memberForSchool = Parcels.wrap(mMember);
+                fragment = SearchResultFragment.newInstance(memberForSchool);
+                break;
+            case Page.COMPLETE:
+                // do nothing
+//                if (!mMember.isRegistered()) {
+//                    createNewMember();
+//                } else {
+//                    showSearch();
+//                }
+            default:
+                throw new IllegalStateException("Page you want to showChat is unsupported");
+        }
         showFragment(fragment);
     }
 
@@ -70,8 +194,8 @@ public class SearchActivity extends AppCompatActivity implements SearchListener{
     public void onBackPressed() {
         Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.container);
         if (fragment instanceof SearchResultFragment) {
-            fragment = SearchSubjectFragment.newInstance(this);
-            showFragment(fragment);
+            currentStep = Page.SUBJECT_PAGE;
+            showNextStep();
         } else {
             super.onBackPressed();
         }
@@ -81,4 +205,59 @@ public class SearchActivity extends AppCompatActivity implements SearchListener{
     public void onBack() {
 
     }
+
+    private void initializeFirebaseAuthListener() {
+        mAuth = FirebaseAuth.getInstance();
+        mAuthListener = firebaseAuth -> {
+            FirebaseUser user = firebaseAuth.getCurrentUser();
+            if (user != null) {
+                addUserToDatabase(user);
+                Log.d("@@@@", "home:signed_in:" + user.getUid());
+            } else {
+                Log.d("@@@@", "home:signed_out");
+                Intent login = SplashActivity.getIntent(SearchActivity.this);
+                startActivity(login);
+                finish();
+            }
+        };
+    }
+
+    private void addUserToDatabase(FirebaseUser firebaseUser) {
+        User user = new User(
+//                firebaseUser.getDisplayName(),
+//                firebaseUser.getEmail(),
+                firebaseUser.getUid()
+//                firebaseUser.getPhotoUrl() == null ? "" : firebaseUser.getPhotoUrl().toString()
+        );
+
+        mDatabase.child("users")
+                .child(user.getUid()).setValue(user);
+
+        String instanceId = FirebaseInstanceId.getInstance().getToken();
+        if (instanceId != null) {
+            mDatabase.child("users")
+                    .child(firebaseUser.getUid())
+                    .child("instanceId")
+                    .setValue(instanceId);
+        }
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        mAuth.addAuthStateListener(mAuthListener);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (mAuthListener != null) {
+            mAuth.removeAuthStateListener(mAuthListener);
+        }
+    }
+
+//    public void showChat(String dbMessageId, String type) {
+//        RequestReceivedDialog dialog = RequestReceivedDialog.Companion.getInstance(dbMessageId, type);
+//        dialog.show(getSupportFragmentManager(), "Handshake");
+//    }
 }

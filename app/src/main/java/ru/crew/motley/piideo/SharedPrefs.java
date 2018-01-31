@@ -16,6 +16,8 @@ public class SharedPrefs {
     private static final String SEARCH_SUBJECT = "searchSubject";
     private static final String PHONE = "memberPhone";
 
+    private static final String VERIFICATION_ID = "verificationId";
+
     public static void register(Context context) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
         prefs.edit()
@@ -62,6 +64,18 @@ public class SharedPrefs {
     public static String getMemberPhone(Context context) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
         return prefs.getString(PHONE, null);
+    }
+
+    public static void verificationId(String value, Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        prefs.edit()
+                .putString(VERIFICATION_ID, value)
+                .apply();
+    }
+
+    public static String getVerificationId(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        return prefs.getString(VERIFICATION_ID, null);
     }
 
 }

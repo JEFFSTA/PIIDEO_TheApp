@@ -16,8 +16,13 @@ public class ChatRowCursorWrapper extends CursorWrapper {
     public PiideoRow getPiideoRow() {
         int id = getInt(getColumnIndex(PiideoSchema.ChatTable.Cols.UUID));
         String piideoFile = getString(getColumnIndex(PiideoSchema.ChatTable.Cols.PIIDEO_FILE));
+        String piideoState = null;
+        if (!isNull(getColumnIndex(PiideoSchema.ChatTable.Cols.PIIDEO_STATE))) {
+            piideoState = getString(getColumnIndex(PiideoSchema.ChatTable.Cols.PIIDEO_STATE));
+        }
         PiideoRow row = new PiideoRow(id);
         row.setPiideoFileName(piideoFile);
+        row.setPiideoState(piideoState);
         return row;
     }
 }

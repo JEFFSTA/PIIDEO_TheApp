@@ -3,17 +3,25 @@ package ru.crew.motley.piideo.registration.activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.annotation.IntDef;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+
+import org.parceler.Parcels;
+
 import butterknife.ButterKnife;
 import ru.crew.motley.piideo.R;
+import ru.crew.motley.piideo.chat.db.ChatLab;
 import ru.crew.motley.piideo.network.Member;
 import ru.crew.motley.piideo.registration.RegistrationListener;
 import ru.crew.motley.piideo.registration.fragments.PhoneFragment;
 import ru.crew.motley.piideo.registration.fragments.PhoneVerifyFragment;
+import ru.crew.motley.piideo.registration.fragments.SchoolGroupFragment;
 import ru.crew.motley.piideo.registration.fragments.SubjectFragment;
 import ru.crew.motley.piideo.search.activity.SearchActivity;
 
@@ -29,11 +37,12 @@ public class UserSetupActivity extends AppCompatActivity implements Registration
     /**
      * Page order
      */
-    @IntDef({Page.SUBJECT_PAGE, Page.PHONE_PAGE, Page.VERIFY_PAGE, Page.COMPLETE})
+    @IntDef({Page.SUBJECT_PAGE, Page.PHONE_PAGE, Page.VERIFY_PAGE, Page.SCHOOL_PAGE, Page.COMPLETE})
     private @interface Page {
         int PHONE_PAGE = 0;
         int SUBJECT_PAGE = 1;
         int VERIFY_PAGE = 2;
+        int SCHOOL_PAGE = 3;
         int COMPLETE = 10;
     }
 
@@ -50,7 +59,16 @@ public class UserSetupActivity extends AppCompatActivity implements Registration
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_registration);
         ButterKnife.bind(this);
-        showFragment(PhoneFragment.newInstance(this));
+        if (mMember == null) {
+            mMember = new Member();
+        }
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+//        if (user == null) {
+            currentStep = Page.PHONE_PAGE;
+//        } else {
+//            currentStep = Page.SCHOOL_PAGE;
+//        }
+        showNextStep();
     }
 
     @Override
@@ -62,8 +80,15 @@ public class UserSetupActivity extends AppCompatActivity implements Registration
     }
 
     @Override
-    public void onComplete() {
-        Intent i = SearchActivity.getIntent(this);
+    public void onComplete(Member member) {
+        ChatLab lab = ChatLab.get(this);
+        if (member.getChatId() == null) {
+            // TODO: 1/19/18 uncomment 
+            member.setChatId(FirebaseAuth.getInstance().getCurrentUser().getUid());
+        }
+        lab.addMember(member);
+        Parcelable byPass = Parcels.wrap(member);
+        Intent i = SearchActivity.getIntent(byPass, this);
         startActivity(i);
         finish();
     }
@@ -71,16 +96,26 @@ public class UserSetupActivity extends AppCompatActivity implements Registration
     private void nextStep() {
         switch (currentStep) {
             case Page.PHONE_PAGE:
-                currentStep = Page.VERIFY_PAGE;
+                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                // TODO: 1/19/18 uncomment next
+                if (user == null) {
+                    currentStep = Page.VERIFY_PAGE;
+                } else {
+                    currentStep = Page.SCHOOL_PAGE;
+                }
                 break;
             case Page.VERIFY_PAGE:
+                currentStep = Page.SCHOOL_PAGE;
+                break;
+            case Page.SCHOOL_PAGE:
                 currentStep = Page.SUBJECT_PAGE;
                 break;
             case Page.SUBJECT_PAGE:
-                currentStep = Page.COMPLETE;
-                return;
+                throw new IllegalStateException("Page you want to go out is final, just use onComplete.");
+//                currentStep = Page.COMPLETE;
+//                return;
             default:
-                throw new IllegalStateException("Page you want to showChat is unsupported");
+                throw new IllegalStateException("Page you want to showChat is unsupported. Current step is " + currentStep);
         }
         showNextStep();
     }
@@ -92,19 +127,27 @@ public class UserSetupActivity extends AppCompatActivity implements Registration
                 showFragment(phone);
                 break;
             case Page.VERIFY_PAGE:
-                Fragment verify = PhoneVerifyFragment.newInstance(this);
+                Parcelable memberForVerification = Parcels.wrap(mMember);
+                Fragment verify = PhoneVerifyFragment.newInstance(memberForVerification, this);
                 showFragment(verify);
                 break;
+            case Page.SCHOOL_PAGE:
+                Parcelable memberForSchool = Parcels.wrap(mMember);
+                Fragment school = SchoolGroupFragment.newInstance(memberForSchool, this);
+                showFragment(school);
+                break;
             case Page.SUBJECT_PAGE:
-                Fragment subject = SubjectFragment.newInstance(mMember, this);
+                Parcelable memberForSubject = Parcels.wrap(mMember);
+                Fragment subject = SubjectFragment.newInstance(memberForSubject, this);
                 showFragment(subject);
-                return;
+                break;
             case Page.COMPLETE:
-                if (!mMember.isRegistered()) {
+                // do nothing
+//                if (!mMember.isRegistered()) {
 //                    createNewMember();
-                } else {
-                    showSearch();
-                }
+//                } else {
+//                    showSearch();
+//                }
             default:
                 throw new IllegalStateException("Page you want to showChat is unsupported");
         }
@@ -116,10 +159,10 @@ public class UserSetupActivity extends AppCompatActivity implements Registration
                 .commit();
     }
 
-    private void showSearch() {
-        startActivity(SearchActivity.getIntent(this));
-        finish();
-    }
+//    private void showSearch() {
+//        startActivity(SearchActivity.getIntent(this));
+//        finish();
+//    }
 
 
 //    @Override

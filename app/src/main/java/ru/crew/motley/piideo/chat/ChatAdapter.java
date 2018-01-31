@@ -34,7 +34,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
 
 //    public interface PlayerBarListener {
 //        void play(String piideoFile, int position);
-//        void pause(int position);
+//        void togglePause(int position);
 //        void stop();
 //    }
 
@@ -91,7 +91,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
 //                    mPlayerBarListener.play(mPiideoRow.getPiideoFileName(), getAdapterPosition());
 //                    mPlayerToggler.setImageResource(R.drawable.ic_pause_24dp);
 //                } else {
-//                    mPlayerBarListener.pause(getAdapterPosition());
+//                    mPlayerBarListener.togglePause(getAdapterPosition());
 //                    mPlayerToggler.setImageResource(R.drawable.ic_play_24dp);
 //                }
 //            });
@@ -106,7 +106,9 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
             });
             Picasso.with(mPlayerToggler.getContext())
                     .load(new File(filePath))
-                    .resize(300, 40)
+//                    .rotate(90)
+//                    .resize(800, 80)
+                    .fit()
                     .centerCrop()
                     .into(mPlayerToggler);
         }

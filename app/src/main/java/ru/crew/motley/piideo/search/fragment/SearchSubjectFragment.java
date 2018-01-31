@@ -2,6 +2,7 @@ package ru.crew.motley.piideo.search.fragment;
 
 import android.database.Cursor;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.provider.ContactsContract;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
@@ -11,20 +12,22 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
-import android.widget.Toast;
 
 import org.json.JSONObject;
+import org.parceler.Parcels;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 import butterknife.BindView;
-import butterknife.OnClick;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import ru.crew.motley.piideo.ButterFragment;
 import ru.crew.motley.piideo.R;
 import ru.crew.motley.piideo.SharedPrefs;
+import ru.crew.motley.piideo.network.Member;
 import ru.crew.motley.piideo.network.neo.NeoApi;
 import ru.crew.motley.piideo.network.neo.NeoApiSingleton;
 import ru.crew.motley.piideo.network.neo.Parameters;
@@ -35,6 +38,7 @@ import ru.crew.motley.piideo.network.neo.transaction.Data;
 import ru.crew.motley.piideo.network.neo.transaction.Result;
 import ru.crew.motley.piideo.network.neo.transaction.Row;
 import ru.crew.motley.piideo.search.SearchListener;
+import ru.crew.motley.piideo.search.SearchRepeaterSingleton;
 import ru.crew.motley.piideo.search.adapter.SubjectAdapter;
 
 import static android.content.ContentValues.TAG;
@@ -45,20 +49,30 @@ import static android.content.ContentValues.TAG;
 
 public class SearchSubjectFragment extends ButterFragment implements SubjectAdapter.SubjectListener {
 
+    private static final String ARG_MEMBER = "member";
+
+    private static final int REQUEST_DELAY = 5;
+
     private SearchListener mSearchListener;
 
-//    @BindView(R.id.subject)
-//    EditText mSubject;
     @BindView(R.id.subjectRecycler)
     RecyclerView mRecyclerView;
-
+    private Member mMember;
     private List<String> mPhones = new ArrayList<>();
     private List<String> mSubjects = new ArrayList<>();
+    private Queue<Member> mMembers = new LinkedList<>();
+
+//    private Disposable mSearchRepeater;
+
+//    private DatabaseReference mDatabase;
 
     private SubjectAdapter mSubjectAdapter;
 
-    public static SearchSubjectFragment newInstance(SearchListener listener) {
+//    private SearchRepeaterSingleton mSearchRepeaterSingleton;
+
+    public static SearchSubjectFragment newInstance(Parcelable member, SearchListener listener) {
         Bundle args = new Bundle();
+        args.putParcelable(ARG_MEMBER, member);
         SearchSubjectFragment fragment = new SearchSubjectFragment();
         fragment.setArguments(args);
         fragment.mSearchListener = listener;
@@ -68,10 +82,13 @@ public class SearchSubjectFragment extends ButterFragment implements SubjectAdap
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mMember = Parcels.unwrap(getArguments().getParcelable(ARG_MEMBER));
         loadContactsPhones();
         syncContacts();
+//        mDatabase = FirebaseDatabase.getInstance().getReference();
         mSubjectAdapter = new SubjectAdapter(mSubjects, this);
     }
+
 
     @Nullable
     @Override
@@ -80,20 +97,8 @@ public class SearchSubjectFragment extends ButterFragment implements SubjectAdap
         View v = super.onCreateView(inflater, container, savedInstanceState);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         mRecyclerView.setAdapter(mSubjectAdapter);
-        loadAllSubjects();
+        loadUsedSubjects();
         return v;
-    }
-
-
-//    @OnClick(R.id.next_btn)
-    public void showSearch() {
-//        if (mSubject.getText().toString().isEmpty()) {
-//            Toast.makeText(getActivity(), R.string.sch_subject_violation, Toast.LENGTH_SHORT)
-//                    .show();
-//            return;
-//        }
-//        SharedPrefs.searchSubject(mSubject.getText().toString(), getActivity());
-        mSearchListener.onNext();
     }
 
     private void loadContactsPhones() {
@@ -108,6 +113,7 @@ public class SearchSubjectFragment extends ButterFragment implements SubjectAdap
                         ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " ASC");
         try {
             if (managedCursor != null && managedCursor.getCount() > 0) {
+                mPhones.clear();
                 managedCursor.moveToFirst();
                 while (!managedCursor.isAfterLast()) {
                     String phone = managedCursor.getString(managedCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
@@ -119,9 +125,9 @@ public class SearchSubjectFragment extends ButterFragment implements SubjectAdap
                     } else if (phone.startsWith("8")) {
                         phone = phone.replaceFirst("8", "");
                     }
-//                    if (phone.startsWith("0")) {
-//                        phone = phone.replaceFirst("0", "");
-//                    }
+                    if (phone.startsWith("0")) {
+                        phone = phone.replaceFirst("0", "");
+                    }
                     mPhones.add(phone);
                     managedCursor.moveToNext();
                 }
@@ -132,27 +138,17 @@ public class SearchSubjectFragment extends ButterFragment implements SubjectAdap
     }
 
     private void syncContacts() {
-        String phoneNumber = SharedPrefs.getMemberPhone(getActivity());
-        Statement search = searchRequest(phoneNumber);
+        String phoneNumber = mMember.getPhoneNumber();
+        Statement search = deleteContactsRequest(phoneNumber);
         Statements statements = new Statements();
         statements.getValues().add(search);
         NeoApi api = NeoApiSingleton.getInstance();
         api.executeStatement(statements)
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(transaction -> {
-//                            List<Data> responseData = transaction.getResults().get(0).getData();
-//                            if (responseData.isEmpty()) {
-//                                Toast.makeText(getActivity(), R.string.sch_no_result, Toast.LENGTH_SHORT)
-//                                        .showChat();
-                            return;
-//                            }
-                        },
-                        error -> {
-
-                        });
+                .subscribe();
     }
 
-    private Statement searchRequest(String phoneNumber) {
+    private Statement deleteContactsRequest(String phoneNumber) {
         if (TextUtils.isEmpty(phoneNumber)) {
             throw new IllegalArgumentException("Phone number can't be null or empty");
         }
@@ -163,12 +159,11 @@ public class SearchSubjectFragment extends ButterFragment implements SubjectAdap
         subject.setStatement(st);
         Parameters parameters = new Parameters();
         parameters.getProps().put(Request.Var.PHONE, phoneNumber);
-//        parameters.getProps().put("nums", TextUtils.join(",", mPhones));
         subject.setParameters(parameters);
         return subject;
     }
 
-    private void loadAllSubjects() {
+    private void loadUsedSubjects() {
         Statement search = subjectRequest();
         Statements statements = new Statements();
         statements.getValues().add(search);
@@ -200,9 +195,10 @@ public class SearchSubjectFragment extends ButterFragment implements SubjectAdap
 
     private Statement subjectRequest() {
         Statement subject = new Statement();
-        String st = Request.FIND_ALL_SUBJECTS;
+        String st = Request.FIND_USED_SUBJECTS_BY_SCHOOL;
         subject.setStatement(st);
         Parameters parameters = new Parameters();
+        parameters.getProps().put(Request.Var.NAME, mMember.getSchool().getName());
         subject.setParameters(parameters);
         return subject;
     }
@@ -210,6 +206,9 @@ public class SearchSubjectFragment extends ButterFragment implements SubjectAdap
     @Override
     public void onClick(String subject) {
         SharedPrefs.searchSubject(subject, getActivity());
+//        mSearchRepeaterSingleton.startSearch();
+
         mSearchListener.onNext();
     }
+
 }

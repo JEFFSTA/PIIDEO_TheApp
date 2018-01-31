@@ -49,17 +49,17 @@ public class SetupAdapter extends FragmentPagerAdapter {
         Fragment fragment;
         switch (position) {
             case Page.SUBJECT_PAGE:
-                fragment = SubjectFragment.newInstance(null, mRegistrationListener);
+//                fragment = SubjectFragment.newInstance(null, mRegistrationListener);
                 break;
             case Page.PHONE_PAGE:
-                fragment = PhoneFragment.newInstance(mRegistrationListener);
+//                fragment = PhoneFragment.newInstance(mRegistrationListener);
                 break;
             case Page.VERIFY_PAGE:
-                fragment = PhoneVerifyFragment.newInstance(mRegistrationListener);
+//                fragment = PhoneVerifyFragment.newInstance(mRegistrationListener);
                 break;
             default:
                 throw new IllegalArgumentException("Setup page position is not in range.");
         }
-        return fragment;
+        return null;
     }
 }

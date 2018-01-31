@@ -6,53 +6,67 @@
     android:layout_height="match_parent"
     tools:context=".registration.activity.UserSetupActivity">
 
-    <com.hbb20.CountryCodePicker
-        android:id="@+id/phone_code"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="40dp"
-        android:layout_marginStart="40dp"
-        android:layout_marginTop="32dp"
-        android:gravity="center_horizontal"
-        app:ccp_textSize="18sp"
-        app:ccp_autoDetectCountry="true"
-        app:layout_constraintBottom_toTopOf="@+id/phone_number"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.4"
-        app:layout_constraintVertical_chainStyle="packed"
-        app:layout_constraintWidth_default="spread"/>
-
-    <EditText
-        android:id="@+id/phone_number"
-        android:layout_width="0dp"
+    <android.support.v7.widget.CardView
+        android:id="@+id/phone_card"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
-        android:layout_marginEnd="40dp"
-        android:layout_marginStart="40dp"
+        android:layout_marginLeft="48dp"
+        android:layout_marginRight="48dp"
         android:layout_marginTop="8dp"
-        android:hint="@string/reg_phone_hint"
-        android:inputType="phone"
-        android:singleLine="true"
-        android:textSize="18sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/phone_code"
-        app:layout_constraintWidth_default="spread" />
+        app:layout_constraintTop_toTopOf="parent">
 
-    <Button
-        android:id="@+id/next_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="48dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
-        android:text="@string/next_btn_caption"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="38dp"
+            android:orientation="vertical">
+
+            <com.hbb20.CountryCodePicker
+                android:layout_marginTop="10dp"
+                android:id="@+id/phone_code"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                app:ccp_autoDetectCountry="true"
+                app:ccp_textSize="18sp" />
+
+            <EditText
+                android:layout_marginTop="20dp"
+                android:id="@+id/phone_number"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/reg_phone_hint"
+                android:inputType="phone"
+                android:singleLine="true"
+
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/timer"
+                tools:text="59 sec"
+                android:layout_gravity="center_horizontal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <Button
+                android:layout_marginBottom="8dp"
+                android:layout_marginTop="20dp"
+                android:layout_gravity="center_horizontal"
+                android:id="@+id/next_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/ButtonStyle"
+                android:text="@string/next_btn_caption"
+                android:elevation="16dp"/>
+        </LinearLayout>
+
+
+    </android.support.v7.widget.CardView>
 
 
 </android.support.constraint.ConstraintLayout>

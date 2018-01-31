@@ -9,6 +9,7 @@ import android.widget.TextView;
 import java.util.List;
 
 import ru.crew.motley.piideo.R;
+import ru.crew.motley.piideo.network.Member;
 
 /**
  * Created by vas on 12/31/17.
@@ -16,10 +17,12 @@ import ru.crew.motley.piideo.R;
 
 public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.SearchViewHolder> {
 
-    private List<String> mPhoneNumbers;
+    private List<Member> mMembers;
+    private SendRequestCallback mListener;
 
-    public SearchAdapter(List<String> phoneNumbers) {
-        mPhoneNumbers = phoneNumbers;
+    public SearchAdapter(List<Member> members, SendRequestCallback listener) {
+        mMembers = members;
+        mListener = listener;
     }
 
     @Override
@@ -31,13 +34,13 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.SearchView
 
     @Override
     public void onBindViewHolder(SearchViewHolder holder, int position) {
-        String phoneNumber = mPhoneNumbers.get(position);
-        holder.bind(phoneNumber);
+        Member member = mMembers.get(position);
+        holder.bind(member);
     }
 
     @Override
     public int getItemCount() {
-        return mPhoneNumbers.size();
+        return mMembers.size();
     }
 
     class SearchViewHolder extends RecyclerView.ViewHolder {
@@ -49,8 +52,16 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.SearchView
             mPhoneNumber = itemView.findViewById(R.id.phone_number);
         }
 
-        public void bind(String phoneNum) {
-            mPhoneNumber.setText(phoneNum);
+        public void bind(Member member) {
+            mPhoneNumber.setText(member.getPhoneNumber());
+            String receiverId = member.getChatId();
+            itemView.setOnClickListener(v -> {
+                startChat(receiverId);
+            });
+        }
+
+        private void startChat(String receiverId) {
+            mListener.onClick(receiverId, itemView);
         }
     }
 

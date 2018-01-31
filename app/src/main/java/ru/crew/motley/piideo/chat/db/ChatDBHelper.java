@@ -4,7 +4,13 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import ru.crew.motley.piideo.network.Member;
+
 import static ru.crew.motley.piideo.chat.db.PiideoSchema.ChatTable;
+import static ru.crew.motley.piideo.chat.db.PiideoSchema.MemberTable;
+import static ru.crew.motley.piideo.chat.db.PiideoSchema.SchoolTable;
+import static ru.crew.motley.piideo.chat.db.PiideoSchema.SubjectTable;
+import static ru.crew.motley.piideo.chat.db.PiideoSchema.MessageTable;
 
 /**
  * Created by vas on 12/26/17.
@@ -25,9 +31,33 @@ public class ChatDBHelper extends SQLiteOpenHelper {
         db.execSQL("create table " + ChatTable.NAME + "(" +
                 " _id integer primary key autoincrement, " +
                 ChatTable.Cols.UUID + ", " +
-                ChatTable.Cols.PIIDEO_FILE +
+                ChatTable.Cols.PIIDEO_FILE + ", " +
+                ChatTable.Cols.PIIDEO_STATE +
                 ")"
         );
+
+        db.execSQL("create table " + MemberTable.NAME + "(" +
+                " _id integer primary key autoincrement, " +
+                MemberTable.Cols.NEO_ID + " TEXT, " +
+                MemberTable.Cols.PHONE + " TEXT," +
+                MemberTable.Cols.CHAT_ID + " TEXT, " +
+                MemberTable.Cols.C_CODE + " TEXT, " +
+                MemberTable.Cols.PH_PREFIX + " TEXT)");
+
+        db.execSQL("create table " + SchoolTable.NAME + "(" +
+                SchoolTable.Cols.NEO_ID + " TEXT primary key, " +
+                SchoolTable.Cols.NAME + " TEXT)");
+
+        db.execSQL("create table " + SubjectTable.NAME + "(" +
+                SubjectTable.Cols.NEO_ID + " TEXT primary key, " +
+                SubjectTable.Cols.NAME + " TEXT)");
+
+        db.execSQL("create table " + MessageTable.NAME + "(" +
+                MessageTable.Cols.UUID + " integer primary key autoincrement, " +
+                MessageTable.Cols.CONTENT + " TEXT, " +
+                MessageTable.Cols.SENDER_ID + " TEXT, " +
+                MessageTable.Cols.RECEIVER_ID + " TEXT, " +
+                MessageTable.Cols.MSG_TYPE + " TEXT)");
     }
 
     @Override

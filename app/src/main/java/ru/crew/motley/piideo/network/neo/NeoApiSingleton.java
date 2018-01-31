@@ -72,6 +72,7 @@ public class NeoApiSingleton {
 
         Retrofit retrofit = new Retrofit.Builder()
                 .client(okHttpClient)
+//                .baseUrl(NeoApi.AWS_INSTANCE_TEST)
                 .baseUrl(NeoApi.AWS_INSTANCE_TEST)
                 .addCallAdapterFactory(rxAdapter)
                 .addConverterFactory(GsonConverterFactory.create(gson))

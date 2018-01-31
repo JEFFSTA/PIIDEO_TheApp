@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_margin="20dp">
+
+        <EditText
+            android:id="@+id/testMessage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:maxLength="40"
+            android:hint="Test message" />
+
+        <TextView
+            android:id="@+id/receivedMessage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+    </android.support.design.widget.TextInputLayout>
+
+    <!--<Button-->
+        <!--android:id="@+id/apply"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_gravity="right|bottom"-->
+        <!--android:layout_margin="20dp"-->
+        <!--android:text="Apply" />-->
+
+    <!--<Button-->
+        <!--android:id="@+id/reject"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_gravity="left|bottom"-->
+        <!--android:layout_margin="20dp"-->
+        <!--android:text="Reject" />-->
+
+    <!--<ProgressBar-->
+    <!--android:id="@+id/promocode_pb"-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:layout_alignBottom="@id/promocode_ok"-->
+    <!--android:layout_alignEnd="@id/promocode_ok"-->
+    <!--android:layout_alignLeft="@id/promocode_ok"-->
+    <!--android:layout_alignRight="@id/promocode_ok"-->
+    <!--android:layout_alignStart="@id/promocode_ok"-->
+    <!--android:layout_alignTop="@id/promocode_ok"-->
+    <!--android:layout_centerVertical="true"-->
+    <!--android:visibility="gone" />-->
+</FrameLayout>

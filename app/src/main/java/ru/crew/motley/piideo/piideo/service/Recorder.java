@@ -9,6 +9,7 @@ import android.media.MediaRecorder;
 import android.os.Environment;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import java.io.File;
 import java.io.IOException;
@@ -81,6 +82,11 @@ public class Recorder extends Service {
     @Override
     public void onDestroy() {
         if (mRecorder != null) {
+            try {
+                Thread.currentThread().sleep(500);
+            } catch (InterruptedException ex) {
+                Log.d("Recorder", " Catch while sleep");
+            }
             stopRecording();
         }
         super.onDestroy();
@@ -95,8 +101,10 @@ public class Recorder extends Service {
         mRecorder.setAudioChannels(1);
         mRecorder.setAudioEncodingBitRate(192000);
         mRecorder.setOutputFile(recPath);
+//        mRecorder.
         mRecorder.prepare();
         mRecorder.start();
+        Log.d("Recorder", "started");
         mStartingTimeMillis = System.currentTimeMillis();
 
     }

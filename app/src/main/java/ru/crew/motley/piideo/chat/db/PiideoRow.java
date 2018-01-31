@@ -8,6 +8,7 @@ public class PiideoRow {
 
     private int mId;
     private String piideoFileName;
+    private String piideoState;
 
     public PiideoRow() {
     }
@@ -30,6 +31,14 @@ public class PiideoRow {
 
     public void setPiideoFileName(String piideoFileName) {
         this.piideoFileName = piideoFileName;
+    }
+
+    public String getPiideoState() {
+        return piideoState;
+    }
+
+    public void setPiideoState(String piideoState) {
+        this.piideoState = piideoState;
     }
 
     @Override
