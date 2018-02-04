@@ -56,7 +56,6 @@ public class ChatActivity extends AppCompatActivity
     private void showFragment(Fragment fragment) {
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.container, fragment)
-
                 .commit();
     }
 

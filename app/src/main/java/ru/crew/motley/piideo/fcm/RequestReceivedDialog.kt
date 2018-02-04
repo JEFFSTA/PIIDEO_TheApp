@@ -14,9 +14,6 @@ import ru.crew.motley.piideo.R
 import ru.crew.motley.piideo.chat.db.ChatLab
 import java.util.*
 
-/**
- * Created by vas on 1/14/18.
- */
 
 fun Date.dayTimeStamp(): Long {
     val calendar = Calendar.getInstance()

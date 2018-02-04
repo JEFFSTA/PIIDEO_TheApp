@@ -4,9 +4,6 @@ import com.google.gson.Gson;
 
 import org.parceler.Parcel;
 
-/**
- * Created by vas on 12/18/17.
- */
 @Parcel(Parcel.Serialization.BEAN)
 public class Member {
 

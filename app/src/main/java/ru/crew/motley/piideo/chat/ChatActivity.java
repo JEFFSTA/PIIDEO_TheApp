@@ -9,10 +9,6 @@ import android.support.v7.app.AppCompatActivity;
 
 import ru.crew.motley.piideo.R;
 
-/**
- * Created by vas on 12/22/17.
- */
-
 public class ChatActivity extends AppCompatActivity implements ChatFragment.PiideoShower, WatchPiideoFragment.ChatShower {
 
     public static Intent getIntent(Context context) {

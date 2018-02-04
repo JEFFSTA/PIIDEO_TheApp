@@ -3,8 +3,8 @@ package ru.crew.motley.piideo.chat.fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Parcelable;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -15,7 +15,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.firebase.database.DatabaseReference;
@@ -23,14 +22,12 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.squareup.picasso.Picasso;
 
-import org.jetbrains.annotations.NotNull;
 import org.parceler.Parcels;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -39,17 +36,19 @@ import butterknife.OnClick;
 import dagger.android.support.AndroidSupportInjection;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import ru.crew.motley.piideo.Appp;
 import ru.crew.motley.piideo.ButterFragment;
 import ru.crew.motley.piideo.R;
+import ru.crew.motley.piideo.SharedPrefs;
 import ru.crew.motley.piideo.chat.ChatAdapter;
 import ru.crew.motley.piideo.chat.MessagesAdapter;
 import ru.crew.motley.piideo.chat.db.ChatLab;
 import ru.crew.motley.piideo.chat.model.PiideoLoader;
 import ru.crew.motley.piideo.fcm.FcmMessage;
 import ru.crew.motley.piideo.piideo.activity.PhotoActivity;
+import ru.crew.motley.piideo.search.activity.SearchActivity;
+import ru.crew.motley.piideo.util.TimeUtils;
 
 import static ru.crew.motley.piideo.piideo.service.Recorder.HOME_PATH;
 
@@ -65,6 +64,7 @@ public class ChatFragment extends ButterFragment
     }
 
     private static final String TAG = ChatFragment.class.getSimpleName();
+    private static final long CHAT_TIMEOUT = TimeUnit.SECONDS.toMillis(60);
     private static final String ARG_DB_MESSAGE_ID = "local_db_id";
 
     @BindView(R.id.chat_recycler)
@@ -75,8 +75,8 @@ public class ChatFragment extends ButterFragment
     @Inject
     PiideoLoader mPiideoLoader;
 
-//    private List<PiideoRow> mPiideoRows;
-//    private ChatAdapter mChatAdapter;
+    private Runnable chatFinisher = () -> showRateView();
+    private Handler finisherHandler = new Handler();
 
     private String mMessageId;
     private FcmMessage mFcmMessage;
@@ -103,15 +103,25 @@ public class ChatFragment extends ButterFragment
     public void onResume() {
         super.onResume();
         ((Appp) getActivity().getApplication()).chatFragmentResumed();
-        disposables = new CompositeDisposable();
+        long chatStartTime = SharedPrefs.loadStartChatTime(getActivity());
+        finisherHandler.postDelayed(chatFinisher, CHAT_TIMEOUT - new Date().getTime() + chatStartTime);
+        Log.d("PiideoLoader", "onResume");
     }
 
     @Override
     public void onPause() {
         super.onPause();
         ((Appp) getActivity().getApplication()).chatFragmentPaused();
-        disposables.clear();
-        disposables.dispose();
+        finisherHandler.removeCallbacks(chatFinisher);
+        Log.d("PiideoLoader", "onPause");
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (!disposables.isDisposed()) {
+            disposables.dispose();
+        }
     }
 
     @Override
@@ -123,15 +133,22 @@ public class ChatFragment extends ButterFragment
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        disposables = new CompositeDisposable();
         mMessageId = getArguments().getString(ARG_DB_MESSAGE_ID);
         ChatLab lab = ChatLab.get(getActivity().getApplicationContext());
         mFcmMessage = lab.getReducedFcmMessage(mMessageId);
+        long chatStartTime = SharedPrefs.loadStartChatTime(getActivity());
+        if (chatStartTime == -1) {
+            SharedPrefs.saveStartChatTime(new Date().getTime(), getActivity());
+            SharedPrefs.saveChatMessageId(mMessageId, getActivity());
+        }
 //        mPiideoRows = lab.getPiideos();
 //        if (mChatAdapter != null) {
 //            mChatAdapter.notifyDataSetChanged();
 //        }
         mDatabase = FirebaseDatabase.getInstance().getReference();
     }
+
 
     @Nullable
     @Override
@@ -170,8 +187,8 @@ public class ChatFragment extends ButterFragment
 
     @OnClick(R.id.sendMessage)
     public void sendMessage() {
-        long timestamp = timeInMillisGmt();
-        long dayTimestamp = getDayTimestamp(timestamp);
+        long timestamp = TimeUtils.Companion.gmtTimeInMillis();
+        long dayTimestamp = TimeUtils.Companion.gmtDayTimestamp(timestamp);
         String body = mMessageInput.getText().toString().trim();
         FcmMessage message = new FcmMessage(
                 timestamp,
@@ -209,6 +226,11 @@ public class ChatFragment extends ButterFragment
     public void uiBackPress() {
         removeChatMessages();
         getActivity().onBackPressed();
+        ChatLab lab = ChatLab.get(getActivity());
+        Parcelable member = Parcels.wrap(lab.getMember());
+        Intent i = SearchActivity.getIntent(member, getActivity());
+        startActivity(i);
+        getActivity().finish();
     }
 
     private void attachRecyclerAdapter() {
@@ -232,20 +254,6 @@ public class ChatFragment extends ButterFragment
         mChatRecycler.setAdapter(adapter);
     }
 
-    private long getDayTimestamp(long timestamp) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(timestamp);
-        calendar.set(Calendar.MILLISECOND, 0);
-        calendar.set(Calendar.HOUR_OF_DAY, 0);
-        calendar.set(Calendar.SECOND, 0);
-        calendar.set(Calendar.MINUTE, 0);
-        return calendar.getTimeInMillis();
-    }
-
-    private long timeInMillisGmt() {
-        return Calendar.getInstance(TimeZone.getTimeZone("GMT")).getTimeInMillis();
-    }
-
     @Override
     public void onClick(String piideoFileName) {
         mPiideoShower.showPiideo(piideoFileName);
@@ -263,17 +271,42 @@ public class ChatFragment extends ButterFragment
     public void send(FcmMessage message, ImageView piideoImage, View progress) {
         showPiideoImage(message.getContent(), piideoImage);
         piideoImage.setOnClickListener(v -> mPiideoShower.showPiideo(message.getContent()));
-        disposables.add(
-                mPiideoLoader.send(message.getContent(), message.getFrom(), message.getTo())
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(next -> {
-                                    progress.setVisibility(View.GONE);
-                                },
-                                error -> {
-                                    Log.e("Piideo", "Send error", error);
-                                }));
+//        disposables.add(
+//                mPiideoLoader.send(message.getContent(), message.getFrom(), message.getTo())
+//                        .subscribeOn(Schedulers.io())
+//                        .observeOn(AndroidSchedulers.mainThread())
+//                        .cache()
+//                        .subscribe(next -> {
+//                                    progress.setVisibility(View.GONE);
+//                                },
+//                                error -> {
+//                                    Log.e("Piideo", "Send error", error);
+//                                }));
 
+
+//        Disposable subscription = mPiideoLoader.send(message.getContent(), message.getFrom(), message.getTo())
+//                .subscribeOn(Schedulers.io())
+//                .observeOn(AndroidSchedulers.mainThread())
+////                        .cache()
+//                .subscribe(next -> {
+//                            progress.setVisibility(View.GONE);
+//                        },
+//                        error -> {
+//                            Log.e("Piideo", "Send error", error);
+//                        });
+
+        mPiideoLoader.send0(
+                message.getContent(),
+                message.getFrom(),
+                message.getTo())
+//                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(next -> {
+                            progress.setVisibility(View.GONE);
+                        },
+                        error -> {
+                            Log.e("Piideo", "Send error", error);
+                        });
     }
 
     private String fileImagePath(String name) throws IOException {
@@ -312,5 +345,13 @@ public class ChatFragment extends ButterFragment
                                     Log.e("Piideo", "Receive error", error);
                                 })
         );
+    }
+
+    private void showRateView() {
+        // TODO: 002 02.02.18 implement rate view
+        getActivity().finish();
+
+        SharedPrefs.clearStartChatTime(getActivity());
+        SharedPrefs.clearChatMessageId(getActivity());
     }
 }

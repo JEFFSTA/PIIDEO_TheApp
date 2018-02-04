@@ -1,9 +1,5 @@
 package ru.crew.motley.piideo.chat.db;
 
-/**
- * Created by vas on 12/26/17.
- */
-
 public class PiideoRow {
 
     private int mId;

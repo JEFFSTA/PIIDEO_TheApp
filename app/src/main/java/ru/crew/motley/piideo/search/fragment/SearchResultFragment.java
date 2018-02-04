@@ -24,6 +24,7 @@ import org.json.JSONObject;
 import org.parceler.Parcels;
 import org.reactivestreams.Subscription;
 
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -153,7 +154,12 @@ public class SearchResultFragment extends ButterFragment implements SendRequestC
 //                            startSearchChain();
                         },
                         error -> {
-                            throw new RuntimeException(error);
+                            Log.e(TAG, "Request target search problem", error);
+                            Toast.makeText(getActivity(), R.string.ex_network, Toast.LENGTH_SHORT)
+                                    .show();
+                            if (!(error instanceof SocketTimeoutException)) {
+                                throw new RuntimeException(error);
+                            }
                         });
     }
 

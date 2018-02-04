@@ -4,10 +4,6 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
-/**
- * Created by vas on 12/18/17.
- */
-
 public class Data {
 
 

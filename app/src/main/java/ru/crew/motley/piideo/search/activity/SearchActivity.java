@@ -2,11 +2,16 @@ package ru.crew.motley.piideo.search.activity;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Parcelable;
 import android.support.annotation.IntDef;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -21,9 +26,7 @@ import com.google.firebase.iid.FirebaseInstanceId;
 import org.parceler.Parcels;
 
 import ru.crew.motley.piideo.R;
-import ru.crew.motley.piideo.chat.activity.ChatActivity;
 import ru.crew.motley.piideo.chat.db.ChatLab;
-import ru.crew.motley.piideo.fcm.RequestReceivedDialog;
 import ru.crew.motley.piideo.fcm.User;
 import ru.crew.motley.piideo.handshake.activity.RequestListenerActivity;
 import ru.crew.motley.piideo.network.Member;
@@ -34,13 +37,14 @@ import ru.crew.motley.piideo.search.fragment.SearchSubjectFragment;
 import ru.crew.motley.piideo.search.fragment.UselessFragment;
 import ru.crew.motley.piideo.splash.SplashActivity;
 
-/**
- * Created by vas on 12/18/17.
- */
+import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
+import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
 public class SearchActivity extends RequestListenerActivity implements SearchListener {
 
     private static final String EXTRA_MEMBER = "member";
+
+    private static final int SD_PERMISSIONS = 1001;
 
     private Member mMember;
 
@@ -96,7 +100,19 @@ public class SearchActivity extends RequestListenerActivity implements SearchLis
         Parcelable member = getIntent().getParcelableExtra(EXTRA_MEMBER);
         mMember = Parcels.unwrap(member);
 //        Fragment fragment = SearchSubjectFragment.newInstance(member, this);
-        showNextStep();
+        int sdCardCheckWrite = ContextCompat.checkSelfPermission(this,
+                WRITE_EXTERNAL_STORAGE);
+        int sdCardCheckRead = ContextCompat.checkSelfPermission(this,
+                READ_EXTERNAL_STORAGE);
+        if (sdCardCheckWrite != PackageManager.PERMISSION_GRANTED || sdCardCheckRead != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(
+                    this,
+                    new String[]{WRITE_EXTERNAL_STORAGE, READ_EXTERNAL_STORAGE},
+                    SD_PERMISSIONS);
+        } else {
+            showNextStep();
+        }
     }
 
     @Override
@@ -256,8 +272,22 @@ public class SearchActivity extends RequestListenerActivity implements SearchLis
         }
     }
 
-//    public void showChat(String dbMessageId, String type) {
-//        RequestReceivedDialog dialog = RequestReceivedDialog.Companion.getInstance(dbMessageId, type);
-//        dialog.show(getSupportFragmentManager(), "Handshake");
-//    }
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode) {
+            case SD_PERMISSIONS:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    showNextStep();
+                } else {
+                    new Handler().postDelayed(() ->
+                                    ActivityCompat.requestPermissions(
+                                            this,
+                                            new String[]{WRITE_EXTERNAL_STORAGE, READ_EXTERNAL_STORAGE},
+                                            SD_PERMISSIONS),
+                            1000);
+                }
+                break;
+        }
+    }
 }

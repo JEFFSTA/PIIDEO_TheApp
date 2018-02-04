@@ -16,6 +16,9 @@ public class SharedPrefs {
     private static final String SEARCH_SUBJECT = "searchSubject";
     private static final String PHONE = "memberPhone";
 
+    private static final String CHAT_START_TIME = "startTime";
+    private static final String CHAT_MESSAGE_ID = "receiverId";
+
     private static final String VERIFICATION_ID = "verificationId";
 
     public static void register(Context context) {
@@ -76,6 +79,46 @@ public class SharedPrefs {
     public static String getVerificationId(Context context) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
         return prefs.getString(VERIFICATION_ID, null);
+    }
+
+    public static void saveStartChatTime(long timeInMillis, Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        prefs.edit()
+                .putLong(CHAT_START_TIME, timeInMillis)
+                .apply();
+    }
+
+    public static void saveChatMessageId(String dbMessageId, Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        prefs.edit()
+                .putString(CHAT_MESSAGE_ID, dbMessageId)
+                .apply();
+    }
+
+    public static long loadStartChatTime(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        long result = prefs.getLong(CHAT_START_TIME, -1);
+        return result;
+    }
+
+    public static String loadChatMessageId(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        String result = prefs.getString(CHAT_MESSAGE_ID, null);
+        return result;
+    }
+
+    public static void clearStartChatTime(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        prefs.edit()
+                .remove(CHAT_START_TIME)
+                .apply();
+    }
+
+    public static void clearChatMessageId(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        prefs.edit()
+                .remove(CHAT_MESSAGE_ID)
+                .apply();
     }
 
 }

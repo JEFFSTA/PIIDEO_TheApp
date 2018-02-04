@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -175,6 +176,10 @@ public class ChatLab {
     }
 
     public void addPiideo(PiideoRow item) {
+        PiideoRow row = searchBy(item.getPiideoFileName());
+        if (row != null) {
+            Log.e("MULTIPLE", "Multiple piideo save");
+        }
         ContentValues values = ChatLab.getContentValues(item);
         mDataBase.insert(PiideoSchema.ChatTable.NAME, null, values);
     }
@@ -204,6 +209,11 @@ public class ChatLab {
                 PiideoSchema.ChatTable.Cols.PIIDEO_FILE + " = ?",
                 new String[]{piideoName});
     }
+
+//    public void setPiideoLoad(String piideoName) {
+//        ContentValues values = new ContentValues();
+//        values.put(PiideoSchema.ChatTable.Cols.PIIDEO_STATE, PiideoSchema.ChatTable.P)
+//    }
 
     public Member getMember() {
         Subject subject = getSubject();

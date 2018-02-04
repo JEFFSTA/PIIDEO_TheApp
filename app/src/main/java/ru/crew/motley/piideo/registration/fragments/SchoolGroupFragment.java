@@ -8,9 +8,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Toast;
 
 import org.parceler.Parcels;
 
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -123,6 +125,11 @@ public class SchoolGroupFragment extends ButterFragment {
                         },
                         error -> {
                             Log.e(TAG, "Load school groups failed");
+                            Toast.makeText(getActivity(), R.string.ex_network, Toast.LENGTH_SHORT)
+                                    .show();
+                            if (!(error instanceof SocketTimeoutException)) {
+                                throw new RuntimeException(error);
+                            }
                         });
     }
 

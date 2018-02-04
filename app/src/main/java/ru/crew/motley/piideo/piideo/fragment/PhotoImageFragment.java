@@ -45,6 +45,7 @@ import ru.crew.motley.piideo.fcm.FcmMessage;
 import ru.crew.motley.piideo.fcm.MessagingService;
 import ru.crew.motley.piideo.piideo.BitmapSingleton;
 import ru.crew.motley.piideo.piideo.service.Recorder;
+import ru.crew.motley.piideo.util.TimeUtils;
 
 /**
  * Created by vas on 12/22/17.
@@ -175,11 +176,11 @@ public class PhotoImageFragment extends ButterFragment {
     }
 
     private void sendPiideoMessage() {
-        long timestamp = timeInMillisGmt();
+        long timestamp = TimeUtils.Companion.gmtTimeInMillis();
         FcmMessage message = new FcmMessage(
                 timestamp,
                 -timestamp,
-                getDayTimestamp(timestamp),
+                TimeUtils.Companion.gmtDayTimestamp(timestamp),
                 mFcmMessage.getTo(),
                 mFcmMessage.getFrom(),
                 mPiideoName,
@@ -194,21 +195,6 @@ public class PhotoImageFragment extends ButterFragment {
                 .push()
                 .setValue(message);
     }
-
-    private long getDayTimestamp(long timestamp) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(timestamp);
-        calendar.set(Calendar.MILLISECOND, 0);
-        calendar.set(Calendar.HOUR_OF_DAY, 0);
-        calendar.set(Calendar.SECOND, 0);
-        calendar.set(Calendar.MINUTE, 0);
-        return calendar.getTimeInMillis();
-    }
-
-    private long timeInMillisGmt() {
-        return Calendar.getInstance(TimeZone.getTimeZone("GMT")).getTimeInMillis();
-    }
-
 
     private void startRecord(Intent intent) {
         mShutterFiller.setVisibility(View.VISIBLE);

@@ -280,6 +280,7 @@ public class PhoneFragment extends ButterFragment {
 //    }
 
     private void login(String fullNumber) {
+//        if (fullNumber.startsWith("+")) fullNumber = fullNumber.substring(1);
         PhoneAuthProvider.getInstance().verifyPhoneNumber(
                 fullNumber,
                 60L,

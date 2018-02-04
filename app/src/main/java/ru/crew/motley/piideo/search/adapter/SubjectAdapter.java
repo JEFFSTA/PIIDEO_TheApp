@@ -10,10 +10,6 @@ import java.util.List;
 
 import ru.crew.motley.piideo.R;
 
-/**
- * Created by vas on 12/30/17.
- */
-
 public class SubjectAdapter extends RecyclerView.Adapter<SubjectAdapter.SubjectViewHolder> {
 
     List<String> mSubjects;

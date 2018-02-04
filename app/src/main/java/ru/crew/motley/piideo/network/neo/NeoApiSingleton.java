@@ -11,6 +11,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 
 import java.lang.reflect.Type;
+import java.util.concurrent.TimeUnit;
 
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.Credentials;
@@ -62,6 +63,9 @@ public class NeoApiSingleton {
                     return chain.proceed(newRequest);
                 })
                 .addInterceptor(interceptor)
+                .connectTimeout(30, TimeUnit.SECONDS)
+                .writeTimeout(25, TimeUnit.SECONDS)
+                .readTimeout(25, TimeUnit.SECONDS)
                 .build();
 
         RxJava2CallAdapterFactory rxAdapter = RxJava2CallAdapterFactory.createWithScheduler(Schedulers.io());

@@ -9,6 +9,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.lang.ref.WeakReference;
+import java.net.SocketTimeoutException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
@@ -36,6 +37,7 @@ import ru.crew.motley.piideo.network.neo.Request;
 import ru.crew.motley.piideo.network.neo.Statement;
 import ru.crew.motley.piideo.network.neo.Statements;
 import ru.crew.motley.piideo.network.neo.transaction.Data;
+import ru.crew.motley.piideo.util.TimeUtils;
 
 import static android.content.ContentValues.TAG;
 
@@ -115,8 +117,8 @@ public class SearchRepeaterSingleton {
     }
 
     private void sendRequest(String receiverId) {
-        long timestamp = timeInMillisGmt();
-        long dayTimestamp = getDayTimestamp(timestamp);
+        long timestamp = TimeUtils.Companion.gmtTimeInMillis();
+        long dayTimestamp = TimeUtils.Companion.gmtDayTimestamp(timestamp);
         String ownerId = mMember.getChatId();
 
         FcmMessage message =
@@ -170,7 +172,16 @@ public class SearchRepeaterSingleton {
                             startSearchChain();
                         },
                         error -> {
-                            throw new RuntimeException(error);
+                            Log.e(TAG, "Error search chain execution", error);
+                            Context context1 = mWeakReference.get();
+                            if (context1 != null) {
+                                Toast.makeText(context, R.string.sch_no_result, Toast.LENGTH_SHORT)
+                                        .show();
+                            }
+                            stopSearch();
+                            if (!(error instanceof SocketTimeoutException)) {
+                                throw new RuntimeException(error);
+                            }
                         });
     }
 
@@ -197,17 +208,4 @@ public class SearchRepeaterSingleton {
         return subject;
     }
 
-    private long getDayTimestamp(long timestamp) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(timestamp);
-        calendar.set(Calendar.MILLISECOND, 0);
-        calendar.set(Calendar.HOUR_OF_DAY, 0);
-        calendar.set(Calendar.SECOND, 0);
-        calendar.set(Calendar.MINUTE, 0);
-        return calendar.getTimeInMillis();
-    }
-
-    private long timeInMillisGmt() {
-        return Calendar.getInstance(TimeZone.getTimeZone("GMT")).getTimeInMillis();
-    }
 }

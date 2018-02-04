@@ -14,17 +14,13 @@ import com.google.firebase.messaging.RemoteMessage
 import dagger.android.AndroidInjection
 import ru.crew.motley.piideo.Appp
 import ru.crew.motley.piideo.R
+import ru.crew.motley.piideo.SharedPrefs
 import ru.crew.motley.piideo.chat.activity.ChatActivity
 import ru.crew.motley.piideo.chat.db.ChatLab
 import ru.crew.motley.piideo.chat.model.PiideoLoader
 import ru.crew.motley.piideo.handshake.activity.HandshakeActivity
 import ru.crew.motley.piideo.search.SearchRepeaterSingleton
 import javax.inject.Inject
-
-
-/**
- * Created by vas on 1/11/18.
- */
 
 class MessagingService : FirebaseMessagingService() {
 
@@ -54,31 +50,31 @@ class MessagingService : FirebaseMessagingService() {
     }
 
     override fun onMessageReceived(message: RemoteMessage) {
-        Log.d(TAG, "Message received" + message.data)
+            Log.d(TAG, "Message received" + message.data)
 
 //        if ((application as Appp).isActivityVisible) {
-        Log.d(TAG, "" + message.data.keys)
-        Log.d(TAG, "" + message.data["senderUid"])
-        Log.d(TAG, "" + message.data["receiverUid"])
-        Log.d(TAG, "" + message.data["type"])
-        Log.d(TAG, "" + message.data["content"])
-        val messageId = saveMessageToDB(
-                message.data["senderUid"]!!,
-                message.data["receiverUid"]!!,
-                message.data["content"] ?: "",
-                message.data["type"]!!)
-        when (message.data["type"]) {
-            SYN -> showRequestNotification(messageId.toString(), message.data["type"]!!)
+            Log.d(TAG, "" + message.data.keys)
+            Log.d(TAG, "" + message.data["senderUid"])
+            Log.d(TAG, "" + message.data["receiverUid"])
+            Log.d(TAG, "" + message.data["type"])
+            Log.d(TAG, "" + message.data["content"])
+            val messageId = saveMessageToDB(
+                    message.data["senderUid"]!!,
+                    message.data["receiverUid"]!!,
+                    message.data["content"] ?: "",
+                    message.data["type"]!!)
+            when (message.data["type"]) {
+                SYN -> showRequestNotification(messageId.toString(), message.data["type"]!!)
 //            ACK -> showAcknowledgeNotification(messageId)
-            ACK -> showChatOrNotification(messageId.toString(), message.data["type"]!!)
-            REJ -> showRejectNotification(messageId.toString())
-            MSG -> showNothingOrNotification(messageId.toString())
-            PDO -> showPiideoNotyOrSkip(messageId.toString())
-            else -> {
-                Log.e(TAG, "Message type error")
-                throw RuntimeException("Fcm meesage type is unsupported")
+                ACK -> showChatOrNotification(messageId.toString(), message.data["type"]!!)
+                REJ -> showRejectNotification(messageId.toString())
+                MSG -> showNothingOrNotification(messageId.toString())
+                PDO -> showPiideoNotyOrSkip(messageId.toString())
+                else -> {
+                    Log.e(TAG, "Message type error")
+                    throw RuntimeException("Fcm meesage type is unsupported")
+                }
             }
-        }
     }
 
     private fun saveMessageToDB(from: String, to: String, content: String, @MessageType type: String): Long {
@@ -104,6 +100,7 @@ class MessagingService : FirebaseMessagingService() {
     }
 
     private fun showRequestNotification(dbMessageId: String, @MessageType type: String) {
+        if (chatIsActive()) return
         val i = HandshakeActivity.getIntent(dbMessageId, type, applicationContext)
         i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
         val pI = PendingIntent.getActivity(
@@ -132,6 +129,7 @@ class MessagingService : FirebaseMessagingService() {
 
     private fun showAcknowledgeNotification(dbMessageId: String) {
         val i = ChatActivity.getIntent(dbMessageId, applicationContext)
+        i.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
         val pI = PendingIntent.getActivity(
                 applicationContext,
                 102,
@@ -173,7 +171,7 @@ class MessagingService : FirebaseMessagingService() {
 
     private fun showNothingOrNotification(messageId: String) {
         val app = application as Appp
-        if (!app.isChatVisible) {
+        if (!app.isChatVisible and chatIsActive()) {
             showChatNotification(messageId)
         }
     }
@@ -205,11 +203,13 @@ class MessagingService : FirebaseMessagingService() {
 
     private fun showPiideoNotyOrSkip(dbMessageId: String) {
         val app = application as Appp
-        if (!app.isChatVisible) {
+        if (!app.isChatVisible && chatIsActive()) {
             showPiideoNotification(dbMessageId)
             loadPiideo(dbMessageId)
         }
     }
+
+    private fun chatIsActive() = SharedPrefs.loadChatMessageId(applicationContext) != null
 
     private fun showPiideoNotification(dbMessageId: String) {
         val lab = ChatLab.get(applicationContext)

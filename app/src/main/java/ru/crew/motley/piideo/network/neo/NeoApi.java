@@ -5,9 +5,6 @@ import retrofit2.http.Body;
 import retrofit2.http.POST;
 import ru.crew.motley.piideo.network.neo.transaction.TransactionResponse;
 
-/**
- * Created by vas on 12/5/17.
- */
 
 public interface NeoApi {
 

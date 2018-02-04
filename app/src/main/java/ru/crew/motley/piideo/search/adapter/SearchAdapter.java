@@ -11,10 +11,6 @@ import java.util.List;
 import ru.crew.motley.piideo.R;
 import ru.crew.motley.piideo.network.Member;
 
-/**
- * Created by vas on 12/31/17.
- */
-
 public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.SearchViewHolder> {
 
     private List<Member> mMembers;

@@ -33,10 +33,6 @@ import ru.crew.motley.piideo.chat.db.ChatLab;
 import ru.crew.motley.piideo.chat.db.PiideoRow;
 import ru.crew.motley.piideo.piideo.service.Recorder;
 
-/**
- * Created by vas on 12/22/17.
- */
-
 public class PhotoImageFragment extends ButterFragment {
 
     private static final String TAG = PhotoImageFragment.class.getSimpleName();

@@ -12,10 +12,6 @@ import static ru.crew.motley.piideo.chat.db.PiideoSchema.SchoolTable;
 import static ru.crew.motley.piideo.chat.db.PiideoSchema.SubjectTable;
 import static ru.crew.motley.piideo.chat.db.PiideoSchema.MessageTable;
 
-/**
- * Created by vas on 12/26/17.
- */
-
 public class ChatDBHelper extends SQLiteOpenHelper {
 
     public static final int VERSION = 1;

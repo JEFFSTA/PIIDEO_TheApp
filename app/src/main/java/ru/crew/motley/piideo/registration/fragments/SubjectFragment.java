@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Parcelable;
 import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
@@ -23,6 +24,7 @@ import com.google.firebase.auth.FirebaseAuth;
 
 import org.parceler.Parcels;
 
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -153,7 +155,9 @@ public class SubjectFragment extends ButterFragment {
                             Log.e(TAG, "Error!: " + error.getLocalizedMessage());
                             Toast.makeText(getActivity(), R.string.ex_network, Toast.LENGTH_SHORT)
                                     .show();
-                            throw new RuntimeException(error);
+                            if (!(error instanceof SocketTimeoutException)) {
+                                throw new RuntimeException(error);
+                            }
                         });
     }
 
@@ -173,7 +177,9 @@ public class SubjectFragment extends ButterFragment {
                                 Log.e(TAG, "Error!: " + error1.getLocalizedMessage());
                                 Toast.makeText(getActivity(), R.string.ex_network, Toast.LENGTH_SHORT)
                                         .show();
-                                throw new RuntimeException(error1);
+                                if (!(error1 instanceof SocketTimeoutException)) {
+                                    throw new RuntimeException(error1);
+                                }
                             });
         }
     }
@@ -188,7 +194,12 @@ public class SubjectFragment extends ButterFragment {
                             prepareAndCreateNewMember();
                         },
                         error -> {
-
+                            Log.e(TAG, "Deleteion old subjects problem occured", error);
+                            Toast.makeText(getActivity(), R.string.ex_network, Toast.LENGTH_SHORT)
+                                    .show();
+                            if (!(error instanceof SocketTimeoutException)) {
+                                throw new RuntimeException(error);
+                            }
                         });
     }
 
@@ -219,6 +230,12 @@ public class SubjectFragment extends ButterFragment {
                             createNewMember();
                         },
                         error -> {
+                            Log.e(TAG, "Neo Request exception", error);
+                            Toast.makeText(getActivity(), R.string.ex_network, Toast.LENGTH_SHORT)
+                                    .show();
+                            if (!(error instanceof SocketTimeoutException)) {
+                                throw new RuntimeException(error);
+                            }
                         });
     }
 
@@ -295,6 +312,12 @@ public class SubjectFragment extends ButterFragment {
                             fillAutocomplete();
                         },
                         error -> {
+                            Log.e(TAG, "Loading subjects while registration problem", error);
+                            Toast.makeText(getActivity(), R.string.ex_network, Toast.LENGTH_SHORT)
+                                    .show();
+                            if (!(error instanceof SocketTimeoutException)) {
+                                throw new RuntimeException(error);
+                            }
                         });
     }
 
@@ -317,8 +340,18 @@ public class SubjectFragment extends ButterFragment {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
                     loadContactsPhones();
 //                    createContacts();
-//                else
-//                    showResponseDialog(getResources().getString(R.string.storage_permission_needed));
+                else {
+                    Toast.makeText(getActivity(),
+                            "This is a key permission. " +
+                                    "You can't use this app without it.",
+                            Toast.LENGTH_SHORT)
+                            .show();
+                    new Handler().postDelayed(() ->
+                                    requestPermissions(
+                                            new String[]{Manifest.permission.READ_CONTACTS},
+                                            REQUEST_CONTACTS),
+                            1000);
+                }
                 break;
             default:
                 super.onRequestPermissionsResult(requestCode, permissions, grantResults);

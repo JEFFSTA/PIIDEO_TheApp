@@ -4,9 +4,6 @@ import android.database.Cursor
 import android.database.CursorWrapper
 import ru.crew.motley.piideo.fcm.FcmMessage
 
-/**
- * Created by vas on 1/14/18.
- */
 class FcmMessageCursorWrapper(cursor: Cursor) : CursorWrapper(cursor) {
 
     fun getFcmMessage() = FcmMessage(

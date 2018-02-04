@@ -18,10 +18,6 @@ import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
-/**
- * Created by vas on 12/22/17.
- */
-
 public class Recorder extends Service {
     private static final String TAG = Recorder.class.getSimpleName();
     private static final String EXTRA_PIIDEO_NAME = "extraPiideoName";

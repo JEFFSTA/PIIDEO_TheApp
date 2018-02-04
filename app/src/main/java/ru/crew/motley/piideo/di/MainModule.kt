@@ -8,9 +8,6 @@ import ru.crew.motley.piideo.Appp
 import ru.crew.motley.piideo.chat.model.PiideoLoader
 import javax.inject.Singleton
 
-/**
- * Created by vas on 1/28/18.
- */
 @Module()
 class MainModule {
 

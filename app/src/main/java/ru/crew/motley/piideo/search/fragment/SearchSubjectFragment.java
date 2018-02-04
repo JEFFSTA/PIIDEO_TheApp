@@ -12,10 +12,12 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import org.json.JSONObject;
 import org.parceler.Parcels;
 
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.LinkedList;
@@ -42,10 +44,6 @@ import ru.crew.motley.piideo.search.SearchRepeaterSingleton;
 import ru.crew.motley.piideo.search.adapter.SubjectAdapter;
 
 import static android.content.ContentValues.TAG;
-
-/**
- * Created by vas on 12/18/17.
- */
 
 public class SearchSubjectFragment extends ButterFragment implements SubjectAdapter.SubjectListener {
 
@@ -145,7 +143,16 @@ public class SearchSubjectFragment extends ButterFragment implements SubjectAdap
         NeoApi api = NeoApiSingleton.getInstance();
         api.executeStatement(statements)
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe();
+                .subscribe(next -> {
+                        },
+                        error -> {
+                            Log.e(TAG, "Contacts deletion request execution problem", error);
+                            Toast.makeText(getActivity(), R.string.ex_network, Toast.LENGTH_SHORT)
+                                    .show();
+                            if (!(error instanceof SocketTimeoutException)) {
+                                throw new RuntimeException(error);
+                            }
+                        });
     }
 
     private Statement deleteContactsRequest(String phoneNumber) {
@@ -175,9 +182,9 @@ public class SearchSubjectFragment extends ButterFragment implements SubjectAdap
                             Log.d(TAG, "" + transaction.toString());
                             for (Result result : transaction.getResults()) {
                                 List<Data> data = result.getData();
-                                for (Data datum: data) {
+                                for (Data datum : data) {
                                     List<Row> rows = datum.getRow();
-                                    for(Row row : rows) {
+                                    for (Row row : rows) {
                                         String json = row.getValue();
                                         JSONObject response = new JSONObject(json);
                                         String subject = response.getString("name");
@@ -189,7 +196,12 @@ public class SearchSubjectFragment extends ButterFragment implements SubjectAdap
 
                         },
                         error -> {
-
+                            Log.e(TAG, "Used subjects loading problem", error);
+                            Toast.makeText(getActivity(), R.string.ex_network, Toast.LENGTH_SHORT)
+                                    .show();
+                            if (!(error instanceof SocketTimeoutException)) {
+                                throw new RuntimeException(error);
+                            }
                         });
     }
 

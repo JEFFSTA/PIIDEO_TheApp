@@ -14,14 +14,12 @@ import com.google.firebase.auth.FirebaseUser;
 import org.parceler.Parcels;
 
 import ru.crew.motley.piideo.R;
+import ru.crew.motley.piideo.SharedPrefs;
+import ru.crew.motley.piideo.chat.activity.ChatActivity;
 import ru.crew.motley.piideo.chat.db.ChatLab;
 import ru.crew.motley.piideo.network.Member;
 import ru.crew.motley.piideo.registration.activity.UserSetupActivity;
 import ru.crew.motley.piideo.search.activity.SearchActivity;
-
-/**
- * Created by vas on 12/18/17.
- */
 
 public class SplashActivity extends AppCompatActivity {
 
@@ -52,7 +50,13 @@ public class SplashActivity extends AppCompatActivity {
 
     private void skipRegistration(Member member) {
         Parcelable byPass = Parcels.wrap(member);
-        Intent i = SearchActivity.getIntent(byPass, this);
-        startActivity(i);
+        String chatMessageId = SharedPrefs.loadChatMessageId(this);
+        if (chatMessageId != null) {
+            Intent i = ChatActivity.getIntent(chatMessageId, this);
+            startActivity(i);
+        } else {
+            Intent i = SearchActivity.getIntent(byPass, this);
+            startActivity(i);
+        }
     }
 }

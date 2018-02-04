@@ -15,6 +15,7 @@ import ru.crew.motley.piideo.chat.db.ChatLab
 import ru.crew.motley.piideo.network.Member
 import ru.crew.motley.piideo.network.neo.*
 import ru.crew.motley.piideo.search.SearchListener
+import java.net.SocketTimeoutException
 import java.util.*
 
 
@@ -92,7 +93,9 @@ class UselessFragment : Fragment() {
                     Log.e(TAG, "Error!: " + error1.localizedMessage)
                     Toast.makeText(activity, R.string.ex_network, Toast.LENGTH_SHORT)
                             .show()
-                    throw RuntimeException(error1)
+                    if (error1 !is SocketTimeoutException) {
+                        throw RuntimeException(error1)
+                    }
                 }
 
     }

@@ -19,10 +19,6 @@ import dagger.android.support.HasSupportFragmentInjector;
 import ru.crew.motley.piideo.R;
 import ru.crew.motley.piideo.piideo.fragment.PhotoImageFragment;
 
-/**
- * Created by vas on 12/22/17.
- */
-
 public class PiideoActivity extends AppCompatActivity implements HasSupportFragmentInjector {
 
     private static final String TAG = PiideoActivity.class.getSimpleName();

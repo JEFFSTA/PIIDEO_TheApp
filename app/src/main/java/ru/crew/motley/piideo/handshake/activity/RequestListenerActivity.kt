@@ -16,13 +16,13 @@ import ru.crew.motley.piideo.fcm.ShowDialogReceiver
  */
 abstract class RequestListenerActivity : AppCompatActivity() {
 
-    lateinit var fbNotificationReceiver: ShowDialogReceiver
+    val fbNotificationReceiver = ShowDialogReceiver(this)
     val contactsListener by lazy { PhoneContactObserver(Handler()) }
 
     override fun onResume() {
         super.onResume()
         (application as Appp).activityResumed()
-        fbNotificationReceiver = ShowDialogReceiver(this)
+//        fbNotificationReceiver = ShowDialogReceiver(this)
         val filter = IntentFilter(ShowDialogReceiver.BROADCAST_ACTION)
         registerReceiver(fbNotificationReceiver, filter)
         contentResolver.registerContentObserver(
@@ -45,6 +45,7 @@ abstract class RequestListenerActivity : AppCompatActivity() {
 
     fun showChat(dbMessageId: String, type: String) {
         val i = ChatActivity.getIntent(dbMessageId, this)
-        startActivity(i);
+        startActivity(i)
+        finish()
     }
 }

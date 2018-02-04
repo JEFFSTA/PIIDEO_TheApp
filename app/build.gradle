@@ -71,7 +71,7 @@ dependencies {
     implementation 'io.reactivex.rxjava2:rxjava:2.1.7'
     implementation 'io.reactivex.rxjava2:rxandroid:2.0.1'
 
-    implementation 'com.google.code.gson:gson:2.8.1'
+    implementation 'com.google.code.gson:gson:2.8.2'
 
     implementation 'com.jakewharton:butterknife:8.8.1'
     kapt 'com.jakewharton:butterknife-compiler:8.8.1'
@@ -89,8 +89,6 @@ dependencies {
 
     implementation 'org.parceler:parceler-api:1.1.9'
     kapt 'org.parceler:parceler:1.1.9'
-
-    implementation 'ch.acra:acra:4.9.2'
 
     implementation 'com.google.firebase:firebase-core:11.8.0'
     implementation 'com.google.firebase:firebase-messaging:11.8.0'
