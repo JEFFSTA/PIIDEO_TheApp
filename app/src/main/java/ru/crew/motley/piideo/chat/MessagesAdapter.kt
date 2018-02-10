@@ -99,11 +99,11 @@ class MessagesAdapter(
             val viewType = this@MessagesAdapter.getItemViewType(layoutPosition)
             when (viewType) {
                 VIEW_TYPE_PIIDEO_SENT -> {
-                    progressBar.visibility =View.VISIBLE
+                    progressBar.visibility = View.VISIBLE
                     loaderCallback.send(message, piideoImage, progressBar)
                 }
                 VIEW_TYPE_PIIDEO_RECEIVE -> {
-                    progressBar.visibility =View.VISIBLE
+                    progressBar.visibility = View.VISIBLE
                     loaderCallback.receive(message, piideoImage, progressBar)
                 }
                 VIEW_TYPE_SENT -> messageBody.text = message.content

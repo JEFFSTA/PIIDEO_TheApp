@@ -17,6 +17,8 @@
     <color name="colorTextPrimaryHighlighted">#F2FFFFFF</color>
     <color name="colorTextSecondary">#8CFFFFFF</color>
 
+    <color name="colorChatBarText">#cfcece</color>
+
     <!--basic colors-->
     <color name="colorTransparent">#00000000</color>
     <color name="colorWhite">#FFFFFF</color>

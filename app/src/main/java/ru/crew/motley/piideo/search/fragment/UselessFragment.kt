@@ -14,6 +14,7 @@ import ru.crew.motley.piideo.R
 import ru.crew.motley.piideo.chat.db.ChatLab
 import ru.crew.motley.piideo.network.Member
 import ru.crew.motley.piideo.network.neo.*
+import ru.crew.motley.piideo.registration.fragments.PhoneFragment.*
 import ru.crew.motley.piideo.search.SearchListener
 import java.net.SocketTimeoutException
 import java.util.*
@@ -27,8 +28,8 @@ class UselessFragment : Fragment() {
     companion object {
         val TAG = UselessFragment::class.java.simpleName
 
-        val FRENCH_LENGTH = 10
-        val FRENCH_PREFIX = "0"
+//        val FRENCH_LENGTH = 10
+//        val FRENCH_PREFIX = "0"
 
         fun newInstance(listener: SearchListener) = UselessFragment().apply { this.callback = listener }
     }
@@ -57,6 +58,14 @@ class UselessFragment : Fragment() {
         val request = Statement()
         val filteredPhone = if (phone.length == FRENCH_LENGTH && phone.startsWith(FRENCH_PREFIX)) {
             phone.substring(1, phone.length)
+        } else if (phone.length == MOROCCO_LENGTH && phone.startsWith(MOROCCO_PREFIX)) {
+            phone.substring(1, phone.length)
+        } else if (phone.length == NIGERIA_LENGTH && phone.startsWith(NIGERIA_PREFIX)) {
+            phone.substring(1, phone.length)
+        } else if (phone.startsWith("234")) {
+            phone.substring(3, phone.length)
+        } else if (phone.startsWith("212")) {
+            phone.substring(3, phone.length)
         } else if (phone.startsWith("33")) {
             phone.substring(2, phone.length)
         } else if (phone.length > 10) {

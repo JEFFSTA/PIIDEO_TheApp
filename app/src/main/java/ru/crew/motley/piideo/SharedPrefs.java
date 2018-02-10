@@ -16,34 +16,12 @@ public class SharedPrefs {
     private static final String SEARCH_SUBJECT = "searchSubject";
     private static final String PHONE = "memberPhone";
 
-    private static final String CHAT_START_TIME = "startTime";
-    private static final String CHAT_MESSAGE_ID = "receiverId";
+    private static final String PAGE = "page";
+    private static final String PAGE_START_TIME = "startTime";
+    private static final String PAGE_MESSAGE_ID = "receiverId";
 
     private static final String VERIFICATION_ID = "verificationId";
 
-    public static void register(Context context) {
-        SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-        prefs.edit()
-                .putBoolean(REGISTERED, true)
-                .apply();
-    }
-
-    public static boolean isRegistered(Context context) {
-        SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-        return prefs.getBoolean(REGISTERED, false);
-    }
-
-    public static void memberSubject(String value, Context context) {
-        SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-        prefs.edit()
-                .putString(MEMBER_SUBJECT, value)
-                .apply();
-    }
-
-    public static String getMemberSubject(Context context) {
-        SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-        return prefs.getString(MEMBER_SUBJECT, null);
-    }
 
     public static void searchSubject(String value, Context context) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
@@ -55,18 +33,6 @@ public class SharedPrefs {
     public static String getSearchSubject(Context context) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
         return prefs.getString(SEARCH_SUBJECT, null);
-    }
-
-    public static void memberPhone(String value, Context context) {
-        SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-        prefs.edit()
-                .putString(PHONE, value)
-                .apply();
-    }
-
-    public static String getMemberPhone(Context context) {
-        SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-        return prefs.getString(PHONE, null);
     }
 
     public static void verificationId(String value, Context context) {
@@ -81,43 +47,52 @@ public class SharedPrefs {
         return prefs.getString(VERIFICATION_ID, null);
     }
 
-    public static void saveStartChatTime(long timeInMillis, Context context) {
+    public static void savePageStartTime(long timeInMillis, Context context) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
         prefs.edit()
-                .putLong(CHAT_START_TIME, timeInMillis)
+                .putLong(PAGE_START_TIME, timeInMillis)
                 .apply();
     }
 
-    public static void saveChatMessageId(String dbMessageId, Context context) {
+    public static void savePageMessageId(String dbMessageId, Context context) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
         prefs.edit()
-                .putString(CHAT_MESSAGE_ID, dbMessageId)
+                .putString(PAGE_MESSAGE_ID, dbMessageId)
                 .apply();
     }
 
-    public static long loadStartChatTime(Context context) {
+    public static long loadPageStartTime(Context context) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-        long result = prefs.getLong(CHAT_START_TIME, -1);
+        long result = prefs.getLong(PAGE_START_TIME, -1);
         return result;
     }
 
-    public static String loadChatMessageId(Context context) {
+    public static String loadPageMessageId(Context context) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-        String result = prefs.getString(CHAT_MESSAGE_ID, null);
+        String result = prefs.getString(PAGE_MESSAGE_ID, null);
         return result;
     }
 
-    public static void clearStartChatTime(Context context) {
+    public static void clearPageStartTime(Context context) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
         prefs.edit()
-                .remove(CHAT_START_TIME)
+                .remove(PAGE_START_TIME)
                 .apply();
     }
 
-    public static void clearChatMessageId(Context context) {
+    public static void clearPageMessageId(Context context) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
         prefs.edit()
-                .remove(CHAT_MESSAGE_ID)
+                .remove(PAGE_MESSAGE_ID)
+                .apply();
+    }
+
+    public static void clearPageData(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        prefs.edit()
+                .remove(PAGE_MESSAGE_ID)
+                .remove(PAGE_START_TIME)
+                .remove(PAGE)
                 .apply();
     }
 

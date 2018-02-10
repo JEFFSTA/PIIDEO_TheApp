@@ -14,32 +14,17 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
-import org.json.JSONObject;
 import org.parceler.Parcels;
-import org.reactivestreams.Subscription;
 
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
-import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 import ru.crew.motley.piideo.ButterFragment;
 import ru.crew.motley.piideo.R;
 import ru.crew.motley.piideo.SharedPrefs;
-import ru.crew.motley.piideo.fcm.FcmMessage;
 import ru.crew.motley.piideo.network.Member;
 import ru.crew.motley.piideo.network.neo.NeoApi;
 import ru.crew.motley.piideo.network.neo.NeoApiSingleton;
@@ -58,9 +43,6 @@ import ru.crew.motley.piideo.search.adapter.SendRequestCallback;
 
 public class SearchResultFragment extends ButterFragment implements SendRequestCallback {
 
-//    @BindView(R.id.debug_result)
-//    TextView mDebugText;
-
     private static final String TAG = SearchResultFragment.class.getSimpleName();
     private static final String ARG_MEMBER = "arg_member";
 
@@ -69,12 +51,9 @@ public class SearchResultFragment extends ButterFragment implements SendRequestC
     @BindView(R.id.progressBar)
     ProgressBar mProgressBar;
 
-    private DatabaseReference mDatabase;
-
     private SearchAdapter mSearchAdapter;
 
     private Member mMember;
-    //    private List<String> mPhoneNumbers = new ArrayList<>();
     private List<Member> mMembers = new ArrayList<>();
     private SearchRepeaterSingleton mSearchRepeaterSingleton;
 
@@ -89,8 +68,10 @@ public class SearchResultFragment extends ButterFragment implements SendRequestC
     @Override
     public void onResume() {
         super.onResume();
-        mSearchRepeaterSingleton = SearchRepeaterSingleton.instance(getActivity());
-        mSearchRepeaterSingleton.setContext(getActivity());
+        if (mSearchRepeaterSingleton == null) {
+            mSearchRepeaterSingleton = SearchRepeaterSingleton.instance(getActivity());
+//            mSearchRepeaterSingleton.setContext(getActivity());
+        }
     }
 
     @Override
@@ -102,10 +83,9 @@ public class SearchResultFragment extends ButterFragment implements SendRequestC
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mDatabase = FirebaseDatabase.getInstance().getReference();
+        mSearchRepeaterSingleton = SearchRepeaterSingleton.newInstance(getActivity());
         mMember = Parcels.unwrap(getArguments().getParcelable(ARG_MEMBER));
         mSearchAdapter = new SearchAdapter(mMembers, this);
-        startSearch();
     }
 
     @Nullable
@@ -115,6 +95,7 @@ public class SearchResultFragment extends ButterFragment implements SendRequestC
         View v = super.onCreateView(inflater, container, savedInstanceState);
         mSearchRecycler.setLayoutManager(new LinearLayoutManager(getActivity()));
         mSearchRecycler.setAdapter(mSearchAdapter);
+        startSearch();
         return v;
     }
 
@@ -126,7 +107,6 @@ public class SearchResultFragment extends ButterFragment implements SendRequestC
 
     private void startSearch() {
         String searchSubject = SharedPrefs.getSearchSubject(getActivity());
-        String phoneNumber = mMember.getPhoneNumber();
         Statement search = searchRequest(searchSubject);
         Statements statements = new Statements();
         statements.getValues().add(search);
@@ -140,18 +120,20 @@ public class SearchResultFragment extends ButterFragment implements SendRequestC
                                         .show();
                                 return;
                             }
+                            mMembers.clear();
                             for (Data item : responseData) {
                                 String response = item
                                         .getRow()
                                         .get(0)
                                         .getValue();
-                                JSONObject object = new JSONObject(response);
                                 Member member = Member.fromJson(response);
                                 Log.d(TAG, member.toString());
                                 mMembers.add(member);
                             }
                             mSearchAdapter.notifyDataSetChanged();
-//                            startSearchChain();
+                            if (mSearchRepeaterSingleton != null) {
+                                mSearchRepeaterSingleton.setMembers(mMembers);
+                            }
                         },
                         error -> {
                             Log.e(TAG, "Request target search problem", error);
@@ -178,12 +160,23 @@ public class SearchResultFragment extends ButterFragment implements SendRequestC
     }
 
 
-
     @Override
     public void onClick(String receiverId, View view) {
         view.setEnabled(false);
         mProgressBar.setVisibility(View.VISIBLE);
-        mSearchRepeaterSingleton.startSearch();
+        mSearchRepeaterSingleton.moveToFirstPosition(receiverId);
+        mSearchRepeaterSingleton.searchObservable()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(next -> {
+                            Log.d(TAG, "First one passed");
+                        },
+                        error -> {
+                            Log.e(TAG, "Error subscription onCLick");
+                        },
+                        () -> {
+                            mProgressBar.setVisibility(View.GONE);
+                        });
+        mSearchRepeaterSingleton.next();
     }
 
 }

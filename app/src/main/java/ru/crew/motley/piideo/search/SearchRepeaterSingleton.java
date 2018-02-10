@@ -10,21 +10,18 @@ import com.google.firebase.database.FirebaseDatabase;
 
 import java.lang.ref.WeakReference;
 import java.net.SocketTimeoutException;
-import java.util.Calendar;
-import java.util.Date;
+import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
-import java.util.TimeZone;
-import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.Consumer;
-import io.reactivex.functions.Function;
-import kotlin.jvm.functions.Function1;
+import io.reactivex.schedulers.Schedulers;
+import io.reactivex.subjects.BehaviorSubject;
+import io.reactivex.subjects.PublishSubject;
 import ru.crew.motley.piideo.R;
 import ru.crew.motley.piideo.SharedPrefs;
 import ru.crew.motley.piideo.chat.db.ChatLab;
@@ -64,21 +61,21 @@ public class SearchRepeaterSingleton {
         return local;
     }
 
-    public static SearchRepeaterSingleton currentInstance() {
-        if (INSTANCE == null) {
-            throw new RuntimeException("Search repeater can't be null from this method");
-        }
-        return INSTANCE;
+    public static SearchRepeaterSingleton newInstance(Context context) {
+        Member member = ChatLab.get(context).getMember();
+        SearchRepeaterSingleton local = new SearchRepeaterSingleton(member, context);
+        INSTANCE = local;
+        return local;
     }
 
-    private static final int REQUEST_DELAY = 20;
+//    private static final int REQUEST_DELAY = 20;
 
-    private Queue<Member> mMembers = new LinkedList<>();
-    private Disposable mSearchRepeater;
+    private Deque<Member> mMembers = new LinkedList<>();
+//    private Disposable mSearchRepeater;
     private DatabaseReference mDatabase;
     private Member mMember;
-    private WeakReference<Context> mWeakReference;
-    private Member mTarget;
+//    private WeakReference<Context> mWeakReference;
+    private BehaviorSubject<Member> mMemberSubject;
 
     private SearchRepeaterSingleton() {
         mDatabase = FirebaseDatabase.getInstance().getReference();
@@ -87,30 +84,46 @@ public class SearchRepeaterSingleton {
     private SearchRepeaterSingleton(Member member, Context context) {
         this();
         mMember = member;
-        mWeakReference = new WeakReference(context);
+//        mWeakReference = new WeakReference(context);
+        mMemberSubject = BehaviorSubject.create();
     }
 
-    public void setContext(Context context) {
-        mWeakReference = new WeakReference<Context>(context);
-    }
+//    public void setContext(Context context) {
+//        mWeakReference = new WeakReference<>(context);
+//    }
 
-    private void startSearchChain() {
-        stopSearchChain();
-        mSearchRepeater =
-                Observable.interval(0, REQUEST_DELAY, TimeUnit.SECONDS)
-                        .map(item -> getNextMember())
-                        .subscribe(member -> sendRequest(member.getChatId()),
-                                error -> {
-                                    Log.e(TAG, "Search Chain Exception", error);
-                                });
-    }
-
-    private void stopSearchChain() {
-        if (mSearchRepeater != null && !mSearchRepeater.isDisposed()) {
-            mSearchRepeater.dispose();
-            mSearchRepeater = null;
+    public void moveToFirstPosition(String receiverId) {
+        Member target = null;
+        for (Member member : mMembers) {
+            if (receiverId.equals(member.getChatId())) {
+                target = member;
+            }
         }
+        mMembers.remove(target);
+        mMembers.addFirst(target);
     }
+
+    public void setMembers(List<Member> members) {
+        mMembers = new LinkedList<>(members);
+    }
+
+//    private void startSearchChain() {
+//        stopSearchChain();
+//        mSearchRepeater =
+//                Observable.interval(0, REQUEST_DELAY, TimeUnit.SECONDS)
+//                        .map(item -> getNextMember())
+//                        .subscribe(member -> sendRequest(member.getChatId()),
+//                                error -> {
+//                                    Log.e(TAG, "Search Chain Exception", error);
+//                                });
+//    }
+
+//    private void stopSearchChain() {
+//        if (mSearchRepeater != null && !mSearchRepeater.isDisposed()) {
+//            mSearchRepeater.dispose();
+//            mSearchRepeater = null;
+//        }
+//    }
 
     private Member getNextMember() {
         return mMembers.poll();
@@ -138,74 +151,85 @@ public class SearchRepeaterSingleton {
                 .setValue(message);
     }
 
-    public void startSearch() {
-        Context context = mWeakReference.get();
-        if (context == null) {
-            return;
-        }
-        String searchSubject = SharedPrefs.getSearchSubject(context);
-        Statement search = searchRequest(searchSubject);
-        Statements statements = new Statements();
-        statements.getValues().add(search);
-        NeoApi api = NeoApiSingleton.getInstance();
-        api.executeStatement(statements)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(transaction -> {
-                            List<Data> responseData = transaction.getResults().get(0).getData();
-                            if (responseData.isEmpty()) {
-                                Context context1 = mWeakReference.get();
-                                if (context1 != null) {
-                                    Toast.makeText(context, R.string.sch_no_result, Toast.LENGTH_SHORT)
-                                            .show();
-                                }
-                                return;
-                            }
-                            for (Data item : responseData) {
-                                String response = item
-                                        .getRow()
-                                        .get(0)
-                                        .getValue();
-                                Member member = Member.fromJson(response);
-                                Log.d(TAG, member.toString());
-                                mMembers.add(member);
-                            }
-                            startSearchChain();
-                        },
-                        error -> {
-                            Log.e(TAG, "Error search chain execution", error);
-                            Context context1 = mWeakReference.get();
-                            if (context1 != null) {
-                                Toast.makeText(context, R.string.sch_no_result, Toast.LENGTH_SHORT)
-                                        .show();
-                            }
-                            stopSearch();
-                            if (!(error instanceof SocketTimeoutException)) {
-                                throw new RuntimeException(error);
-                            }
-                        });
-    }
+//    public void startSearch() {
+//        Context context = mWeakReference.get();
+//        if (context == null) {
+//            return;
+//        }
+//        String searchSubject = SharedPrefs.getSearchSubject(context);
+//        Statement search = searchRequest(searchSubject);
+//        Statements statements = new Statements();
+//        statements.getValues().add(search);
+//        NeoApi api = NeoApiSingleton.getInstance();
+//        api.executeStatement(statements)
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe(transaction -> {
+//                            List<Data> responseData = transaction.getResults().get(0).getData();
+//                            if (responseData.isEmpty()) {
+//                                Context context1 = mWeakReference.get();
+//                                if (context1 != null) {
+//                                    Toast.makeText(context, R.string.sch_no_result, Toast.LENGTH_SHORT)
+//                                            .show();
+//                                }
+//                                return;
+//                            }
+//                            for (Data item : responseData) {
+//                                String response = item
+//                                        .getRow()
+//                                        .get(0)
+//                                        .getValue();
+//                                Member member = Member.fromJson(response);
+//                                Log.d(TAG, member.toString());
+//                                mMembers.add(member);
+//                            }
+//                            startSearchChain();
+//                        },
+//                        error -> {
+//                            Log.e(TAG, "Error search chain execution", error);
+//                            Context context1 = mWeakReference.get();
+//                            if (context1 != null) {
+//                                Toast.makeText(context, R.string.sch_no_result, Toast.LENGTH_SHORT)
+//                                        .show();
+//                            }
+//                            stopSearch();
+//                            if (!(error instanceof SocketTimeoutException)) {
+//                                throw new RuntimeException(error);
+//                            }
+//                        });
+//    }
 
-    public void stopSearch() {
-        stopSearchChain();
-    }
+//    public void stopSearch() {
+//        stopSearchChain();
+//    }
 
     public void next() {
 //        stopSearchChain();
-        startSearchChain();
+        if (mMembers.isEmpty()) {
+            mMemberSubject.onComplete();
+            return;
+        }
+        mMemberSubject.onNext(getNextMember());
     }
 
-    private Statement searchRequest(String searchSubject) {
-        if (TextUtils.isEmpty(searchSubject)) {
-            throw new IllegalStateException("Search mSubject can't be null or empty");
-        }
-        Statement subject = new Statement();
-        subject.setStatement(Request.FIND_QUESTION_TARGET);
-        Parameters parameters = new Parameters();
-        parameters.getProps().put(Request.Var.PHONE, mMember.getPhoneNumber());
-        parameters.getProps().put(Request.Var.NAME, searchSubject);
-        parameters.getProps().put(Request.Var.NAME_2, mMember.getSchool().getName());
-        subject.setParameters(parameters);
-        return subject;
+    public Observable<Member> searchObservable() {
+        return mMemberSubject.map(item -> {
+            sendRequest(item.getChatId());
+            return item;
+        }).subscribeOn(Schedulers.io());
     }
+
+//    private Statement searchRequest(String searchSubject) {
+//        if (TextUtils.isEmpty(searchSubject)) {
+//            throw new IllegalStateException("Search mSubject can't be null or empty");
+//        }
+//        Statement subject = new Statement();
+//        subject.setStatement(Request.FIND_QUESTION_TARGET);
+//        Parameters parameters = new Parameters();
+//        parameters.getProps().put(Request.Var.PHONE, mMember.getPhoneNumber());
+//        parameters.getProps().put(Request.Var.NAME, searchSubject);
+//        parameters.getProps().put(Request.Var.NAME_2, mMember.getSchool().getName());
+//        subject.setParameters(parameters);
+//        return subject;
+//    }
 
 }

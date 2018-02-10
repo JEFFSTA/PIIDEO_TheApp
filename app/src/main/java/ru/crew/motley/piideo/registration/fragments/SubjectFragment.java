@@ -52,6 +52,10 @@ import ru.crew.motley.piideo.registration.RegistrationListener;
 
 import static ru.crew.motley.piideo.registration.fragments.PhoneFragment.FRENCH_LENGTH;
 import static ru.crew.motley.piideo.registration.fragments.PhoneFragment.FRENCH_PREFIX;
+import static ru.crew.motley.piideo.registration.fragments.PhoneFragment.MOROCCO_LENGTH;
+import static ru.crew.motley.piideo.registration.fragments.PhoneFragment.MOROCCO_PREFIX;
+import static ru.crew.motley.piideo.registration.fragments.PhoneFragment.NIGERIA_LENGTH;
+import static ru.crew.motley.piideo.registration.fragments.PhoneFragment.NIGERIA_PREFIX;
 
 /**
  * Created by vas on 12/17/17.
@@ -111,7 +115,6 @@ public class SubjectFragment extends ButterFragment {
                     .show();
             return;
         }
-        SharedPrefs.memberSubject(subject, getActivity());
         setSubjectIfExist();
         deleteOldSubjectRelationAndCreateNewMember();
     }
@@ -372,6 +375,10 @@ public class SubjectFragment extends ButterFragment {
         Statement request = new Statement();
         if (phone.length() == FRENCH_LENGTH && phone.startsWith(FRENCH_PREFIX)) {
             request.setStatement(Request.NEW_CONTACT_WITH_PHONE_PREFIX);
+        } else if (phone.length() == MOROCCO_LENGTH && phone.startsWith(MOROCCO_PREFIX)) {
+            request.setStatement(Request.NEW_CONTACT_WITH_PHONE_PREFIX);
+        } else if (phone.length() == NIGERIA_LENGTH && phone.startsWith(NIGERIA_PREFIX)) {
+            request.setStatement(Request.NEW_CONTACT_WITH_PHONE_PREFIX);
         } else if (phone.length() > 10) {
             request.setStatement(Request.NEW_CONTACT_WITH_COUNTRY_CODE);
         } else {
@@ -381,10 +388,21 @@ public class SubjectFragment extends ButterFragment {
         if (phone.length() == FRENCH_LENGTH && phone.startsWith(FRENCH_PREFIX)) {
             parameters.getProps().put(Request.Var.PH_PREFIX, phone.substring(0, 1));
             parameters.getProps().put(Request.Var.PHONE, phone.substring(1, phone.length()));
-
+        } else if (phone.length() == MOROCCO_LENGTH && phone.startsWith(MOROCCO_PREFIX)) {
+            parameters.getProps().put(Request.Var.PH_PREFIX, phone.substring(0, 1));
+            parameters.getProps().put(Request.Var.PHONE, phone.substring(1, phone.length()));
+        } else if (phone.length() == NIGERIA_LENGTH && phone.startsWith(NIGERIA_PREFIX)) {
+            parameters.getProps().put(Request.Var.PH_PREFIX, phone.substring(0, 1));
+            parameters.getProps().put(Request.Var.PHONE, phone.substring(1, phone.length()));
         } else if (phone.startsWith("33")) {
             parameters.getProps().put(Request.Var.C_CODE, phone.substring(0, 2));
             parameters.getProps().put(Request.Var.PHONE, phone.substring(2, phone.length()));
+        } else if (phone.startsWith("212")) {
+            parameters.getProps().put(Request.Var.C_CODE, phone.substring(0, 3));
+            parameters.getProps().put(Request.Var.PHONE, phone.substring(3, phone.length()));
+        } else if (phone.startsWith("234")) {
+            parameters.getProps().put(Request.Var.C_CODE, phone.substring(0, 3));
+            parameters.getProps().put(Request.Var.PHONE, phone.substring(3, phone.length()));
         } else if (phone.length() > 10) {
             parameters.getProps().put(Request.Var.C_CODE, phone.substring(0, phone.length() - 10));
             parameters.getProps().put(Request.Var.PHONE, phone.substring(phone.length() - 10, phone.length()));
@@ -400,8 +418,16 @@ public class SubjectFragment extends ButterFragment {
         String filteredPhone;
         if (phone.length() == FRENCH_LENGTH && phone.startsWith(FRENCH_PREFIX)) {
             filteredPhone = phone.substring(1, phone.length());
+        } else if (phone.length() == MOROCCO_LENGTH && phone.startsWith(MOROCCO_PREFIX)) {
+            filteredPhone = phone.substring(1, phone.length());
+        } else if (phone.length() == NIGERIA_LENGTH && phone.startsWith(NIGERIA_PREFIX)) {
+            filteredPhone = phone.substring(1, phone.length());
         } else if (phone.startsWith("33")) {
             filteredPhone = phone.substring(2, phone.length());
+        } else if (phone.startsWith("212")) {
+            filteredPhone = phone.substring(3, phone.length());
+        } else if (phone.startsWith("234")) {
+            filteredPhone = phone.substring(3, phone.length());
         } else if (phone.length() > 10) {
             filteredPhone = phone.substring(phone.length() - 10, phone.length());
         } else {
@@ -422,10 +448,13 @@ public class SubjectFragment extends ButterFragment {
         Statement request = new Statement();
         if (!TextUtils.isEmpty(mMember.getCountryCode()) && !TextUtils.isEmpty(mMember.getPhonePrefix())) {
             request.setStatement(Request.ME_WITH_CC_AND_PREFIX);
+            Toast.makeText(getActivity(), "WITH CC AND 0" + " " + mMember.getPhoneNumber(), Toast.LENGTH_LONG).show();
         } else if (!TextUtils.isEmpty(mMember.getCountryCode())) {
             request.setStatement(Request.ME_WITH_CC);
+            Toast.makeText(getActivity(), "WITH CC " + " " + mMember.getPhoneNumber(), Toast.LENGTH_LONG).show();
         } else if (!TextUtils.isEmpty(mMember.getPhonePrefix())) {
             request.setStatement(Request.ME_WITH_PREFIX);
+            Toast.makeText(getActivity(), "WITH 0" + " " + mMember.getPhoneNumber(), Toast.LENGTH_LONG).show();
         } else {
             throw new RuntimeException("Illegal Full Phone Number Format");
         }

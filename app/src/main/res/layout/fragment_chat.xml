@@ -2,9 +2,9 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
     <LinearLayout
         android:id="@+id/chat_container"
@@ -18,49 +18,69 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_chainStyle="spread">
 
-        <LinearLayout
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/colorPrimary"
+            android:background="@color/screenColorBackground"
             android:orientation="horizontal">
 
-            <Button
-                android:id="@+id/back_button"
-                android:layout_width="0dp"
+            <LinearLayout
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Back" />
+                android:layout_marginBottom="@dimen/simple_padding_large"
+                android:layout_marginLeft="@dimen/simple_padding_large"
+                android:layout_marginTop="@dimen/simple_padding_large"
+                android:orientation="vertical">
 
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_weight="9"
-                android:gravity="center_horizontal"
-                android:text="[Author]" />
+                <TextView
+                    android:id="@+id/topic"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="[Author]"
+                    android:textColor="@color/colorWhite"
+                    android:textSize="@dimen/text_size_primary_huge"
+                    tools:text="Topic" />
 
-            <Button
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="watch" />
+                <TextView
+                    android:id="@+id/subject"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="[Author]"
+                    android:textColor="@color/colorWhite"
+                    android:textSize="@dimen/text_size_secondary"
+                    tools:text="(Subject)" />
+            </LinearLayout>
 
-            <Button
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="menu" />
 
-        </LinearLayout>
+            <FrameLayout
+                android:layout_width="120dp"
+                android:layout_height="60dp"
+                android:layout_gravity="center_vertical|right"
+                android:background="@drawable/shadow_1176">
+
+                <TextView
+                    android:id="@+id/watch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+
+                    android:textColor="@color/screenColorBackground"
+                    android:textSize="@dimen/text_size_primary_huge"
+                    tools:text="00:00" />
+
+                <!--android:layout_marginBottom="@dimen/simple_padding_tiny"-->
+                <!--android:layout_marginRight="@dimen/simple_padding_tiny"-->
+
+            </FrameLayout>
+
+        </FrameLayout>
 
         <FrameLayout
-            android:background="@android:color/darker_gray"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/chat_recycler"
-                android:background="@color/screenColorBackground"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_gravity="bottom" />
@@ -73,40 +93,55 @@
         android:id="@+id/input_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
         android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/chat_container">
 
-        <Button
+        <LinearLayout
+            android:layout_marginTop="@dimen/simple_padding_tiny"
+            android:layout_weight="1"
+            android:background="@drawable/chat_text_bar_bg"
+            android:layout_marginLeft="@dimen/simple_padding_medium"
+            android:layout_marginRight="@dimen/simple_padding_medium"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="2"
-            android:text="emj" />
+            android:orientation="horizontal"
+            android:elevation="4dp">
 
-        <EditText
-            android:id="@+id/messageInput"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="9" />
+            <!--<Button-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:text="e" />-->
 
-        <Button
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="2"
-            android:text="attach" />
+            <EditText
+                android:paddingTop="@dimen/simple_padding_largish"
+                android:paddingBottom="@dimen/simple_padding_largish"
+                android:layout_marginLeft="48dp"
+                android:id="@+id/messageInput"
+                android:ems="10"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@color/colorWhite"
+                android:textColor="@color/colorChatBarText"
+                android:hint="@string/chat_bar_hint"
+                android:textSize="@dimen/text_size_primary" />
 
-        <Button
+        </LinearLayout>
+
+        <ImageButton
             android:id="@+id/piideo"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="2"
-            android:text="piideo" />
 
-        <Button
+            android:background="@drawable/ic_chat_piideo_button" />
+
+        <ImageButton
+
             android:id="@+id/sendMessage"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="2"
+            android:background="@drawable/ic_send_button"
             android:text="send" />
 
     </LinearLayout>

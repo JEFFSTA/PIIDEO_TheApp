@@ -14,12 +14,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.crashlytics.android.answers.Answers;
+import com.crashlytics.android.answers.CustomEvent;
+
 import org.json.JSONObject;
 import org.parceler.Parcels;
 
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -40,7 +42,6 @@ import ru.crew.motley.piideo.network.neo.transaction.Data;
 import ru.crew.motley.piideo.network.neo.transaction.Result;
 import ru.crew.motley.piideo.network.neo.transaction.Row;
 import ru.crew.motley.piideo.search.SearchListener;
-import ru.crew.motley.piideo.search.SearchRepeaterSingleton;
 import ru.crew.motley.piideo.search.adapter.SubjectAdapter;
 
 import static android.content.ContentValues.TAG;
@@ -118,6 +119,8 @@ public class SearchSubjectFragment extends ButterFragment implements SubjectAdap
                     phone = phone.replaceAll("\\D", "");
                     if (phone.startsWith("33")) {
                         phone = phone.replaceFirst("33", "");
+                    } else if (phone.length() > 10 && phone.startsWith("212")) {
+                        phone = phone.replaceFirst("212", "");
                     } else if (phone.startsWith("7")) {
                         phone = phone.replaceFirst("7", "");
                     } else if (phone.startsWith("8")) {
@@ -175,9 +178,16 @@ public class SearchSubjectFragment extends ButterFragment implements SubjectAdap
         Statements statements = new Statements();
         statements.getValues().add(search);
         NeoApi api = NeoApiSingleton.getInstance();
+        final long subjectsLoadingStart = System.currentTimeMillis();
         api.executeStatement(statements)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(transaction -> {
+                            long subjectsLoadingTime = System.currentTimeMillis() - subjectsLoadingStart;
+                            Answers.getInstance()
+                                    .logCustom(
+                                            new CustomEvent("Loading search subjects")
+                                                    .putCustomAttribute("Subjects loading time", subjectsLoadingTime));
+                            mSubjectAdapter.notifyDataSetChanged();
                             mSubjects.clear();
                             Log.d(TAG, "" + transaction.toString());
                             for (Result result : transaction.getResults()) {
@@ -192,8 +202,6 @@ public class SearchSubjectFragment extends ButterFragment implements SubjectAdap
                                     }
                                 }
                             }
-                            mSubjectAdapter.notifyDataSetChanged();
-
                         },
                         error -> {
                             Log.e(TAG, "Used subjects loading problem", error);

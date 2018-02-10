@@ -9,12 +9,12 @@ import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.firebase.database.DatabaseReference;
@@ -26,7 +26,9 @@ import org.parceler.Parcels;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -46,8 +48,8 @@ import ru.crew.motley.piideo.chat.MessagesAdapter;
 import ru.crew.motley.piideo.chat.db.ChatLab;
 import ru.crew.motley.piideo.chat.model.PiideoLoader;
 import ru.crew.motley.piideo.fcm.FcmMessage;
+import ru.crew.motley.piideo.fcm.MessagingService;
 import ru.crew.motley.piideo.piideo.activity.PhotoActivity;
-import ru.crew.motley.piideo.search.activity.SearchActivity;
 import ru.crew.motley.piideo.util.TimeUtils;
 
 import static ru.crew.motley.piideo.piideo.service.Recorder.HOME_PATH;
@@ -64,19 +66,20 @@ public class ChatFragment extends ButterFragment
     }
 
     private static final String TAG = ChatFragment.class.getSimpleName();
-    private static final long CHAT_TIMEOUT = TimeUnit.SECONDS.toMillis(60);
+    private static final int CHAT_TIMEOUT = 60;
     private static final String ARG_DB_MESSAGE_ID = "local_db_id";
 
     @BindView(R.id.chat_recycler)
     RecyclerView mChatRecycler;
     @BindView(R.id.messageInput)
     EditText mMessageInput;
+    @BindView(R.id.topic)
+    TextView topicText;
+    @BindView(R.id.watch)
+    TextView watchText;
 
     @Inject
     PiideoLoader mPiideoLoader;
-
-    private Runnable chatFinisher = () -> showRateView();
-    private Handler finisherHandler = new Handler();
 
     private String mMessageId;
     private FcmMessage mFcmMessage;
@@ -87,9 +90,6 @@ public class ChatFragment extends ButterFragment
 
     private CompositeDisposable disposables = new CompositeDisposable();
 
-//    @Inject
-//    Object any;
-
     public static ChatFragment newInstance(String dbMessageId, PiideoShower piideoShower) {
         ChatFragment f = new ChatFragment();
         f.mPiideoShower = piideoShower;
@@ -99,12 +99,57 @@ public class ChatFragment extends ButterFragment
         return f;
     }
 
+    Handler handler = new Handler();
+    Runnable mTimer;
+
+    private class TimerDelay implements Runnable {
+
+        private int seconds = 60;
+
+        public TimerDelay(int seconds) {
+            this.seconds = seconds;
+        }
+
+        @Override
+        public void run() {
+            if (seconds < 0) {
+                handler.removeCallbacks(mTimer);
+                showRateView();
+            }
+            if (watchText != null && seconds >= 0) {
+                watchText.setText(timeMin(seconds) + ":" + timeSec(seconds));
+            }
+            seconds--;
+            handler.postDelayed(this, 1000);
+        }
+
+        private String timeMin(int seconds) {
+            int min = seconds / 60;
+            if (min > 9) {
+                return "" + min;
+            }
+            return "0" + min;
+        }
+
+        private String timeSec(int seconds) {
+            int sec = seconds % 60;
+            if (sec > 9) {
+                return "" + sec;
+            }
+            return "0" + sec;
+        }
+    }
+
     @Override
     public void onResume() {
         super.onResume();
         ((Appp) getActivity().getApplication()).chatFragmentResumed();
-        long chatStartTime = SharedPrefs.loadStartChatTime(getActivity());
-        finisherHandler.postDelayed(chatFinisher, CHAT_TIMEOUT - new Date().getTime() + chatStartTime);
+        long chatStartTime = SharedPrefs.loadPageStartTime(getActivity());
+        int chatTimeout = CHAT_TIMEOUT - (int) TimeUnit.MILLISECONDS.toSeconds(
+                new Date().getTime() - chatStartTime);
+        mTimer = new TimerDelay(chatTimeout);
+        handler.post(mTimer);
+
         Log.d("PiideoLoader", "onResume");
     }
 
@@ -112,7 +157,7 @@ public class ChatFragment extends ButterFragment
     public void onPause() {
         super.onPause();
         ((Appp) getActivity().getApplication()).chatFragmentPaused();
-        finisherHandler.removeCallbacks(chatFinisher);
+        handler.removeCallbacks(mTimer);
         Log.d("PiideoLoader", "onPause");
     }
 
@@ -137,15 +182,11 @@ public class ChatFragment extends ButterFragment
         mMessageId = getArguments().getString(ARG_DB_MESSAGE_ID);
         ChatLab lab = ChatLab.get(getActivity().getApplicationContext());
         mFcmMessage = lab.getReducedFcmMessage(mMessageId);
-        long chatStartTime = SharedPrefs.loadStartChatTime(getActivity());
+        long chatStartTime = SharedPrefs.loadPageStartTime(getActivity());
         if (chatStartTime == -1) {
-            SharedPrefs.saveStartChatTime(new Date().getTime(), getActivity());
-            SharedPrefs.saveChatMessageId(mMessageId, getActivity());
+            SharedPrefs.savePageStartTime(new Date().getTime(), getActivity());
+            SharedPrefs.savePageMessageId(mMessageId, getActivity());
         }
-//        mPiideoRows = lab.getPiideos();
-//        if (mChatAdapter != null) {
-//            mChatAdapter.notifyDataSetChanged();
-//        }
         mDatabase = FirebaseDatabase.getInstance().getReference();
     }
 
@@ -161,20 +202,20 @@ public class ChatFragment extends ButterFragment
             v = super.onCreateView(inflater, container, savedInstanceState);
         }
 //        mChatAdapter = new ChatAdapter(mPiideoRows, this);
-        attachRecyclerAdapter();
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         layoutManager.setReverseLayout(true);
         mChatRecycler.setLayoutManager(layoutManager);
-        v.setFocusableInTouchMode(true);
-        v.requestFocus();
-        v.setOnKeyListener((v1, keyCode, event) -> {
-            Log.i(TAG, "keyCode: " + keyCode);
-            if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_UP) {
-                Log.i(TAG, "onKey Back listener is working!!!");
-                removeChatMessages();
-            }
-            return false;
-        });
+        attachRecyclerAdapter();
+//        v.setFocusableInTouchMode(true);
+//        v.requestFocus();
+//        v.setOnKeyListener((v1, keyCode, event) -> {
+//            Log.i(TAG, "keyCode: " + keyCode);
+//            if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_UP) {
+//                Log.i(TAG, "onKey Back listener is working!!!");
+//                removeChatMessages();
+//            }
+//            return false;
+//        });
         return v;
     }
 
@@ -185,10 +226,18 @@ public class ChatFragment extends ButterFragment
         startActivity(i);
     }
 
+//    private SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z", Locale.getDefault());
+
     @OnClick(R.id.sendMessage)
     public void sendMessage() {
+        // 1 because there's stub hello message
+        if (mChatRecycler.getAdapter().getItemCount() == 1) {
+            sendAcknowledge();
+        }
         long timestamp = TimeUtils.Companion.gmtTimeInMillis();
         long dayTimestamp = TimeUtils.Companion.gmtDayTimestamp(timestamp);
+        Calendar cal = Calendar.getInstance(Locale.getDefault());
+        cal.setTimeInMillis(timestamp);
         String body = mMessageInput.getText().toString().trim();
         FcmMessage message = new FcmMessage(
                 timestamp,
@@ -199,12 +248,14 @@ public class ChatFragment extends ButterFragment
                 body,
                 "message",
                 mFcmMessage.getFrom() + "_" + mFcmMessage.getFrom());
-
-        mDatabase
-                .child("notifications")
-                .child("messages")
-                .push()
-                .setValue(message);
+        // 1 because there's stub hello message
+        if (mChatRecycler.getAdapter().getItemCount() > 1) {
+            mDatabase
+                    .child("notifications")
+                    .child("messages")
+                    .push()
+                    .setValue(message);
+        }
         mDatabase
                 .child("messages")
                 .child(mFcmMessage.getFrom())
@@ -222,16 +273,18 @@ public class ChatFragment extends ButterFragment
         mMessageInput.setText("");
     }
 
-    @OnClick(R.id.back_button)
-    public void uiBackPress() {
-        removeChatMessages();
-        getActivity().onBackPressed();
-        ChatLab lab = ChatLab.get(getActivity());
-        Parcelable member = Parcels.wrap(lab.getMember());
-        Intent i = SearchActivity.getIntent(member, getActivity());
-        startActivity(i);
-        getActivity().finish();
-    }
+////    @OnClick(R.id.back_button)
+//    public void uiBackPress() {
+//        removeChatMessages();
+////        getActivity().onBackPressed();
+//        SharedPrefs.clearPageMessageId(getActivity());
+//        SharedPrefs.clearPageStartTime(getActivity());
+//        ChatLab lab = ChatLab.get(getActivity());
+//        Parcelable member = Parcels.wrap(lab.getMember());
+//        Intent i = SearchActivity.getIntent(member, getActivity());
+//        startActivity(i);
+//        getActivity().finish();
+//    }
 
     private void attachRecyclerAdapter() {
         Query messagesQuery = mDatabase
@@ -259,47 +312,22 @@ public class ChatFragment extends ButterFragment
         mPiideoShower.showPiideo(piideoFileName);
     }
 
-    private void removeChatMessages() {
-        mDatabase
-                .child("messages")
-                .child(mFcmMessage.getTo())
-                .child(mFcmMessage.getFrom())
-                .removeValue();
-    }
+//    private void removeChatMessages() {
+//        mDatabase
+//                .child("messages")
+//                .child(mFcmMessage.getTo())
+//                .child(mFcmMessage.getFrom())
+//                .removeValue();
+//    }
 
     @Override
     public void send(FcmMessage message, ImageView piideoImage, View progress) {
         showPiideoImage(message.getContent(), piideoImage);
         piideoImage.setOnClickListener(v -> mPiideoShower.showPiideo(message.getContent()));
-//        disposables.add(
-//                mPiideoLoader.send(message.getContent(), message.getFrom(), message.getTo())
-//                        .subscribeOn(Schedulers.io())
-//                        .observeOn(AndroidSchedulers.mainThread())
-//                        .cache()
-//                        .subscribe(next -> {
-//                                    progress.setVisibility(View.GONE);
-//                                },
-//                                error -> {
-//                                    Log.e("Piideo", "Send error", error);
-//                                }));
-
-
-//        Disposable subscription = mPiideoLoader.send(message.getContent(), message.getFrom(), message.getTo())
-//                .subscribeOn(Schedulers.io())
-//                .observeOn(AndroidSchedulers.mainThread())
-////                        .cache()
-//                .subscribe(next -> {
-//                            progress.setVisibility(View.GONE);
-//                        },
-//                        error -> {
-//                            Log.e("Piideo", "Send error", error);
-//                        });
-
         mPiideoLoader.send0(
                 message.getContent(),
                 message.getFrom(),
                 message.getTo())
-//                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(next -> {
                             progress.setVisibility(View.GONE);
@@ -347,11 +375,28 @@ public class ChatFragment extends ButterFragment
         );
     }
 
+    private void sendAcknowledge() {
+        long now = TimeUtils.Companion.gmtTimeInMillis();
+        FcmMessage message = new FcmMessage(
+                now,
+                -now,
+                TimeUtils.Companion.gmtDayTimestamp(now),
+                mFcmMessage.getTo(),
+                mFcmMessage.getFrom(),
+                "",
+                MessagingService.ACK,
+                mFcmMessage.getTo() + "_" + mFcmMessage.getFrom());
+        mDatabase.child("notifications")
+                .child("handshake")
+                .push()
+                .setValue(message);
+    }
+
     private void showRateView() {
         // TODO: 002 02.02.18 implement rate view
         getActivity().finish();
 
-        SharedPrefs.clearStartChatTime(getActivity());
-        SharedPrefs.clearChatMessageId(getActivity());
+        SharedPrefs.clearPageStartTime(getActivity());
+        SharedPrefs.clearPageMessageId(getActivity());
     }
 }

@@ -28,4 +28,7 @@
 
 
     <string name="placeholder">Placeholder</string>
+
+    <string name="chat_message_stub">Hello, do you have 10 minutes?</string>
+    <string name="chat_bar_hint">Type message here</string>
 </resources>

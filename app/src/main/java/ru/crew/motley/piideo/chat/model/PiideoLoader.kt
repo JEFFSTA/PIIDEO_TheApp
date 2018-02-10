@@ -75,6 +75,7 @@ class PiideoLoader(val context: Context) {
     }
 
     fun send0(piideoName: String, from: String, to: String): io.reactivex.Single<Int> {
+        createRootFolder()
         Log.d(TAG, "send " + piideoName)
         if (checkSynced(piideoName)) {
             Log.d(TAG, " return just ");
@@ -131,6 +132,7 @@ class PiideoLoader(val context: Context) {
             .cache()
 
     fun receive(piideoName: String, from: String, to: String): io.reactivex.Observable<Int> {
+        createRootFolder()
         Log.d(TAG, "download msg receive " + piideoName + " " + from + " " + to)
         return if (checkExisted(piideoName))
             io.reactivex.Observable.just(0)
@@ -201,6 +203,13 @@ class PiideoLoader(val context: Context) {
                 .child(from)
                 .push()
                 .setValue(message)
+    }
+
+    private fun createRootFolder() {
+        val piideoFolder = File(Recorder.HOME_PATH)
+        if (!piideoFolder.exists()) {
+            piideoFolder.mkdir()
+        }
     }
 
 }

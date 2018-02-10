@@ -28,7 +28,6 @@ import butterknife.OnClick;
 import ru.crew.motley.piideo.ButterFragment;
 import ru.crew.motley.piideo.R;
 import ru.crew.motley.piideo.SharedPrefs;
-import ru.crew.motley.piideo.chat.db.ChatLab;
 import ru.crew.motley.piideo.network.Member;
 import ru.crew.motley.piideo.registration.RegistrationListener;
 
@@ -42,7 +41,21 @@ public class PhoneFragment extends ButterFragment {
     private static final String ARG_MEMBER = "member";
 
     public static final int FRENCH_LENGTH = 10;
+    public static final int MOROCCO_LENGTH = 10;
+    public static final int NIGERIA_LENGTH = 11;
+    public static final int ALGERIA_LENGTH = 10;
+//    public static final int Tunisia
+//    public static final int Ivory_Coast,
+//    public static final int Guinea_Conakry
+//    public static final int Togo
+//    public static final int Ghana
+//    public static final int Cameroun
+
+
     public static final String FRENCH_PREFIX = "0";
+    public static final String MOROCCO_PREFIX = "0";
+    public static final String NIGERIA_PREFIX = "0";
+    public
 
     @BindView(R.id.phone_code)
     CountryCodePicker mCCP;
@@ -156,8 +169,6 @@ public class PhoneFragment extends ButterFragment {
 //        }
 
 
-
-
         if (validatePhone()) {
             mNext.setEnabled(false);
             String phoneNumber = getPhoneNumber();
@@ -170,13 +181,21 @@ public class PhoneFragment extends ButterFragment {
             if (mCCP.getSelectedCountryCode().equals("33") && phoneNumber.length() == FRENCH_LENGTH && phoneNumber.startsWith(FRENCH_PREFIX)) {
                 mMember.setPhonePrefix(FRENCH_PREFIX);
                 mMember.setPhoneNumber(phoneNumber.substring(1, phoneNumber.length()));
+            } else if (mCCP.getSelectedCountryCode().equals("212") && phoneNumber.length() == MOROCCO_LENGTH && phoneNumber.startsWith(MOROCCO_PREFIX)) {
+                mMember.setPhonePrefix(MOROCCO_PREFIX);
+                mMember.setPhoneNumber(phoneNumber.substring(1, phoneNumber.length()));
+            } else if (mCCP.getSelectedCountryCode().equals("234") && phoneNumber.length() == NIGERIA_LENGTH && phoneNumber.startsWith(NIGERIA_PREFIX)) {
+                mMember.setPhonePrefix(NIGERIA_PREFIX);
+                mMember.setPhoneNumber(phoneNumber.substring(1, phoneNumber.length()));
             } else {
                 mMember.setPhoneNumber(phoneNumber);
             }
             // TODO: swap next 2 strings commented/uncommented
 //            mRegistrationListener.onNextStep(mMember);
+            Toast.makeText(getActivity(), mMember.getPhoneNumber(), Toast.LENGTH_LONG).show();
             login(fullNumber);
 //            signIn();
+//            mRegistrationListener.onNextStep(mMember);
         }
     }
 
@@ -191,93 +210,6 @@ public class PhoneFragment extends ButterFragment {
         }
         return true;
     }
-
-//    private void loadMember(String phoneNumber, String authUid) {
-//        Statements statements = new Statements();
-//        Statement create = new Statement();
-//        create.setStatement(Request.FIND_PERSON);
-//        Parameters parameters = new Parameters();
-//        parameters.getProps().put(Request.Var.PHONE, phoneNumber);
-//        create.setParameters(parameters);
-//        statements.getValues().add(create);
-//        NeoApi api = NeoApiSingleton.getInstance();
-//        Single<TransactionResponse> apiRequest = api.executeStatement(statements)
-//                .observeOn(AndroidSchedulers.mainThread());
-//        ifMemberExist(apiRequest, authUid);
-//        ifMemberNotExist(apiRequest, phoneNumber, authUid);
-//    }
-
-//    private void ifMemberExist(Single<TransactionResponse> apiRequest, String authUid) {
-//        apiRequest.filter(transaction -> isMemberExist(transaction))
-//                .map(transaction -> {
-//                    String json = getFirstRow(transaction);
-//                    Member member = Member.fromJson(json);
-//                    member.setId(getRowId(transaction));
-//                    member.setChatId(authUid);
-//                    return member;
-//                })
-//                .subscribe(
-//                        member -> {
-//                            Log.d(TAG, member.getPhoneNumber());
-//                            if (getActivity() != null) {
-//                                SharedPrefs.register(getActivity());
-//                                mRegistrationListener.onNextStep(member);
-//                            }
-//                        },
-//                        throwable -> {
-//                            Log.e(TAG, "Error!: " + throwable.getLocalizedMessage());
-//                            Toast.makeText(getActivity(), R.string.ex_network, Toast.LENGTH_SHORT)
-//                                    .show();
-//                            throw new RuntimeException(throwable);
-//                        });
-//    }
-
-//    private void ifMemberNotExist(Single<TransactionResponse> apiRequest, String phoneNumber, String authUid) {
-//        apiRequest.filter(transaction -> !isMemberExist(transaction))
-//                .map(transaction -> {
-//                    Member member = new Member();
-//                    member.setPhoneNumber(phoneNumber);
-//                    member.setRegistered(false);
-//                    member.setChatId(authUid);
-//                    return member;
-//                })
-//                .subscribe(
-//                        member -> {
-//                            if (getActivity() != null) {
-//                                mRegistrationListener.onNextStep(member);
-//                            }
-//                        },
-//                        throwable -> {
-//                            Log.e(TAG, "Error!: " + throwable.getLocalizedMessage());
-//                            Toast.makeText(getActivity(), R.string.ex_network, Toast.LENGTH_SHORT)
-//                                    .show();
-//                            throw new RuntimeException(throwable);
-//                        });
-//    }
-
-//    private boolean isMemberExist(TransactionResponse transaction) {
-//        return !transaction.getResults().get(0).getData().isEmpty();
-//    }
-
-//    private String getFirstRow(TransactionResponse transaction) {
-//        return transaction.getResults()
-//                .get(0)
-//                .getData()
-//                .get(0)
-//                .getRow()
-//                .get(0)
-//                .getValue();
-//    }
-
-//    private Long getRowId(TransactionResponse transaction) {
-//        return (long) transaction.getResults()
-//                .get(0)
-//                .getData()
-//                .get(0)
-//                .getMeta()
-//                .get(0)
-//                .getId();
-//    }
 
     private void login(String fullNumber) {
 //        if (fullNumber.startsWith("+")) fullNumber = fullNumber.substring(1);
@@ -321,7 +253,7 @@ public class PhoneFragment extends ButterFragment {
 
     private void signInWithPhoneAuthCredential(PhoneAuthCredential credential) {
         FirebaseAuth.getInstance().signInWithCredential(credential)
-                .addOnCompleteListener(getActivity(), task -> {
+                .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         // Sign in success, update UI with the signed-in user's information
                         Log.d(TAG, "signInWithCredential:success");

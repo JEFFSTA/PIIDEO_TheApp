@@ -16,7 +16,7 @@
         android:layout_marginTop="8dp"
         app:layout_constraintBottom_toTopOf="@+id/textView2"
         app:layout_constraintEnd_toEndOf="parent"
-
+        app:layout_constraintVertical_chainStyle="packed"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
@@ -24,7 +24,9 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="center_horizontal"
-            android:layout_margin="38dp"
+            android:layout_marginTop="38dp"
+            android:layout_marginLeft="38dp"
+            android:layout_marginRight="38dp"
             android:orientation="vertical">
 
             <!--<TextView-->
@@ -36,12 +38,19 @@
             <!--android:text="@string/reg_subject_title"-->
             <!--android:textSize="18sp" />-->
 
+            <ImageView
+                android:layout_marginTop="20dp"
+                android:layout_gravity="center_horizontal"
+                android:src="@drawable/earth"
+                android:layout_width="134dp"
+                android:layout_height="110dp" />
+
 
             <AutoCompleteTextView
                 android:id="@+id/subject"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="40dp"
+                android:layout_marginBottom="16dp"
                 android:layout_marginTop="40dp"
                 android:completionHint="@string/reg_subject_hint"
                 android:completionThreshold="1"
@@ -71,7 +80,7 @@
     <FrameLayout
         android:id="@+id/step_container"
         android:layout_width="match_parent"
-        android:layout_height="100dp"
+        android:layout_height="120dp"
         android:background="@android:color/white"
         app:layout_constraintBottom_toBottomOf="parent">
 

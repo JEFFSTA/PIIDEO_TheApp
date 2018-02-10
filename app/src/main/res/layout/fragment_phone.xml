@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -10,63 +10,67 @@
         android:id="@+id/phone_card"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
         android:layout_marginLeft="48dp"
         android:layout_marginRight="48dp"
-        android:layout_marginTop="8dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        android:layout_marginTop="72dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_margin="38dp"
+            android:layout_marginTop="38dp"
+            android:layout_marginLeft="38dp"
+            android:layout_marginRight="38dp"
+            android:layout_marginBottom="20dp"
             android:orientation="vertical">
 
             <com.hbb20.CountryCodePicker
-                android:layout_marginTop="10dp"
                 android:id="@+id/phone_code"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
                 android:gravity="center_horizontal"
                 app:ccp_autoDetectCountry="true"
-                app:ccp_textSize="18sp" />
+                app:ccp_textSize="16sp" />
 
             <EditText
-                android:layout_marginTop="20dp"
                 android:id="@+id/phone_number"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
                 android:hint="@string/reg_phone_hint"
                 android:inputType="phone"
                 android:singleLine="true"
 
-                android:textSize="18sp" />
+                android:textSize="16sp" />
 
             <TextView
                 android:id="@+id/timer"
-                tools:text="59 sec"
-                android:layout_gravity="center_horizontal"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
-            <Button
-                android:layout_marginBottom="8dp"
-                android:layout_marginTop="20dp"
-                android:layout_gravity="center_horizontal"
-                android:id="@+id/next_btn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                tools:text="59 sec" />
+
+            <Button
+                android:id="@+id/next_btn"
                 style="@style/ButtonStyle"
-                android:text="@string/next_btn_caption"
-                android:elevation="16dp"/>
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="8dp"
+                android:layout_marginTop="20dp"
+                android:elevation="16dp"
+                android:text="@string/next_btn_caption" />
         </LinearLayout>
 
 
     </android.support.v7.widget.CardView>
 
+    <ImageView
+        android:layout_width="254dp"
+        android:layout_height="200dp"
+        android:layout_gravity="center_horizontal|bottom"
+        android:src="@drawable/laptop" />
 
-</android.support.constraint.ConstraintLayout>
+
+</FrameLayout>
