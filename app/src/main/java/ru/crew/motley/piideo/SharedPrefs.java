@@ -3,22 +3,18 @@ package ru.crew.motley.piideo;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-/**
- * Created by vas on 12/19/17.
- */
-
 public class SharedPrefs {
 
     private static final String PREFS = "prefs";
 
-    private static final String REGISTERED = "registered";
-    private static final String MEMBER_SUBJECT = "memberSubject";
     private static final String SEARCH_SUBJECT = "searchSubject";
-    private static final String PHONE = "memberPhone";
 
-    private static final String PAGE = "page";
-    private static final String PAGE_START_TIME = "startTime";
-    private static final String PAGE_MESSAGE_ID = "receiverId";
+
+    private static final String CHAT = "page";
+    private static final String CHAT_START_TIME = "chatStartTime";
+    private static final String CHAT_MESSAGE_ID = "chatReceiverId";
+
+    private static final String HANDSHAKE_START_TIME = "handshakeStartTime";
 
     private static final String VERIFICATION_ID = "verificationId";
 
@@ -47,53 +43,74 @@ public class SharedPrefs {
         return prefs.getString(VERIFICATION_ID, null);
     }
 
-    public static void savePageStartTime(long timeInMillis, Context context) {
+    public static void saveChatStartTime(long timeInMillis, Context context) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
         prefs.edit()
-                .putLong(PAGE_START_TIME, timeInMillis)
+                .putLong(CHAT_START_TIME, timeInMillis)
                 .apply();
     }
 
-    public static void savePageMessageId(String dbMessageId, Context context) {
+    public static void saveChatMessageId(String dbMessageId, Context context) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
         prefs.edit()
-                .putString(PAGE_MESSAGE_ID, dbMessageId)
+                .putString(CHAT_MESSAGE_ID, dbMessageId)
                 .apply();
     }
 
-    public static long loadPageStartTime(Context context) {
+    public static long loadChatStartTime(Context context) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-        long result = prefs.getLong(PAGE_START_TIME, -1);
+        long result = prefs.getLong(CHAT_START_TIME, -1);
         return result;
     }
 
-    public static String loadPageMessageId(Context context) {
+    public static String loadChatMessageId(Context context) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-        String result = prefs.getString(PAGE_MESSAGE_ID, null);
+        String result = prefs.getString(CHAT_MESSAGE_ID, null);
         return result;
     }
 
-    public static void clearPageStartTime(Context context) {
+    public static void clearChatStartTime(Context context) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
         prefs.edit()
-                .remove(PAGE_START_TIME)
+                .remove(CHAT_START_TIME)
                 .apply();
     }
 
-    public static void clearPageMessageId(Context context) {
+    public static void clearChatMessageId(Context context) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
         prefs.edit()
-                .remove(PAGE_MESSAGE_ID)
+                .remove(CHAT_MESSAGE_ID)
                 .apply();
     }
 
-    public static void clearPageData(Context context) {
+    public static void clearChatData(Context context) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
         prefs.edit()
-                .remove(PAGE_MESSAGE_ID)
-                .remove(PAGE_START_TIME)
-                .remove(PAGE)
+                .remove(CHAT_MESSAGE_ID)
+                .remove(CHAT_START_TIME)
+                .remove(CHAT)
                 .apply();
     }
 
+
+    public static void saveHandshakeStartTime(long timeInMillis, Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        prefs.edit()
+                .putLong(HANDSHAKE_START_TIME, timeInMillis)
+                .apply();
+    }
+
+
+    public static long loadHandshakeStartTime(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        long result = prefs.getLong(HANDSHAKE_START_TIME, -1);
+        return result;
+    }
+
+    public static void clearHandshakeStartTime(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        prefs.edit()
+                .remove(HANDSHAKE_START_TIME)
+                .apply();
+    }
 }

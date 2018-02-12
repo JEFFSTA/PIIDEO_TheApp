@@ -21,6 +21,7 @@ import ru.crew.motley.piideo.R
 import ru.crew.motley.piideo.SharedPrefs
 import ru.crew.motley.piideo.chat.activity.ChatActivity
 import ru.crew.motley.piideo.chat.db.ChatLab
+import ru.crew.motley.piideo.chat.fragment.ChatFragment
 import ru.crew.motley.piideo.chat.model.PiideoLoader
 import ru.crew.motley.piideo.fcm.MessagingService.Companion.SYN_ID
 import ru.crew.motley.piideo.handshake.activity.HandshakeActivity
@@ -75,7 +76,7 @@ class MessagingService : FirebaseMessagingService() {
     override fun onMessageReceived(message: RemoteMessage) {
         Log.d(TAG, "Message received" + message.data)
 
-//        if ((application as Appp).isActivityVisible) {
+//        if ((application as Appp).searchActivityVisible) {
         Log.d(TAG, "" + message.data.keys)
         Log.d(TAG, "" + message.data["senderUid"])
         Log.d(TAG, "" + message.data["receiverUid"])
@@ -115,10 +116,8 @@ class MessagingService : FirebaseMessagingService() {
     }
 
     private fun showChatOrNotification(dbMessageId: String, @MessageType type: String, timestamp: Date) {
-//        val searchRepeater = SearchRepeaterSingleton.instance(applicationContext)
-//        searchRepeater.stopSearch()
         val app = application as Appp
-        if (app.isActivityVisible) {
+        if (app.searchActivityVisible()) {
             showChat(dbMessageId)
         } else {
             showAcknowledgeNotification(dbMessageId, timestamp)
@@ -132,12 +131,15 @@ class MessagingService : FirebaseMessagingService() {
 
     private fun showRequestNotification(dbMessageId: String, @MessageType type: String, timestamp: Date) {
         clearChatTimeout()
+//        clearHandShakeTimeout()
         if (chatIsActive()) return
+        if (handShakeIsActive()) return
         val i = HandshakeActivity.getIntent(dbMessageId, type, applicationContext)
         i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
         val pI = notificationIntent(SYN_REQUEST_CODE, i)
         createChannelIfNeeded()
         showNotification(SYN_ID, pI, "", dateFormatter.format(timestamp) + " New request")
+        SharedPrefs.saveHandshakeStartTime(Date().time, applicationContext)
         setAlarm(dbMessageId)
     }
 
@@ -162,7 +164,7 @@ class MessagingService : FirebaseMessagingService() {
 
     private fun showNothingOrNotification(messageId: String) {
         val app = application as Appp
-        if (!app.isChatVisible and chatIsActive()) {
+        if (!app.isChatActivityVisible and chatIsActive()) {
             showChatNotification(messageId)
         }
     }
@@ -178,13 +180,16 @@ class MessagingService : FirebaseMessagingService() {
 
     private fun showPiideoNotyOrSkip(dbMessageId: String) {
         val app = application as Appp
-        if (!app.isChatVisible && chatIsActive()) {
+        if (!app.isChatActivityVisible && chatIsActive()) {
             showPiideoNotification(dbMessageId)
             loadPiideo(dbMessageId)
         }
     }
 
-    private fun chatIsActive() = SharedPrefs.loadPageMessageId(applicationContext) != null
+    private fun chatIsActive() = SharedPrefs.loadChatMessageId(applicationContext) != null
+
+    private fun handShakeIsActive() =
+            SharedPrefs.loadChatStartTime(applicationContext) + TimeUnit.SECONDS.toMillis(HandshakeActivity.HANDSHAKE_TIMEOUT) > Date().time
 
     private fun showPiideoNotification(dbMessageId: String) {
         val lab = ChatLab.get(applicationContext)
@@ -221,9 +226,16 @@ class MessagingService : FirebaseMessagingService() {
     }
 
     private fun clearChatTimeout() {
-        val chatStartTime = SharedPrefs.loadPageStartTime(applicationContext)
-        if (chatStartTime + TimeUnit.SECONDS.toMillis(60) < Date().time) {
-            SharedPrefs.clearPageData(applicationContext)
+        val chatStartTime = SharedPrefs.loadChatStartTime(applicationContext)
+        if (chatStartTime + TimeUnit.SECONDS.toMillis(ChatFragment.CHAT_TIMEOUT) < Date().time) {
+            SharedPrefs.clearChatData(applicationContext)
+        }
+    }
+
+    private fun clearHandShakeTimeout() {
+        val handshakeStartTime = SharedPrefs.loadHandshakeStartTime(applicationContext)
+        if (handshakeStartTime + TimeUnit.SECONDS.toMillis(HandshakeActivity.HANDSHAKE_TIMEOUT) < Date().time) {
+            SharedPrefs.clearHandshakeStartTime(applicationContext)
         }
     }
 
@@ -259,7 +271,7 @@ class MessagingService : FirebaseMessagingService() {
         intent.putExtra("DB_MESSAGE_ID", dbMessageId)
 
         val pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0)
-        val executeAt = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(45)
+        val executeAt = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(HandshakeActivity.HANDSHAKE_TIMEOUT)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             alarmManager.setExactAndAllowWhileIdle(
@@ -283,7 +295,7 @@ class Receiver : BroadcastReceiver() {
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.cancel(SYN_ID)
         val firstMessageId = intent.getStringExtra("DB_MESSAGE_ID")
-        if (SharedPrefs.loadPageMessageId(context) == null) {
+        if (SharedPrefs.loadChatMessageId(context) == null) {
             val dbMessage = ChatLab.get(context).getReducedFcmMessage(firstMessageId)!!
             val timestamp = System.currentTimeMillis()
             val dayTimestamp = TimeUtils.gmtDayTimestamp(timestamp)

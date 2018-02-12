@@ -77,7 +77,7 @@ public class SearchActivity extends RequestListenerActivity implements SearchLis
 //    @Override
 //    protected void onResume() {
 //        super.onResume();
-//        ((Appp) getApplication()).activityResumed();
+//        ((Appp) getApplication()).searchActivityResumed();
 //        if (mDialogReceiver == null) {
 //            mDialogReceiver = new ShowDialogReceiver(this);
 //        }
@@ -88,7 +88,7 @@ public class SearchActivity extends RequestListenerActivity implements SearchLis
 //    @Override
 //    protected void onPause() {
 //        unregisterReceiver(mDialogReceiver);
-//        ((Appp) getApplication()).activityPaused();
+//        ((Appp) getApplication()).searchActivityPaused();
 //        super.onPause();
 //    }
 

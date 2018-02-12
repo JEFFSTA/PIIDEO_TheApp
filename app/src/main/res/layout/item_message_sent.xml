@@ -42,7 +42,7 @@
             android:paddingEnd="@dimen/simple_padding_large"
             android:paddingStart="@dimen/simple_padding_large"
             android:text="@string/placeholder"
-            android:textColor="@color/colorPrimaryDark"
+            android:textColor="@color/colorChatSendText"
             android:textSize="@dimen/text_size_primary" />
     </FrameLayout>
 

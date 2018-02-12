@@ -28,6 +28,7 @@ class MessagesAdapter(
         private const val VIEW_TYPE_RECEIVED = 1
         private const val VIEW_TYPE_PIIDEO_SENT = 2
         private const val VIEW_TYPE_PIIDEO_RECEIVE = 3
+        const val VIEW_TYPE_HELLO = 4
     }
 
     interface PiideoLoaderCallback {
@@ -57,6 +58,10 @@ class MessagesAdapter(
                 LayoutInflater.from(parent.context)
                         .inflate(R.layout.item_chat, parent, false)
             }
+            VIEW_TYPE_HELLO -> {
+                LayoutInflater.from(parent.context)
+                        .inflate(R.layout.item_message_received, parent, false)
+            }
             else -> throw RuntimeException("Message view type is unsupported")
         }
         return MessageViewHolder(itemView)
@@ -68,6 +73,9 @@ class MessagesAdapter(
 
     override fun getItemViewType(position: Int): Int {
         val message = getItem(position)
+        if (position == itemCount - 1 && message.content == "Hello_stub") {
+            return VIEW_TYPE_HELLO
+        }
         return if (message.type == MessagingService.PDO) {
             if (message.from.equals(ownerUid))
                 VIEW_TYPE_PIIDEO_SENT
@@ -108,6 +116,7 @@ class MessagesAdapter(
                 }
                 VIEW_TYPE_SENT -> messageBody.text = message.content
                 VIEW_TYPE_RECEIVED -> messageBody.text = message.content
+                VIEW_TYPE_HELLO -> messageBody.setText(R.string.chat_message_stub_text)
             }
             //todo("check message type and in case it's piideo do a request to the loader, perhaps by loaderCallback")
         }

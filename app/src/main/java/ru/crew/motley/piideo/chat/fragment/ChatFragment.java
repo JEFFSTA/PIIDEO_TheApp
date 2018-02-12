@@ -1,5 +1,7 @@
 package ru.crew.motley.piideo.chat.fragment;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -49,7 +51,16 @@ import ru.crew.motley.piideo.chat.db.ChatLab;
 import ru.crew.motley.piideo.chat.model.PiideoLoader;
 import ru.crew.motley.piideo.fcm.FcmMessage;
 import ru.crew.motley.piideo.fcm.MessagingService;
+import ru.crew.motley.piideo.fcm.Receiver;
+import ru.crew.motley.piideo.network.Member;
+import ru.crew.motley.piideo.network.neo.NeoApi;
+import ru.crew.motley.piideo.network.neo.NeoApiSingleton;
+import ru.crew.motley.piideo.network.neo.Parameters;
+import ru.crew.motley.piideo.network.neo.Request;
+import ru.crew.motley.piideo.network.neo.Statement;
+import ru.crew.motley.piideo.network.neo.Statements;
 import ru.crew.motley.piideo.piideo.activity.PhotoActivity;
+import ru.crew.motley.piideo.splash.SplashActivity;
 import ru.crew.motley.piideo.util.TimeUtils;
 
 import static ru.crew.motley.piideo.piideo.service.Recorder.HOME_PATH;
@@ -66,7 +77,7 @@ public class ChatFragment extends ButterFragment
     }
 
     private static final String TAG = ChatFragment.class.getSimpleName();
-    private static final int CHAT_TIMEOUT = 60;
+    public static final long CHAT_TIMEOUT = 300L;
     private static final String ARG_DB_MESSAGE_ID = "local_db_id";
 
     @BindView(R.id.chat_recycler)
@@ -104,9 +115,9 @@ public class ChatFragment extends ButterFragment
 
     private class TimerDelay implements Runnable {
 
-        private int seconds = 60;
+        private long seconds = 60;
 
-        public TimerDelay(int seconds) {
+        public TimerDelay(long seconds) {
             this.seconds = seconds;
         }
 
@@ -115,6 +126,7 @@ public class ChatFragment extends ButterFragment
             if (seconds < 0) {
                 handler.removeCallbacks(mTimer);
                 showRateView();
+                makeMeFree();
             }
             if (watchText != null && seconds >= 0) {
                 watchText.setText(timeMin(seconds) + ":" + timeSec(seconds));
@@ -123,16 +135,16 @@ public class ChatFragment extends ButterFragment
             handler.postDelayed(this, 1000);
         }
 
-        private String timeMin(int seconds) {
-            int min = seconds / 60;
+        private String timeMin(long seconds) {
+            long min = seconds / 60;
             if (min > 9) {
                 return "" + min;
             }
             return "0" + min;
         }
 
-        private String timeSec(int seconds) {
-            int sec = seconds % 60;
+        private String timeSec(long seconds) {
+            long sec = seconds % 60;
             if (sec > 9) {
                 return "" + sec;
             }
@@ -143,9 +155,9 @@ public class ChatFragment extends ButterFragment
     @Override
     public void onResume() {
         super.onResume();
-        ((Appp) getActivity().getApplication()).chatFragmentResumed();
-        long chatStartTime = SharedPrefs.loadPageStartTime(getActivity());
-        int chatTimeout = CHAT_TIMEOUT - (int) TimeUnit.MILLISECONDS.toSeconds(
+        ((Appp) getActivity().getApplication()).chatAcitivityResumed();
+        long chatStartTime = SharedPrefs.loadChatStartTime(getActivity());
+        long chatTimeout = CHAT_TIMEOUT - (int) TimeUnit.MILLISECONDS.toSeconds(
                 new Date().getTime() - chatStartTime);
         mTimer = new TimerDelay(chatTimeout);
         handler.post(mTimer);
@@ -156,7 +168,7 @@ public class ChatFragment extends ButterFragment
     @Override
     public void onPause() {
         super.onPause();
-        ((Appp) getActivity().getApplication()).chatFragmentPaused();
+        ((Appp) getActivity().getApplication()).chatActivityPaused();
         handler.removeCallbacks(mTimer);
         Log.d("PiideoLoader", "onPause");
     }
@@ -182,10 +194,12 @@ public class ChatFragment extends ButterFragment
         mMessageId = getArguments().getString(ARG_DB_MESSAGE_ID);
         ChatLab lab = ChatLab.get(getActivity().getApplicationContext());
         mFcmMessage = lab.getReducedFcmMessage(mMessageId);
-        long chatStartTime = SharedPrefs.loadPageStartTime(getActivity());
-        if (chatStartTime == -1) {
-            SharedPrefs.savePageStartTime(new Date().getTime(), getActivity());
-            SharedPrefs.savePageMessageId(mMessageId, getActivity());
+        long startChatTime = SharedPrefs.loadChatStartTime(getActivity());
+        if (startChatTime == -1) {
+            startChatTime = new Date().getTime();
+            SharedPrefs.saveChatStartTime(startChatTime, getActivity());
+            SharedPrefs.saveChatMessageId(mMessageId, getActivity());
+            makeMeBusy(startChatTime);
         }
         mDatabase = FirebaseDatabase.getInstance().getReference();
     }
@@ -226,14 +240,22 @@ public class ChatFragment extends ButterFragment
         startActivity(i);
     }
 
-//    private SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z", Locale.getDefault());
+    private void cancelRejectTimeout() {
+        if (mChatRecycler.getAdapter().getItemCount() == 2 &&
+                mChatRecycler.getAdapter().getItemViewType(0) == MessagesAdapter.VIEW_TYPE_HELLO) {
+            AlarmManager alarmManager = (AlarmManager) getActivity().getSystemService(Context.ALARM_SERVICE);
+            Intent intent = new Intent(getActivity(), Receiver.class);
+            intent.setAction("action");
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(getActivity(), 0, intent, 0);
+            alarmManager.cancel(pendingIntent);
+        }
+    }
 
     @OnClick(R.id.sendMessage)
     public void sendMessage() {
         // 1 because there's stub hello message
-        if (mChatRecycler.getAdapter().getItemCount() == 1) {
-            sendAcknowledge();
-        }
+        sendAcknowledge();
+        cancelRejectTimeout();
         long timestamp = TimeUtils.Companion.gmtTimeInMillis();
         long dayTimestamp = TimeUtils.Companion.gmtDayTimestamp(timestamp);
         Calendar cal = Calendar.getInstance(Locale.getDefault());
@@ -249,7 +271,8 @@ public class ChatFragment extends ButterFragment
                 "message",
                 mFcmMessage.getFrom() + "_" + mFcmMessage.getFrom());
         // 1 because there's stub hello message
-        if (mChatRecycler.getAdapter().getItemCount() > 1) {
+        if (mChatRecycler.getAdapter().getItemCount() > 1 ||
+                mChatRecycler.getAdapter().getItemViewType(0) != MessagesAdapter.VIEW_TYPE_HELLO) {
             mDatabase
                     .child("notifications")
                     .child("messages")
@@ -273,18 +296,6 @@ public class ChatFragment extends ButterFragment
         mMessageInput.setText("");
     }
 
-////    @OnClick(R.id.back_button)
-//    public void uiBackPress() {
-//        removeChatMessages();
-////        getActivity().onBackPressed();
-//        SharedPrefs.clearPageMessageId(getActivity());
-//        SharedPrefs.clearPageStartTime(getActivity());
-//        ChatLab lab = ChatLab.get(getActivity());
-//        Parcelable member = Parcels.wrap(lab.getMember());
-//        Intent i = SearchActivity.getIntent(member, getActivity());
-//        startActivity(i);
-//        getActivity().finish();
-//    }
 
     private void attachRecyclerAdapter() {
         Query messagesQuery = mDatabase
@@ -376,27 +387,68 @@ public class ChatFragment extends ButterFragment
     }
 
     private void sendAcknowledge() {
-        long now = TimeUtils.Companion.gmtTimeInMillis();
-        FcmMessage message = new FcmMessage(
-                now,
-                -now,
-                TimeUtils.Companion.gmtDayTimestamp(now),
-                mFcmMessage.getTo(),
-                mFcmMessage.getFrom(),
-                "",
-                MessagingService.ACK,
-                mFcmMessage.getTo() + "_" + mFcmMessage.getFrom());
-        mDatabase.child("notifications")
-                .child("handshake")
-                .push()
-                .setValue(message);
+        if (mChatRecycler.getAdapter().getItemCount() == 1 &&
+                mChatRecycler.getAdapter().getItemViewType(0) == MessagesAdapter.VIEW_TYPE_HELLO) {
+            long now = TimeUtils.Companion.gmtTimeInMillis();
+            FcmMessage message = new FcmMessage(
+                    now,
+                    -now,
+                    TimeUtils.Companion.gmtDayTimestamp(now),
+                    mFcmMessage.getTo(),
+                    mFcmMessage.getFrom(),
+                    "",
+                    MessagingService.ACK,
+                    mFcmMessage.getTo() + "_" + mFcmMessage.getFrom());
+            mDatabase.child("notifications")
+                    .child("handshake")
+                    .push()
+                    .setValue(message);
+        }
     }
 
     private void showRateView() {
         // TODO: 002 02.02.18 implement rate view
+        Intent i = SplashActivity.getIntent(getActivity());
+        getActivity().startActivity(i);
         getActivity().finish();
+        SharedPrefs.clearChatStartTime(getActivity());
+        SharedPrefs.clearChatMessageId(getActivity());
+    }
 
-        SharedPrefs.clearPageStartTime(getActivity());
-        SharedPrefs.clearPageMessageId(getActivity());
+    private Statement createBusyRequest(long startChatTime) {
+        ChatLab lab = ChatLab.get(getActivity());
+        Member member = lab.getMember();
+        Statement statement = new Statement();
+        statement.setStatement(Request.MAKE_ME_BUSY);
+        Parameters parameters = new Parameters();
+        parameters.getProps().put(Request.Var.PHONE, member.getPhoneNumber());
+        parameters.getProps().put(Request.Var.DLG_TIME, startChatTime);
+        statement.setParameters(parameters);
+        return statement;
+    }
+
+    private void makeMeBusy(long startChatTime) {
+        Statements statements = new Statements();
+        statements.getValues().add(createBusyRequest(startChatTime));
+        NeoApi api = NeoApiSingleton.getInstance();
+        api.executeStatement(statements).subscribe();
+    }
+
+    private Statement createFreeRequest() {
+        ChatLab lab = ChatLab.get(getActivity());
+        Member member = lab.getMember();
+        Statement statement = new Statement();
+        statement.setStatement(Request.MAKE_ME_BUSY);
+        Parameters parameters = new Parameters();
+        parameters.getProps().put(Request.Var.PHONE, member.getPhoneNumber());
+        statement.setParameters(parameters);
+        return statement;
+    }
+
+    private void makeMeFree() {
+        Statements statements = new Statements();
+        statements.getValues().add(createFreeRequest());
+        NeoApi api = NeoApiSingleton.getInstance();
+        api.executeStatement(statements).subscribe();
     }
 }

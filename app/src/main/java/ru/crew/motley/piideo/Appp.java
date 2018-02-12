@@ -25,8 +25,9 @@ public class Appp extends Application implements HasActivityInjector, HasService
     @Inject
     DispatchingAndroidInjector<Service> mServiceInjector;
 
-    private boolean activityVisible = false;
-    private boolean chatFragmentVisible = false;
+    private boolean searchActivityVisible = false;
+    private boolean chatActivityVisible = false;
+    private boolean handshakeActivityVisible = false;
 
     @Override
     public void onCreate() {
@@ -40,28 +41,40 @@ public class Appp extends Application implements HasActivityInjector, HasService
                 .inject(this);
     }
 
-    public void activityResumed() {
-        activityVisible = true;
+    public void searchActivityResumed() {
+        searchActivityVisible = true;
     }
 
-    public void activityPaused() {
-        activityVisible = false;
+    public void searchActivityPaused() {
+        searchActivityVisible = false;
     }
 
-    public boolean isActivityVisible() {
-        return activityVisible;
+    public boolean searchActivityVisible() {
+        return searchActivityVisible;
     }
 
-    public void chatFragmentResumed() {
-        chatFragmentVisible = true;
+    public void chatAcitivityResumed() {
+        chatActivityVisible = true;
     }
 
-    public void chatFragmentPaused() {
-        chatFragmentVisible = false;
+    public void chatActivityPaused() {
+        chatActivityVisible = false;
     }
 
-    public boolean isChatVisible() {
-        return chatFragmentVisible;
+    public boolean isChatActivityVisible() {
+        return chatActivityVisible;
+    }
+
+    public void handshakeActivityResumed() {
+        handshakeActivityVisible =  true;
+    }
+
+    public void handshaekActivityPaused() {
+        handshakeActivityVisible = false;
+    }
+
+    public boolean isHandshakeActivityVisible() {
+        return handshakeActivityVisible;
     }
 
     @Override

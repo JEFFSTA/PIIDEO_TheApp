@@ -18,10 +18,6 @@ import ru.crew.motley.piideo.R;
 import ru.crew.motley.piideo.chat.fragment.ChatFragment;
 import ru.crew.motley.piideo.chat.fragment.WatchPiideoFragment;
 
-/**
- * Created by vas on 12/22/17.
- */
-
 public class ChatActivity extends AppCompatActivity
         implements
         ChatFragment.PiideoShower,
@@ -35,8 +31,6 @@ public class ChatActivity extends AppCompatActivity
     @Inject
     DispatchingAndroidInjector<Fragment> injector;
 
-//    @Inject
-//    Object any;
 
     public static Intent getIntent(String dbMessageId, Context context) {
         Intent i = new Intent(context, ChatActivity.class);

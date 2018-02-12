@@ -179,7 +179,7 @@ class PiideoLoader(val context: Context) {
             throw RuntimeException("From is not equal to auth user uid")
         }
         val timestamp = TimeUtils.gmtTimeInMillis()
-        val message = FcmMessage(
+        val message = FcmMessage(`
                 timestamp,
                 -timestamp,
                 TimeUtils.Companion.gmtDayTimestamp(timestamp),

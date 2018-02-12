@@ -49,7 +49,7 @@ public class SplashActivity extends AppCompatActivity {
 
     private void skipRegistration(Member member) {
         Parcelable byPass = Parcels.wrap(member);
-        String chatMessageId = SharedPrefs.loadPageMessageId(this);
+        String chatMessageId = SharedPrefs.loadChatMessageId(this);
         if (chatMessageId != null) {
             Intent i = ChatActivity.getIntent(chatMessageId, this);
             startActivity(i);

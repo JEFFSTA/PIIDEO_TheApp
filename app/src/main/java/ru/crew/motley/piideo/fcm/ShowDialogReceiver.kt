@@ -36,50 +36,10 @@ class ShowDialogReceiver(activity: AppCompatActivity) : BroadcastReceiver() {
 
         weakActivity.get()?.let {
             val app = it.application as Appp
-            if (app.isActivityVisible) {
+            if (app.searchActivityVisible()) {
                 (it as SearchActivity).showChat(dbMessageId, type)
+                it.finish()
             }
         }
     }
-
-//    br = new BroadcastReceiver()
-//    {
-//        // действия при получении сообщений
-//        public void onReceive(Context context, Intent intent) {
-//            int task = intent . getIntExtra (PARAM_TASK, 0);
-//            int status = intent . getIntExtra (PARAM_STATUS, 0);
-//            Log.d(LOG_TAG, "onReceive: task = " + task + ", status = " + status);
-//
-//            // Ловим сообщения о старте задач
-//            if (status == STATUS_START) {
-//                switch(task) {
-//                    case TASK1_CODE :
-//                    tvTask1.setText("Task1 start");
-//                    break;
-//                    case TASK2_CODE :
-//                    tvTask2.setText("Task2 start");
-//                    break;
-//                    case TASK3_CODE :
-//                    tvTask3.setText("Task3 start");
-//                    break;
-//                }
-//            }
-//
-//            // Ловим сообщения об окончании задач
-//            if (status == STATUS_FINISH) {
-//                int result = intent . getIntExtra (PARAM_RESULT, 0);
-//                switch(task) {
-//                    case TASK1_CODE :
-//                    tvTask1.setText("Task1 finish, result = " + result);
-//                    break;
-//                    case TASK2_CODE :
-//                    tvTask2.setText("Task2 finish, result = " + result);
-//                    break;
-//                    case TASK3_CODE :
-//                    tvTask3.setText("Task3 finish, result = " + result);
-//                    break;
-//                }
-//            }
-//        }
-//    };
 }

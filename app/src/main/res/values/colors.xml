@@ -18,6 +18,7 @@
     <color name="colorTextSecondary">#8CFFFFFF</color>
 
     <color name="colorChatBarText">#cfcece</color>
+    <color name="colorChatSendText">#7290c9</color>
 
     <!--basic colors-->
     <color name="colorTransparent">#00000000</color>

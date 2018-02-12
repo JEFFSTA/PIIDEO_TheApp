@@ -11,10 +11,10 @@ public class Request {
 
         public static final String PHONE = "phoneNumber";
         public static final String NAME = "name";
-        public static final String C_CODE = "countryCode";
+        public static final String DLG_TIME = "dialogTime";
+        public static final String CC = "countryCode";
         public static final String PH_PREFIX = "phonePrefix";
         public static final String CHAT_ID = "chatId";
-        public static final String ASKED = "askedAt";
     }
 
     public static final class SubjectNode {
@@ -48,6 +48,7 @@ public class Request {
         public static final String CHAT_ID = "chat_id";
         public static final String C_CODE = "country_code";
         public static final String PH_PREFIX = "phone_prefix";
+        public static final String DLG_TIME = "dialog_time";
     }
 
     public static final String ME =
@@ -109,17 +110,6 @@ public class Request {
                     "(" + SubjectNode.LABEL + " ) " +
                     " DELETE r";
 
-    public static final String CONTAINS =
-            "MATCH (from" + SubjectNode.LABEL + "), " +
-                    "(to" + SchoolGroupNode.LABEL + " {" + SchoolGroupNode.NAME + ":{props}." + Var.NAME + "}) " +
-                    "WHERE id(from) = {props}.id " +
-                    "MERGE (from)-[" + ContainsRelation.LABEL + "]->(to)";
-
-    public static final String FIND_PERSON =
-            "MATCH (p" + PersonNode.LABEL +
-                    " { " + PersonNode.PHONE + ": {props}." + Var.PHONE + " }) " +
-                    "RETURN p";
-
     public static final String NEW_CONTACT =
             "MERGE (p" + PersonNode.LABEL +
                     " { " + PersonNode.PHONE + ": {props}." + Var.PHONE + "})" +
@@ -160,8 +150,7 @@ public class Request {
                     "-[" + ContainsRelation.LABEL + "]->" +
                     "(" + SchoolGroupNode.LABEL + " { name : {props}." + Var.NAME_2 + "})" +
                     " WHERE friendOfFriend." + PersonNode.PHONE + " <> { props }." + Var.PHONE +
-//                    " AND " +
-//                    " id(s) = " + Var.ID +
+                    " AND NOT EXISTS(friendOfFriend." + PersonNode.DLG_TIME + ")" +
                     " RETURN DISTINCT friendOfFriend LIMIT 7";
 
     public static final String FIND_SUBJECTS_BY_SCHOOL =
@@ -176,14 +165,15 @@ public class Request {
                     "->(g" + SchoolGroupNode.LABEL + " {" + SchoolGroupNode.NAME + ": {props}." + Var.NAME + "})" +
                     "RETURN DISTINCT s ORDER BY LOWER(s.name)";
 
-    public static final String FIND_ALL_SUBJECTS =
-            "MATCH (s" + SubjectNode.LABEL + ") RETURN s ORDER BY s.name";
-
     public static final String FIND_ALL_SCHOOL_GROUPS =
             "MATCH (g" + SchoolGroupNode.LABEL + ") " +
                     "RETURN g";
 
-    public static final String FIND_SCHOOL_GROUP =
-            "MATCH (g" + SchoolGroupNode.LABEL + " {" + SchoolGroupNode.NAME + ": {props}." + Var.NAME + "})" +
-                    " RETURN g";
+    public static final String MAKE_ME_BUSY =
+            "MERGE (me" + PersonNode.LABEL + " {" + PersonNode.PHONE + " : {props}." + Var.PHONE + " }) " +
+                    " ON MATCH SET me.dialogTime = {props}." + Var.DLG_TIME;
+
+    public static final String MAKE_ME_FREE =
+            "MATCH (me" + PersonNode.LABEL + " {" + PersonNode.PHONE + " : {props}." + Var.PHONE + " }) " +
+                    " REMOVE me.dialogTime";
 }

@@ -21,7 +21,7 @@ abstract class RequestListenerActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        (application as Appp).activityResumed()
+        (application as Appp).searchActivityResumed()
 //        fbNotificationReceiver = ShowDialogReceiver(this)
         val filter = IntentFilter(ShowDialogReceiver.BROADCAST_ACTION)
         registerReceiver(fbNotificationReceiver, filter)
@@ -34,7 +34,7 @@ abstract class RequestListenerActivity : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         unregisterReceiver(fbNotificationReceiver)
-        (application as Appp).activityPaused()
+        (application as Appp).searchActivityPaused()
         contentResolver.unregisterContentObserver(contactsListener)
     }
 
