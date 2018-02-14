@@ -23,8 +23,8 @@ class HandshakeActivity : AppCompatActivity() {
 
     companion object {
 
-        private val EXTRA_DB_MESSAGE_ID = "local_db_id"
-        private val EXTRA_TYPE = "message_type"
+        private const val EXTRA_DB_MESSAGE_ID = "local_db_id"
+        private const val EXTRA_TYPE = "message_type"
 
         fun getIntent(dbMessageId: String, @MessageType type: String, context: Context) =
                 Intent(context, HandshakeActivity::class.java).apply {

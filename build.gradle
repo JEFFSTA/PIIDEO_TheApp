@@ -28,6 +28,9 @@ allprojects {
 
     project.ext {
         dagger_version = '2.14.1'
+        support_version ='27.0.2'
+        retrofit_version = '2.3.0'
+        firebase_version = '11.8.0'
     }
 }
 

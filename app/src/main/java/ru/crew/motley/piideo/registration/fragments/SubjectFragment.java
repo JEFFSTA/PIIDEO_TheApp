@@ -397,10 +397,7 @@ public class SubjectFragment extends ButterFragment {
         } else if (phone.startsWith("33")) {
             parameters.getProps().put(Request.Var.C_CODE, phone.substring(0, 2));
             parameters.getProps().put(Request.Var.PHONE, phone.substring(2, phone.length()));
-        } else if (phone.startsWith("212")) {
-            parameters.getProps().put(Request.Var.C_CODE, phone.substring(0, 3));
-            parameters.getProps().put(Request.Var.PHONE, phone.substring(3, phone.length()));
-        } else if (phone.startsWith("234")) {
+        } else if (phone.startsWith("212") || phone.startsWith("213") || phone.startsWith("234")) {
             parameters.getProps().put(Request.Var.C_CODE, phone.substring(0, 3));
             parameters.getProps().put(Request.Var.PHONE, phone.substring(3, phone.length()));
         } else if (phone.length() > 10) {
@@ -424,9 +421,7 @@ public class SubjectFragment extends ButterFragment {
             filteredPhone = phone.substring(1, phone.length());
         } else if (phone.startsWith("33")) {
             filteredPhone = phone.substring(2, phone.length());
-        } else if (phone.startsWith("212")) {
-            filteredPhone = phone.substring(3, phone.length());
-        } else if (phone.startsWith("234")) {
+        } else if (phone.startsWith("212") || phone.startsWith("213") || phone.startsWith("234")) {
             filteredPhone = phone.substring(3, phone.length());
         } else if (phone.length() > 10) {
             filteredPhone = phone.substring(phone.length() - 10, phone.length());

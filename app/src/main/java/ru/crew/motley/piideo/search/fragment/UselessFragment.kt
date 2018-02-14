@@ -62,9 +62,7 @@ class UselessFragment : Fragment() {
             phone.substring(1, phone.length)
         } else if (phone.length == NIGERIA_LENGTH && phone.startsWith(NIGERIA_PREFIX)) {
             phone.substring(1, phone.length)
-        } else if (phone.startsWith("234")) {
-            phone.substring(3, phone.length)
-        } else if (phone.startsWith("212")) {
+        } else if (phone.startsWith("234") || phone.startsWith("212") || phone.startsWith("213")) {
             phone.substring(3, phone.length)
         } else if (phone.startsWith("33")) {
             phone.substring(2, phone.length)

@@ -1,42 +1,22 @@
 package ru.crew.motley.piideo.search;
 
 import android.content.Context;
-import android.text.TextUtils;
-import android.util.Log;
-import android.widget.Toast;
 
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
-import java.lang.ref.WeakReference;
-import java.net.SocketTimeoutException;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
-import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subjects.BehaviorSubject;
-import io.reactivex.subjects.PublishSubject;
-import ru.crew.motley.piideo.R;
-import ru.crew.motley.piideo.SharedPrefs;
 import ru.crew.motley.piideo.chat.db.ChatLab;
 import ru.crew.motley.piideo.fcm.FcmMessage;
+import ru.crew.motley.piideo.fcm.MessagingService;
 import ru.crew.motley.piideo.network.Member;
-import ru.crew.motley.piideo.network.neo.NeoApi;
-import ru.crew.motley.piideo.network.neo.NeoApiSingleton;
-import ru.crew.motley.piideo.network.neo.Parameters;
-import ru.crew.motley.piideo.network.neo.Request;
-import ru.crew.motley.piideo.network.neo.Statement;
-import ru.crew.motley.piideo.network.neo.Statements;
-import ru.crew.motley.piideo.network.neo.transaction.Data;
 import ru.crew.motley.piideo.util.TimeUtils;
-
-import static android.content.ContentValues.TAG;
 
 /**
  * Created by vas on 1/21/18.
@@ -129,10 +109,14 @@ public class SearchRepeaterSingleton {
         return mMembers.poll();
     }
 
-    private void sendRequest(String receiverId) {
+    private void sendRequest(Member receiver) {
         long timestamp = TimeUtils.Companion.gmtTimeInMillis();
         long dayTimestamp = TimeUtils.Companion.gmtDayTimestamp(timestamp);
         String ownerId = mMember.getChatId();
+        String directRequestMarker = "";
+        if (receiver.getReceivedFrom().getChatId().equals(ownerId)) {
+            directRequestMarker = "++";
+        }
 
         FcmMessage message =
                 new FcmMessage(
@@ -140,10 +124,10 @@ public class SearchRepeaterSingleton {
                         -timestamp,
                         dayTimestamp,
                         ownerId,
-                        receiverId,
-                        "",
-                        "synchronize",
-                        ownerId + "_" + receiverId);
+                        receiver.getChatId(),
+                        directRequestMarker + receiver.getReceivedFrom().getPhoneNumber(),
+                        MessagingService.SYN,
+                        ownerId + "_" + receiver.getChatId());
         mDatabase
                 .child("notifications")
                 .child("handshake")
@@ -213,7 +197,7 @@ public class SearchRepeaterSingleton {
 
     public Observable<Member> searchObservable() {
         return mMemberSubject.map(item -> {
-            sendRequest(item.getChatId());
+            sendRequest(item);
             return item;
         }).subscribeOn(Schedulers.io());
     }

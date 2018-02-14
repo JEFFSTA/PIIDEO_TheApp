@@ -15,6 +15,7 @@ public class Member {
     private boolean registered;
     private Subject subject;
     private School mSchool;
+    private Member mReceivedFrom;
 
 
     public Long getId() {
@@ -79,6 +80,14 @@ public class Member {
 
     public void setPhonePrefix(String phonePrefix) {
         this.phonePrefix = phonePrefix;
+    }
+
+    public Member getReceivedFrom() {
+        return mReceivedFrom;
+    }
+
+    public void setReceivedFrom(Member receivedFrom) {
+        mReceivedFrom = receivedFrom;
     }
 
     public static Member fromJson(String jsonString) {

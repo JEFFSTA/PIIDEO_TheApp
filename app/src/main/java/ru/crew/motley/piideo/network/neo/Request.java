@@ -153,6 +153,21 @@ public class Request {
                     " AND NOT EXISTS(friendOfFriend." + PersonNode.DLG_TIME + ")" +
                     " RETURN DISTINCT friendOfFriend LIMIT 7";
 
+    public static final String FIND_QUESTION_TARGET_0 =
+            "MATCH path=((me" + PersonNode.LABEL + " {" + PersonNode.PHONE + ":{props}." + Var.PHONE + "})" +
+                    "<-[" + KnowsRelation.LABEL + "*1..]-" +
+                    "(friendOfFriend" + PersonNode.LABEL + ")" +
+                    "-[" + StudiesRelation.LABEL + "]->" +
+                    "(" + SubjectNode.LABEL + " {" + SubjectNode.NAME + ":{props}." + Var.NAME + "})" +
+                    "-[" + ContainsRelation.LABEL + "]->" +
+                    "(" + SchoolGroupNode.LABEL + "{" + SchoolGroupNode.NAME + ":{props}." + Var.NAME_2 + "})) " +
+                    " WHERE friendOfFriend." + PersonNode.PHONE + "<> {props}." + Var.PHONE +
+                    " WITH size(relationships(path)) AS pathLength, " +
+                    " endNode(last(filter(x IN relationships(path) WHERE type(x) = \"KNOWS\"))) AS nearest, friendOfFriend " +
+                    " WITH head(collect([pathLength, nearest])) AS frst, friendOfFriend " +
+                    " RETURN frst[1] AS nearest, friendOfFriend " +
+                    " ORDER BY frst[0] limit 7";
+
     public static final String FIND_SUBJECTS_BY_SCHOOL =
             "MATCH (s" + SubjectNode.LABEL + ")" +
                     "-[r" + ContainsRelation.LABEL + "]" +

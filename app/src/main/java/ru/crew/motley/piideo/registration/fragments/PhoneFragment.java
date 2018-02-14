@@ -187,6 +187,9 @@ public class PhoneFragment extends ButterFragment {
             } else if (mCCP.getSelectedCountryCode().equals("234") && phoneNumber.length() == NIGERIA_LENGTH && phoneNumber.startsWith(NIGERIA_PREFIX)) {
                 mMember.setPhonePrefix(NIGERIA_PREFIX);
                 mMember.setPhoneNumber(phoneNumber.substring(1, phoneNumber.length()));
+            } else if (mCCP.getSelectedCountryCode().equals("213") && phoneNumber.length() == MOROCCO_LENGTH && phoneNumber.startsWith(MOROCCO_PREFIX)) {
+                mMember.setPhonePrefix(MOROCCO_PREFIX);
+                mMember.setPhoneNumber(phoneNumber.substring(1, phoneNumber.length()));
             } else {
                 mMember.setPhoneNumber(phoneNumber);
             }

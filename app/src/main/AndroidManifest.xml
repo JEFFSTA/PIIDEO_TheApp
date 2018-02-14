@@ -20,11 +20,13 @@
         android:largeHeap="true"
         tools:replace="android:allowBackup">
         <!--        android:supportsRtl="true"-->
-        <activity android:name=".NewMemberActivity" />
+        <activity android:name=".NewMemberActivity" >
+
+        </activity>
 
         <activity
             android:name=".registration.activity.UserSetupActivity"
-            android:screenOrientation="portrait"></activity>
+            android:screenOrientation="portrait"/>
 
         <activity
             android:name=".search.activity.SearchActivity"
@@ -36,7 +38,7 @@
         <activity
             android:name=".piideo.activity.PhotoActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar"/>
 
         <activity
             android:theme="@style/AppTheme.ChatTheme"

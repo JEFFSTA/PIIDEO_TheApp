@@ -32,4 +32,7 @@
     <string name="chat_message_stub">Hello_stub</string>
     <string name="chat_message_stub_text">Hello, do you have 10 minutes?</string>
     <string name="chat_bar_hint">Type message here</string>
+    
+    <string name="req_from_stub">Connected\nBy</string>
+    <string name="req_me_stub">Me</string>
 </resources>

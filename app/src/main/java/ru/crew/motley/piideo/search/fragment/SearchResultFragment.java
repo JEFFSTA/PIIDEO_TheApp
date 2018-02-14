@@ -122,11 +122,15 @@ public class SearchResultFragment extends ButterFragment implements SendRequestC
                             }
                             mMembers.clear();
                             for (Data item : responseData) {
-                                String response = item
-                                        .getRow()
+                                String targetFriendOfFriend = item.getRow()
+                                        .get(1)
+                                        .getValue();
+                                Member member = Member.fromJson(targetFriendOfFriend);
+                                String nearestToTarget = item.getRow()
                                         .get(0)
                                         .getValue();
-                                Member member = Member.fromJson(response);
+                                Member receivedFrom = Member.fromJson(nearestToTarget);
+                                member.setReceivedFrom(receivedFrom);
                                 Log.d(TAG, member.toString());
                                 mMembers.add(member);
                             }
@@ -150,7 +154,7 @@ public class SearchResultFragment extends ButterFragment implements SendRequestC
             throw new IllegalStateException("Search mSubject can't be null or empty");
         }
         Statement subject = new Statement();
-        subject.setStatement(Request.FIND_QUESTION_TARGET);
+        subject.setStatement(Request.FIND_QUESTION_TARGET_0);
         Parameters parameters = new Parameters();
         parameters.getProps().put(Request.Var.PHONE, mMember.getPhoneNumber());
         parameters.getProps().put(Request.Var.NAME, searchSubject);
@@ -172,6 +176,7 @@ public class SearchResultFragment extends ButterFragment implements SendRequestC
                         },
                         error -> {
                             Log.e(TAG, "Error subscription onCLick");
+                            Log.e(TAG, "", error);
                         },
                         () -> {
                             mProgressBar.setVisibility(View.GONE);

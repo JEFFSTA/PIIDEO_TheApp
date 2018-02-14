@@ -11,6 +11,8 @@
 
     <color name="colorButton">#f16264</color>
 
+    <color name="colorBorder">#efefef</color>
+
 
     <!--text colors-->
     <color name="colorTextPrimary">#D9FFFFFF</color>

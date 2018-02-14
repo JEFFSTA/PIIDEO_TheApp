@@ -45,6 +45,7 @@ import ru.crew.motley.piideo.search.SearchListener;
 import ru.crew.motley.piideo.search.adapter.SubjectAdapter;
 
 import static android.content.ContentValues.TAG;
+import static ru.crew.motley.piideo.registration.fragments.PhoneFragment.MOROCCO_LENGTH;
 
 public class SearchSubjectFragment extends ButterFragment implements SubjectAdapter.SubjectListener {
 
@@ -119,8 +120,9 @@ public class SearchSubjectFragment extends ButterFragment implements SubjectAdap
                     phone = phone.replaceAll("\\D", "");
                     if (phone.startsWith("33")) {
                         phone = phone.replaceFirst("33", "");
-                    } else if (phone.length() > 10 && phone.startsWith("212")) {
-                        phone = phone.replaceFirst("212", "");
+                    } else if (phone.length() > MOROCCO_LENGTH &&
+                            (phone.startsWith("212") || phone.startsWith("213") || phone.startsWith("234"))) {
+                        phone = phone.substring(3);
                     } else if (phone.startsWith("7")) {
                         phone = phone.replaceFirst("7", "");
                     } else if (phone.startsWith("8")) {

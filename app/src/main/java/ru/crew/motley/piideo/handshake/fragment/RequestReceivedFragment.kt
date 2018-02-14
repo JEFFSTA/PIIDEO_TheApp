@@ -11,7 +11,6 @@ import android.view.View
 import android.view.ViewGroup
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
-import kotlinx.android.synthetic.main.fragment_requets_received.view.*
 import ru.crew.motley.piideo.R
 import ru.crew.motley.piideo.chat.activity.ChatActivity
 import ru.crew.motley.piideo.chat.db.ChatLab
@@ -19,6 +18,11 @@ import ru.crew.motley.piideo.fcm.FcmMessage
 import ru.crew.motley.piideo.fcm.MessagingService
 import ru.crew.motley.piideo.fcm.Receiver
 import ru.crew.motley.piideo.util.TimeUtils
+import android.provider.ContactsContract
+import android.provider.BaseColumns
+import android.net.Uri
+import kotlinx.android.synthetic.main.fragment_request_received_0.view.*
+
 
 /**
  * Created by vas on 1/20/18.
@@ -38,10 +42,7 @@ class RequestReceivedFragment : Fragment() {
     val database by lazy { FirebaseDatabase.getInstance().reference }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val v = inflater.inflate(R.layout.fragment_requets_received, container, false)
-        v.requester.text = "Friend"
-        v.requestSubject.text = "[Stub Subject]"
-        v.me.text = "[Me Name]"
+        val v = inflater.inflate(R.layout.fragment_request_received_0, container, false)
         v.applyRequest.setOnClickListener {
             cancelAlarm()
             clearPreviousChat()
@@ -55,6 +56,13 @@ class RequestReceivedFragment : Fragment() {
             cancelAlarm()
             sendReject()
             activity?.finish()
+        }
+        if (message.content!!.startsWith("++")) {
+            v.topLine.visibility = View.GONE
+            v.cardView3.visibility = View.GONE
+            setMeFriendText(v, message.content!!.substring(2))
+        } else {
+            setMeFriendText(v, message.content!!)
         }
         return v
     }
@@ -108,5 +116,23 @@ class RequestReceivedFragment : Fragment() {
                 content,
                 type
         )
+    }
+
+    private fun setMeFriendText(v: View, friendNumber: String) {
+        val uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(friendNumber))
+        activity?.contentResolver
+                ?.query(
+                        uri,
+                        arrayOf(BaseColumns._ID, ContactsContract.PhoneLookup.DISPLAY_NAME),
+                        null,
+                        null,
+                        null)
+                .use { contacts ->
+                    if (contacts != null && contacts.count > 0) {
+                        contacts.moveToNext()
+                        val index = contacts.getColumnIndex(ContactsContract.Data.DISPLAY_NAME)
+                        v.meFriend.text = contacts.getString(index)
+                    }
+                }
     }
 }

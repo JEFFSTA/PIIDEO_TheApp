@@ -22,65 +22,12 @@ import ru.crew.motley.piideo.network.neo.Statements;
 
 public class NewMemberActivity extends AppCompatActivity {
 
-    @BindView(R.id.create_person)
-    Button createPerson;
-    @BindView(R.id.response)
-    TextView response;
-
-    private String username = "neo4j";
-    private String password = "aeknyy";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_new_member);
-        ButterKnife.bind(this);
-        createPerson.setOnClickListener(v -> {
-            Statements statements = new Statements();
-            Statement create = new Statement();
-            create.setStatement(Request.ME);
-//            Map<String, String> parameters = new Parameters();
-//            parameters.getProps().put(Request.PersonNode.PHONE, "123-123-123");
-//            parameters.getProps().put(Request.PersonNode.NAME, "David");
-//            create.setParameters(parameters);
-            statements.getValues().add(create);
-            NeoApi api = build();
-            api.executeStatement(statements)
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(next -> response.append(next.getResults().size() + "\n\n"),
-                            error -> response.append(
-                                    "Error!: " + error.getLocalizedMessage() + "\n\n"));
-        });
+        setContentView(R.layout.fragment_request_received_0);
+
     }
 
-    public NeoApi build() {
-
-        HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
-        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-
-        OkHttpClient okHttpClient = new OkHttpClient.Builder()
-                .addInterceptor(chain -> {
-                    okhttp3.Request originalRequest = chain.request();
-
-                    okhttp3.Request.Builder builder = originalRequest.newBuilder()
-                            .header("Authorization", Credentials.basic(username, password))
-                            .header("Content-Type", "application/json;")
-                            .header("Accept", "application/json;charset=UTF-8");
-
-                    okhttp3.Request newRequest = builder.build();
-                    return chain.proceed(newRequest);
-                })
-                .addInterceptor(interceptor)
-                .build();
-
-        RxJava2CallAdapterFactory rxAdapter = RxJava2CallAdapterFactory.createWithScheduler(Schedulers.io());
-
-        Retrofit retrofit = new Retrofit.Builder()
-                .client(okHttpClient)
-                .baseUrl(NeoApi.LOCAL_URL)
-                .addCallAdapterFactory(rxAdapter)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-        return retrofit.create(NeoApi.class);
-    }
 }
