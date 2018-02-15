@@ -23,11 +23,11 @@
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="40dp"
+        android:layout_marginLeft="10dp"
         android:layout_marginTop="4dp"
         android:layout_marginBottom="4dp"
-        android:layout_marginRight="20dp"
-        android:background="@color/colorChatSendText"
+        android:layout_marginRight="40dp"
+        android:background="@drawable/message_received_chip"
         >
 
         <!--android:background="@drawable/chat_message_blue">-->
@@ -36,9 +36,9 @@
             android:id="@+id/messageBody"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical|right"
+            android:layout_gravity="center_vertical"
             android:layout_marginBottom="@dimen/simple_padding_tiny"
-            android:layout_marginLeft="@dimen/simple_padding_larger"
+            android:layout_marginLeft="@dimen/simple_padding_tiny"
             android:layout_marginRight="@dimen/simple_padding_tiny"
             android:layout_marginTop="@dimen/simple_padding_tiny"
             android:clickable="true"
@@ -46,7 +46,7 @@
             android:padding="@dimen/simple_padding_medium"
             android:paddingEnd="@dimen/simple_padding_large"
             android:paddingStart="@dimen/simple_padding_large"
-            android:textColor="@color/colorWhite"
+            android:textColor="@color/colorChatSendText"
             android:textSize="@dimen/text_size_primary"
             tools:text="@string/placeholder" />
 

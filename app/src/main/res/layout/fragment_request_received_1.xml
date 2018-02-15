@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!--<FrameLayout-->
+        <!--android:id="@+id/cardView3"-->
+        <!--android:layout_width="96dp"-->
+        <!--android:layout_height="96dp"-->
+        <!--android:layout_gravity="left|top"-->
+
+        <!--android:background="@drawable/circle_small"-->
+        <!--app:layout_constraintBottom_toTopOf="@+id/guideline5"-->
+        <!--app:layout_constraintEnd_toStartOf="@+id/guideline2"-->
+        <!--app:layout_constraintStart_toStartOf="@+id/guideline2"-->
+        <!--app:layout_constraintTop_toTopOf="@+id/guideline5">-->
+
+        <!--<TextView-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_gravity="center"-->
+            <!--android:layout_marginRight="@dimen/simple_padding_tiny"-->
+            <!--android:gravity="center"-->
+            <!--android:text="@string/req_from_stub" />-->
+
+    <!--</FrameLayout>-->
+
+    <!--<ImageView-->
+        <!--android:id="@+id/topLine"-->
+        <!--android:layout_width="0dp"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_marginBottom="8dp"-->
+
+        <!--android:layout_marginTop="8dp"-->
+        <!--android:adjustViewBounds="true"-->
+        <!--app:layout_constraintBottom_toTopOf="@+id/cardView"-->
+        <!--app:layout_constraintEnd_toStartOf="@+id/guideline"-->
+        <!--app:layout_constraintStart_toStartOf="@+id/guideline2"-->
+        <!--app:layout_constraintTop_toBottomOf="@+id/cardView3"-->
+        <!--app:srcCompat="@drawable/ic_request_received_line" />-->
+
+
+    <FrameLayout
+        android:id="@+id/cardView"
+        android:layout_width="192dp"
+        android:layout_height="192dp"
+        android:layout_gravity="center"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/center_circle"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/meFriend"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginLeft="@dimen/simple_padding_larger"
+            android:layout_marginRight="@dimen/simple_padding_larger" />
+
+    </FrameLayout>
+
+    <ImageView
+        android:id="@+id/bottomLine"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginTop="8dp"
+        android:adjustViewBounds="true"
+        app:layout_constraintBottom_toTopOf="@+id/cardView4"
+        app:layout_constraintEnd_toStartOf="@+id/guideline4"
+        app:layout_constraintStart_toStartOf="@+id/guideline"
+        app:layout_constraintTop_toBottomOf="@+id/cardView"
+        app:srcCompat="@drawable/ic_request_received_line" />
+
+    <FrameLayout
+        android:id="@+id/cardView4"
+        android:layout_width="96dp"
+        android:layout_height="96dp"
+        android:layout_gravity="right|bottom"
+
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/circle_small"
+        app:layout_constraintBottom_toTopOf="@+id/guideline6"
+        app:layout_constraintEnd_toStartOf="@+id/guideline4"
+        app:layout_constraintStart_toStartOf="@+id/guideline4"
+        app:layout_constraintTop_toTopOf="@+id/guideline6">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginBottom="@dimen/simple_padding_tiny"
+            android:layout_marginRight="@dimen/simple_padding_tiny"
+            android:gravity="center"
+            android:text="@string/req_me_stub" />
+
+    </FrameLayout>
+
+    <android.support.constraint.Guideline
+        android:id="@+id/guideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.5" />
+
+    <android.support.constraint.Guideline
+        android:id="@+id/guideline2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.2" />
+
+    <android.support.constraint.Guideline
+        android:id="@+id/guideline4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.8" />
+
+    <android.support.v7.widget.CardView
+        android:id="@+id/explanation"
+        android:layout_width="0dp"
+        android:layout_height="60dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:thicknessRatio="1.9"
+        app:cardCornerRadius="10dp"
+        app:cardElevation="4dp"
+        app:cardPreventCornerOverlap="false"
+        app:layout_constraintBottom_toTopOf="@+id/guideline5"
+        app:layout_constraintEnd_toStartOf="@+id/guideline4"
+        app:layout_constraintStart_toStartOf="@+id/guideline2"
+        app:layout_constraintTop_toTopOf="@+id/guideline5"
+        app:layout_goneMarginLeft="-50dp">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/cardview_border">
+
+        </FrameLayout>
+
+    </android.support.v7.widget.CardView>
+
+    <android.support.v7.widget.CardView
+        android:id="@+id/buttons"
+        android:layout_width="0dp"
+        android:layout_height="60dp"
+        android:layout_margin="40dp"
+        app:cardCornerRadius="10dp"
+        app:cardElevation="4dp"
+        app:cardPreventCornerOverlap="false"
+        app:layout_constraintBottom_toTopOf="@+id/guideline6"
+        app:layout_constraintEnd_toStartOf="@+id/cardView4"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/guideline6">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/cardview_border">
+
+            <ImageButton
+                android:id="@+id/rejectRequest"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginBottom="7dp"
+                android:layout_marginLeft="@dimen/simple_padding_large"
+                android:layout_marginRight="@dimen/simple_padding_large"
+                android:layout_marginTop="@dimen/simple_padding_medium"
+                android:adjustViewBounds="true"
+                android:background="@color/colorWhite"
+                android:scaleType="centerInside"
+                android:src="@drawable/reject_button" />
+
+            <ImageButton
+                android:id="@+id/applyRequest"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right|center_vertical"
+                android:layout_marginBottom="7dp"
+                android:layout_marginRight="@dimen/simple_padding_large"
+                android:layout_marginTop="@dimen/simple_padding_medium"
+                android:adjustViewBounds="true"
+                android:background="@color/colorWhite"
+                android:scaleType="centerInside"
+                android:src="@drawable/apply_button" />
+
+        </FrameLayout>
+
+    </android.support.v7.widget.CardView>
+
+    <android.support.constraint.Guideline
+        android:id="@+id/guideline5"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.16" />
+
+    <android.support.constraint.Guideline
+        android:id="@+id/guideline6"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.84" />
+
+</android.support.constraint.ConstraintLayout>

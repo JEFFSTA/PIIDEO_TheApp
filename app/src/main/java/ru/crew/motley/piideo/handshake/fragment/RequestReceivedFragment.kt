@@ -42,7 +42,11 @@ class RequestReceivedFragment : Fragment() {
     val database by lazy { FirebaseDatabase.getInstance().reference }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val v = inflater.inflate(R.layout.fragment_request_received_0, container, false)
+        val friendNumber = message.content!!
+        val v = if (friendNumber.startsWith("++"))
+            inflater.inflate(R.layout.fragment_request_received_1, container, false)
+        else
+            inflater.inflate(R.layout.fragment_request_received_0, container, false)
         v.applyRequest.setOnClickListener {
             cancelAlarm()
             clearPreviousChat()
@@ -57,10 +61,8 @@ class RequestReceivedFragment : Fragment() {
             sendReject()
             activity?.finish()
         }
-        if (message.content!!.startsWith("++")) {
-            v.topLine.visibility = View.GONE
-            v.cardView3.visibility = View.GONE
-            setMeFriendText(v, message.content!!.substring(2))
+        if (friendNumber.startsWith("++")) {
+            setMeFriendText(v, friendNumber.substring(2))
         } else {
             setMeFriendText(v, message.content!!)
         }

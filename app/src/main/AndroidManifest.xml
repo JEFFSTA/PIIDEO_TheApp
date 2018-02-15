@@ -44,7 +44,7 @@
             android:theme="@style/AppTheme.ChatTheme"
             android:name=".chat.activity.ChatActivity"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustResize">
+            android:windowSoftInputMode="adjustResize|stateHidden">
 
         </activity>
 

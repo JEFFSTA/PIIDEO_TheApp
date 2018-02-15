@@ -8,10 +8,12 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.os.Bundle
 import android.provider.Settings
 import android.support.annotation.StringDef
 import android.support.v4.app.NotificationCompat
 import android.util.Log
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
@@ -116,17 +118,26 @@ class MessagingService : FirebaseMessagingService() {
     }
 
     private fun showChatOrNotification(dbMessageId: String, @MessageType type: String, timestamp: Date) {
+
         val app = application as Appp
+        val params = Bundle()
+        val date = Date()
+        params.putBoolean("searchActivityVisible", app.searchActivityVisible())
+        params.putLong("timeInMillis", date.time)
+        FirebaseAnalytics.getInstance(this).logEvent("showChatOrNotification", params)
+//        mFirebaseAnalytics.logEvent("share_image", params);
         if (app.searchActivityVisible()) {
-            showChat(dbMessageId)
+            showChat(dbMessageId,params)
         } else {
             showAcknowledgeNotification(dbMessageId, timestamp)
         }
     }
 
-    private fun showChat(dbMessageId: String) {
+    private fun showChat(dbMessageId: String, logBundle: Bundle) {
         val i = ShowDialogReceiver.getIntent(dbMessageId, SYN)
+        logBundle.putString("sendBroadCast", "executing")
         sendBroadcast(i)
+        FirebaseAnalytics.getInstance(this).logEvent("broadCastToHandshake", logBundle)
     }
 
     private fun showRequestNotification(dbMessageId: String, @MessageType type: String, timestamp: Date) {

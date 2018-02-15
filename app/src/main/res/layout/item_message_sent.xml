@@ -24,19 +24,19 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
         android:layout_marginBottom="4dp"
-        android:layout_marginLeft="20dp"
-        android:layout_marginRight="40dp"
-        android:background="@color/colorWhite">
+        android:layout_marginLeft="40dp"
+        android:layout_marginRight="10dp"
+        android:background="@drawable/message_sent_chip">
         <!--android:background="@drawable/chat_message_white">-->
 
         <TextView
             android:id="@+id/messageBody"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
+            android:layout_gravity="center_vertical|right"
             android:layout_marginBottom="@dimen/simple_padding_tiny"
             android:layout_marginLeft="@dimen/simple_padding_tiny"
-            android:layout_marginRight="@dimen/simple_padding_larger"
+            android:layout_marginRight="@dimen/simple_padding_tiny"
             android:layout_marginTop="@dimen/simple_padding_tiny"
 
             android:clickable="true"
@@ -45,7 +45,7 @@
             android:paddingEnd="@dimen/simple_padding_large"
             android:paddingStart="@dimen/simple_padding_large"
             android:text="@string/placeholder"
-            android:textColor="@color/colorChatSendText"
+            android:textColor="@color/colorWhite"
             android:textSize="@dimen/text_size_primary" />
     </FrameLayout>
 
