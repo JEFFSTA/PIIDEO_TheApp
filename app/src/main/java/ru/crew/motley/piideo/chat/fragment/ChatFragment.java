@@ -10,11 +10,15 @@ import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -88,6 +92,10 @@ public class ChatFragment extends ButterFragment
     TextView topicText;
     @BindView(R.id.watch)
     TextView watchText;
+    @BindView(R.id.piideo)
+    ImageButton piideoButton;
+    @BindView(R.id.sendMessage)
+    ImageButton messageButton;
 
     @Inject
     PiideoLoader mPiideoLoader;
@@ -215,21 +223,11 @@ public class ChatFragment extends ButterFragment
         } else {
             v = super.onCreateView(inflater, container, savedInstanceState);
         }
-//        mChatAdapter = new ChatAdapter(mPiideoRows, this);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         layoutManager.setReverseLayout(true);
         mChatRecycler.setLayoutManager(layoutManager);
         attachRecyclerAdapter();
-//        v.setFocusableInTouchMode(true);
-//        v.requestFocus();
-//        v.setOnKeyListener((v1, keyCode, event) -> {
-//            Log.i(TAG, "keyCode: " + keyCode);
-//            if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_UP) {
-//                Log.i(TAG, "onKey Back listener is working!!!");
-//                removeChatMessages();
-//            }
-//            return false;
-//        });
+        attachTextWatcher();
         return v;
     }
 
@@ -238,6 +236,44 @@ public class ChatFragment extends ButterFragment
         Parcelable message = Parcels.wrap(mFcmMessage);
         Intent i = PhotoActivity.getIntent(mMessageId, message, getActivity());
         startActivity(i);
+    }
+
+    private void attachTextWatcher() {
+        if (mMessageInput.getText().toString().isEmpty()) {
+            showPiideoButton();
+        } else {
+            showMessageButton();
+        }
+        mMessageInput.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (s.toString().isEmpty()) {
+                    showPiideoButton();
+                } else {
+                    showMessageButton();
+                }
+            }
+        });
+    }
+
+    private void showPiideoButton() {
+        messageButton.setVisibility(View.GONE);
+        piideoButton.setVisibility(View.VISIBLE);
+    }
+
+    private void showMessageButton() {
+        piideoButton.setVisibility(View.GONE);
+        messageButton.setVisibility(View.VISIBLE);
     }
 
     private void cancelRejectTimeout() {
@@ -323,13 +359,6 @@ public class ChatFragment extends ButterFragment
         mPiideoShower.showPiideo(piideoFileName);
     }
 
-//    private void removeChatMessages() {
-//        mDatabase
-//                .child("messages")
-//                .child(mFcmMessage.getTo())
-//                .child(mFcmMessage.getFrom())
-//                .removeValue();
-//    }
 
     @Override
     public void send(FcmMessage message, ImageView piideoImage, View progress) {

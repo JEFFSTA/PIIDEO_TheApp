@@ -96,8 +96,13 @@ class MessagingService : FirebaseMessagingService() {
                 timeInMillis = message.data["timestamp"]!!.toLong()
             }
         } else {
-            null
+            return
+//            null
         }
+        val logger = MessageLogger()
+        val date = Date()
+        logger.saveToLogFile("onMessageReceived", date.time)
+        logger.saveToLogFile(message.data["type"]!!, date.time)
         when (message.data["type"]) {
             SYN -> showRequestNotification(dbMessageId, message.data["type"]!!, calendar!!.time)
             ACK -> showChatOrNotification(dbMessageId, message.data["type"]!!, calendar!!.time)
@@ -122,12 +127,16 @@ class MessagingService : FirebaseMessagingService() {
         val app = application as Appp
         val params = Bundle()
         val date = Date()
-        params.putBoolean("searchActivityVisible", app.searchActivityVisible())
-        params.putLong("timeInMillis", date.time)
-        FirebaseAnalytics.getInstance(this).logEvent("showChatOrNotification", params)
+//        val visible  = if (app.searchActivityVisible()) 1L else 0L
+//        params.putLong("searchActivityVisible", visible )
+//        params.putLong("timeInMillis", date.time)
+//        FirebaseAnalytics.getInstance(this).logEvent("showChatOrNotification", params)
 //        mFirebaseAnalytics.logEvent("share_image", params);
+        val logger = MessageLogger()
+        logger.saveToLogFile("showChatOrNotification", date.time)
+        logger.saveToLogFile("searchActivityVisible " + app.searchActivityVisible(), date.time)
         if (app.searchActivityVisible()) {
-            showChat(dbMessageId,params)
+            showChat(dbMessageId, params)
         } else {
             showAcknowledgeNotification(dbMessageId, timestamp)
         }
@@ -135,9 +144,12 @@ class MessagingService : FirebaseMessagingService() {
 
     private fun showChat(dbMessageId: String, logBundle: Bundle) {
         val i = ShowDialogReceiver.getIntent(dbMessageId, SYN)
-        logBundle.putString("sendBroadCast", "executing")
+//        logBundle.putString("sendBroadCast", "executing")
+        val logger = MessageLogger()
+        val date = Date()
+        logger.saveToLogFile("showChat", date.time)
         sendBroadcast(i)
-        FirebaseAnalytics.getInstance(this).logEvent("broadCastToHandshake", logBundle)
+//        FirebaseAnalytics.getInstance(this).logEvent("broadCastToHandshake", logBundle)
     }
 
     private fun showRequestNotification(dbMessageId: String, @MessageType type: String, timestamp: Date) {
@@ -281,7 +293,7 @@ class MessagingService : FirebaseMessagingService() {
         intent.action = "action"
         intent.putExtra("DB_MESSAGE_ID", dbMessageId)
 
-        val pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0)
+        val pendingIntent = PendingIntent.getBroadcast(this, 100500, intent, 0)
         val executeAt = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(HandshakeActivity.HANDSHAKE_TIMEOUT)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {

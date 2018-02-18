@@ -1,5 +1,7 @@
 package ru.crew.motley.piideo.registration.fragments;
 
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
@@ -13,7 +15,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.FirebaseException;
-import com.google.firebase.FirebaseTooManyRequestsException;
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseUser;
@@ -74,6 +76,11 @@ public class PhoneFragment extends ButterFragment {
 
     private Member mMember;
 
+    private String OS;
+    private String SDK;
+    private String GOO_S;
+    private String MF;
+
     public static PhoneFragment newInstance(/*Parcelable member,*/ RegistrationListener registrationListener) {
 //        if (member == null) {
 //            throw new NullPointerException("Member variable can't be null");
@@ -89,17 +96,25 @@ public class PhoneFragment extends ButterFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        mMember = Parcels.unwrap(getArguments().getParcelable(ARG_MEMBER));
+        try {
+            String vN = getContext().getPackageManager().getPackageInfo("com.google.android.gms", 0).versionName;
+            OS = "Android " + Build.VERSION.RELEASE;
+            SDK = "SDK " + Build.VERSION.SDK_INT;
+            GOO_S = vN;
+            MF = Build.MANUFACTURER;
+            Log.d("FOR_AUTH", " " + vN);
+            Log.d("FOR_AUTH",
+                    Build.MANUFACTURER + " " +
+                            Build.MODEL + " " +
+                            "SDK " + Build.VERSION.SDK_INT + " " +
+                            "Android " + Build.VERSION.RELEASE);
+        } catch (PackageManager.NameNotFoundException ex) {
+            throw new RuntimeException(ex);
+        }
         mCallbacks = new PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
 
             @Override
             public void onVerificationCompleted(PhoneAuthCredential credential) {
-                // This callback will be invoked in two situations:
-                // 1 - Instant verification. In some cases the phone number can be instantly
-                //     verified without needing to send or enter a verification code.
-                // 2 - Auto-retrieval. On some devices Google Play services can automatically
-                //     detect the incoming verification SMS and perform verification without
-                //     user action.
                 Log.d(TAG, "onVerificationCompleted:" + credential);
 
                 signInWithPhoneAuthCredential(credential);
@@ -108,37 +123,24 @@ public class PhoneFragment extends ButterFragment {
 
             @Override
             public void onVerificationFailed(FirebaseException e) {
-                // This callback is invoked in an invalid request for verification is made,
-                // for instance if the the phone number format is not valid.
                 Log.w(TAG, "onVerificationFailed", e);
 
-                if (e instanceof FirebaseAuthInvalidCredentialsException) {
-                    // Invalid request
-                    // ...
-                } else if (e instanceof FirebaseTooManyRequestsException) {
-                    // The SMS quota for the project has been exceeded
-                    // ...
-                }
+//                if (e instanceof FirebaseAuthInvalidCredentialsException) {
+//                    throw new RuntimeException(e);
+//                } else if (e instanceof FirebaseTooManyRequestsException) {
+//                    throw new RuntimeException(e);
+//                }
                 mNext.setEnabled(true);
-
-                // Show a message and update the UI
-                // ...
+                throw new RuntimeException(e);
             }
 
             @Override
             public void onCodeSent(String verificationId,
                                    PhoneAuthProvider.ForceResendingToken token) {
-                // The SMS verification code has been sent to the provided phone number, we
-                // now need to ask the user to enter the code and then construct a credential
-                // by combining the code with a verification ID.
                 Log.d(TAG, "onCodeSent:" + verificationId);
-
-                // Save verification ID and resending token so we can use them later
                 mVerificationId = verificationId;
                 mResendToken = token;
                 SharedPrefs.verificationId(verificationId, getActivity());
-//                loadMember(getPhoneNumber());
-                // ...
             }
         };
 
@@ -215,13 +217,22 @@ public class PhoneFragment extends ButterFragment {
     }
 
     private void login(String fullNumber) {
-//        if (fullNumber.startsWith("+")) fullNumber = fullNumber.substring(1);
         PhoneAuthProvider.getInstance().verifyPhoneNumber(
                 fullNumber,
                 60L,
                 TimeUnit.SECONDS,
                 getActivity(),
                 mCallbacks);
+
+        Bundle params = new Bundle();
+        params.putString("phone", fullNumber);
+        params.putString("OS", OS);
+        params.putString("SDK", SDK);
+        params.putString("GMS", GOO_S);
+        params.putString("MF", MF);
+        FirebaseAnalytics.getInstance(getActivity()).logEvent("registration", params);
+
+
         mTimer = new TimerDelay();
         handler.postDelayed(mTimer, 1000);
     }
@@ -258,13 +269,11 @@ public class PhoneFragment extends ButterFragment {
         FirebaseAuth.getInstance().signInWithCredential(credential)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        // Sign in success, update UI with the signed-in user's information
                         Log.d(TAG, "signInWithCredential:success");
 
                         FirebaseUser user = task.getResult().getUser();
                         if (user != null) {
                             Log.d(TAG, "Member uid " + user.getUid());
-//                            loadMember(getPhoneNumber(), user.getUid());
                             mMember.setChatId(user.getUid());
                             mRegistrationListener.onNextStep(mMember);
                         } else {
@@ -275,11 +284,11 @@ public class PhoneFragment extends ButterFragment {
                                     .show();
                         }
                     } else {
-                        // Sign in failed, display a message and update the UI
                         Log.w(TAG, "signInWithCredential:failure", task.getException());
-                        if (task.getException() instanceof FirebaseAuthInvalidCredentialsException) {
-                            // The verification code entered was invalid
-                        }
+                        Toast.makeText(getContext(), "SignIn failure", Toast.LENGTH_SHORT).show();
+//                        if (task.getException() instanceof FirebaseAuthInvalidCredentialsException) {
+
+//                        }
                     }
                 });
     }

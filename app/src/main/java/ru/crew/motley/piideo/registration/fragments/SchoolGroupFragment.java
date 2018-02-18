@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import org.parceler.Parcels;
@@ -45,11 +46,17 @@ public class SchoolGroupFragment extends ButterFragment {
     private static final String ARG_MEMBER = "member";
 
     @BindView(R.id.high_school)
-    Button highSchool;
+    View highSchool;
+    @BindView(R.id.high_school_active)
+    ImageView highSchoolActive;
     @BindView(R.id.prep_classes)
-    Button prepClasses;
+    View prepClasses;
+    @BindView(R.id.prep_classes_active)
+    ImageView prepClassesActive;
     @BindView(R.id.engin_school)
-    Button enginShool;
+    View enginSchool;
+    @BindView(R.id.engin_school_active)
+    ImageView enginSchoolActive;
 
     private RegistrationListener mRegistrationListener;
 
@@ -83,12 +90,20 @@ public class SchoolGroupFragment extends ButterFragment {
         mMember = Parcels.unwrap(getArguments().getParcelable(ARG_MEMBER));
     }
 
+    private void deactivateAll() {
+        highSchoolActive.setImageResource(R.drawable.ic_school_group_gray);
+        prepClassesActive.setImageResource(R.drawable.ic_school_group_gray);
+        enginSchoolActive.setImageResource(R.drawable.ic_school_group_gray);
+    }
+
     @OnClick(R.id.high_school)
     public void chooseHighSchool() {
         for (School school: mSchoolGroups) {
             if (school.getName().equals("High School")) {
                 mMember.setSchool(school);
-                mRegistrationListener.onNextStep(mMember);
+                deactivateAll();
+                highSchoolActive.setImageResource(R.drawable.ic_school_group_green);
+//                mRegistrationListener.onNextStep(mMember);
             }
         }
     }
@@ -98,7 +113,9 @@ public class SchoolGroupFragment extends ButterFragment {
         for (School school: mSchoolGroups) {
             if (school.getName().equals("Preparatory Classes")) {
                 mMember.setSchool(school);
-                mRegistrationListener.onNextStep(mMember);
+                deactivateAll();
+                prepClassesActive.setImageResource(R.drawable.ic_school_group_green);
+//                mRegistrationListener.onNextStep(mMember);
             }
         }
     }
@@ -108,9 +125,16 @@ public class SchoolGroupFragment extends ButterFragment {
         for (School school: mSchoolGroups) {
             if (school.getName().equals("Engineering School")) {
                 mMember.setSchool(school);
-                mRegistrationListener.onNextStep(mMember);
+                deactivateAll();
+                enginSchoolActive.setImageResource(R.drawable.ic_school_group_green);
+//                mRegistrationListener.onNextStep(mMember);
             }
         }
+    }
+
+    @OnClick(R.id.next_btn)
+    public void showNextStep() {
+        mRegistrationListener.onNextStep(mMember);
     }
 
     private void loadSchoolGroups() {

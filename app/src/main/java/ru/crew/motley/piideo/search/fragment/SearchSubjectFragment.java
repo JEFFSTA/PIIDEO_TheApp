@@ -111,33 +111,42 @@ public class SearchSubjectFragment extends ButterFragment implements SubjectAdap
                         null,
                         null,
                         ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " ASC");
+        List<String> phones = new ArrayList<>();
         try {
             if (managedCursor != null && managedCursor.getCount() > 0) {
-                mPhones.clear();
+
                 managedCursor.moveToFirst();
                 while (!managedCursor.isAfterLast()) {
                     String phone = managedCursor.getString(managedCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
-                    phone = phone.replaceAll("\\D", "");
-                    if (phone.startsWith("33")) {
-                        phone = phone.replaceFirst("33", "");
-                    } else if (phone.length() > MOROCCO_LENGTH &&
-                            (phone.startsWith("212") || phone.startsWith("213") || phone.startsWith("234"))) {
-                        phone = phone.substring(3);
-                    } else if (phone.startsWith("7")) {
-                        phone = phone.replaceFirst("7", "");
-                    } else if (phone.startsWith("8")) {
-                        phone = phone.replaceFirst("8", "");
-                    }
-                    if (phone.startsWith("0")) {
-                        phone = phone.replaceFirst("0", "");
-                    }
-                    mPhones.add(phone);
+                    phones.add(phone);
                     managedCursor.moveToNext();
                 }
             }
+
         } finally {
             managedCursor.close();
         }
+        for (String phone : phones) {
+            phone = phone.replaceAll("\\D", "");
+            if (phone.startsWith("33")) {
+                phone = phone.replaceFirst("33", "");
+            } else if (phone.length() > MOROCCO_LENGTH &&
+                    (phone.startsWith("212") || phone.startsWith("213") || phone.startsWith("234"))) {
+                phone = phone.substring(3);
+            } else if (phone.startsWith("7")) {
+                phone = phone.replaceFirst("7", "");
+            } else if (phone.startsWith("8")) {
+                phone = phone.replaceFirst("8", "");
+            }
+            if (phone.startsWith("0")) {
+                phone = phone.replaceFirst("0", "");
+            }
+            mPhones.add(phone);
+        }
+//        if (!phones.isEmpty()) {
+//            mPhones.clear();
+//            mPhones.addAll(phones);
+//        }
     }
 
     private void syncContacts() {

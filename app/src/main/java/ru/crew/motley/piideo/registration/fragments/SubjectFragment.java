@@ -270,25 +270,21 @@ public class SubjectFragment extends ButterFragment {
                         null,
                         null,
                         ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " ASC");
+        List<String> phones = new ArrayList<>();
         try {
             if (managedCursor != null && managedCursor.getCount() > 0) {
                 managedCursor.moveToFirst();
                 while (!managedCursor.isAfterLast()) {
                     String phone = managedCursor.getString(managedCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
-                    phone = phone.replaceAll("\\D", "");
-//                    if (phone.startsWith("33")) {
-//                        phone = phone.replaceFirst("33", "");
-//                    } else if (phone.startsWith("7")) {
-//                        phone = phone.replaceFirst("7", "");
-//                    } else if (phone.startsWith("8")) {
-//                        phone = phone.replaceFirst("8", "");
-//                    }
-                    mPhones.add(phone);
+                    phones.add(phone);
                     managedCursor.moveToNext();
                 }
             }
         } finally {
             managedCursor.close();
+        }
+        for (String phone: phones) {
+            mPhones.add(phone.replaceAll("\\D", ""));
         }
     }
 
@@ -344,16 +340,18 @@ public class SubjectFragment extends ButterFragment {
                     loadContactsPhones();
 //                    createContacts();
                 else {
+
                     Toast.makeText(getActivity(),
                             "This is a key permission. " +
                                     "You can't use this app without it.",
                             Toast.LENGTH_SHORT)
                             .show();
-                    new Handler().postDelayed(() ->
-                                    requestPermissions(
-                                            new String[]{Manifest.permission.READ_CONTACTS},
-                                            REQUEST_CONTACTS),
-                            1000);
+                    // uncommenting this makes Fatal Exception: java.lang.IllegalStateException not attached to Activity
+//                    new Handler().postDelayed(() ->
+//                                    requestPermissions(
+//                                            new String[]{Manifest.permission.READ_CONTACTS},
+//                                            REQUEST_CONTACTS),
+//                            1000);
                 }
                 break;
             default:

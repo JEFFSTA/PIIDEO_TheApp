@@ -15,18 +15,18 @@
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:largeHeap="true"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:theme="@style/AppTheme.NoActionBar"
-        android:largeHeap="true"
         tools:replace="android:allowBackup">
         <!--        android:supportsRtl="true"-->
-        <activity android:name=".NewMemberActivity" >
+        <activity android:name=".NewMemberActivity">
 
         </activity>
 
         <activity
             android:name=".registration.activity.UserSetupActivity"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait" />
 
         <activity
             android:name=".search.activity.SearchActivity"
@@ -38,12 +38,12 @@
         <activity
             android:name=".piideo.activity.PhotoActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar"/>
+            android:theme="@style/AppTheme.NoActionBar" />
 
         <activity
-            android:theme="@style/AppTheme.ChatTheme"
             android:name=".chat.activity.ChatActivity"
             android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.ChatTheme"
             android:windowSoftInputMode="adjustResize|stateHidden">
 
         </activity>
@@ -72,14 +72,16 @@
 
         <service
             android:name=".fcm.InstanceIdService"
-            tools:ignore="ExportedService">
+            tools:ignore="ExportedService"
+            android:stopWithTask="false">
+            <!--tools:ignore="ExportedService">-->
             <intent-filter>
                 <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
             </intent-filter>
         </service>
 
-        <service
-            android:name=".fcm.MessagingService"
+        <service android:name=".fcm.MessagingService"
+            android:stopWithTask="false"
             tools:ignore="ExportedService">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />

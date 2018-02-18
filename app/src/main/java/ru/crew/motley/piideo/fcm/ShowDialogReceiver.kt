@@ -37,12 +37,15 @@ class ShowDialogReceiver(activity: AppCompatActivity) : BroadcastReceiver() {
         val type = intent.getStringExtra(EXTRA_TYPE)!!
         val dbMessageId = intent.getStringExtra(EXTRA_ID)!!
 
-        val params = Bundle()
+//        val params = Bundle()
+//        val date = Date()
+//        params.putLong("timeInMillis", date.time)
+//        params.putBoolean("weakActivityIsNotNull", weakActivity.get() != null)
+//        FirebaseAnalytics.getInstance(context).logEvent("receiveByActivity", params)
+        val logger = MessageLogger()
         val date = Date()
-        params.putLong("timeInMillis", date.time)
-        params.putBoolean("weakActivityIsNotNull", weakActivity.get() != null)
-        FirebaseAnalytics.getInstance(context).logEvent("receiveByActivity", params)
-
+        logger.saveToLogFile("onReceive", date.time)
+        logger.saveToLogFile("weakActivity.get " + (weakActivity.get() == null), date.time)
         weakActivity.get()?.let {
             val app = it.application as Appp
             if (app.searchActivityVisible()) {

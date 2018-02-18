@@ -3,7 +3,9 @@ package ru.crew.motley.piideo.search.activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Parcelable;
 import android.support.annotation.IntDef;
@@ -12,10 +14,12 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -24,6 +28,10 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.iid.FirebaseInstanceId;
 
 import org.parceler.Parcels;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Date;
 
 import ru.crew.motley.piideo.R;
 import ru.crew.motley.piideo.chat.db.ChatLab;
@@ -39,6 +47,7 @@ import ru.crew.motley.piideo.splash.SplashActivity;
 
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
+import static ru.crew.motley.piideo.piideo.service.Recorder.HOME_PATH;
 
 public class SearchActivity extends RequestListenerActivity implements SearchListener {
 
@@ -138,11 +147,74 @@ public class SearchActivity extends RequestListenerActivity implements SearchLis
                 i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 finish();
                 break;
+
+            case R.id.dump:
+                File logFile = generateLog();
+                Intent intent = new Intent(Intent.ACTION_SEND);
+                intent.putExtra(Intent.EXTRA_EMAIL, new String[]{"tabaqui.vn@gmail.com"});
+                intent.putExtra(Intent.EXTRA_SUBJECT, "Log file");
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                Uri logUri = FileProvider.getUriForFile(
+                        this,
+                        /*getApplicationContext().getPackageName() + */"ru.crew.motley.piideo.fileprovider",
+                        logFile);
+                intent.putExtra(Intent.EXTRA_STREAM, logUri);
+                intent.setType("multipart/");
+                startActivity(intent);
             default:
                 return super.onOptionsItemSelected(item);
         }
         return true;
     }
+
+    private File generateLog() {
+        File logFolder = new File(HOME_PATH, "log");
+        if (!logFolder.exists()) {
+            logFolder.mkdir();
+        }
+        String filename = "myapp_log_" + new Date().getTime() + ".log";
+
+        File logFile = new File(logFolder, filename);
+        if (logFile.exists()) {
+            logFile.delete();
+        }
+        try {
+            String[] cmd = new String[] { "logcat", "-f", logFile.getAbsolutePath(), "-v", "time", "*:D"};
+            Runtime.getRuntime().exec(cmd);
+            Toast.makeText(this, "Log generated to: " + filename, Toast.LENGTH_SHORT);
+            return logFile;
+        }
+        catch (IOException ioEx) {
+            ioEx.printStackTrace();
+        }
+        return null;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     private void showFragment(Fragment fragment) {
         getSupportFragmentManager().beginTransaction()

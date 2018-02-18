@@ -5,61 +5,167 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <android.support.v7.widget.CardView
-        android:id="@+id/school_group"
-        android:layout_width="match_parent"
+    <!--<android.support.v7.widget.CardView-->
+    <!--android:id="@+id/school_group"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:layout_marginBottom="16dp"-->
+    <!--android:layout_marginLeft="48dp"-->
+    <!--android:layout_marginRight="48dp"-->
+    <!--app:layout_constraintBottom_toTopOf="@+id/step_container"-->
+    <!--app:layout_constraintEnd_toEndOf="parent"-->
+    <!--app:layout_constraintStart_toStartOf="parent"-->
+    <!--app:layout_constraintTop_toTopOf="parent">-->
+    <FrameLayout
+        android:id="@+id/frameLayout"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:layout_marginRight="48dp"
-        android:layout_marginLeft="48dp"
-        app:layout_constraintBottom_toTopOf="@+id/step_container"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="20dp"
         app:layout_constraintTop_toTopOf="parent">
 
-        <LinearLayout
-            android:layout_margin="38dp"
-            android:layout_gravity="center_horizontal"
+        <ImageView
             android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:adjustViewBounds="true"
+            android:layout_margin="40dp"
+            android:src="@drawable/registration_card_background" />
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_gravity="center_horizontal|bottom"
+            android:layout_marginLeft="98dp"
+            android:layout_marginRight="98dp"
+            android:layout_marginBottom="88dp"
             android:orientation="vertical">
 
-            <Button
-                android:layout_gravity="center_horizontal"
-                android:id="@+id/high_school"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="10dp"
-                android:text="@string/reg_high_school"
-                android:textAllCaps="false" />
 
-            <Button
-                android:layout_gravity="center_horizontal"
-                android:id="@+id/prep_classes"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="20dp"
-                android:text="@string/reg_preparatory_classes"
-                android:textAllCaps="false" />
+            <FrameLayout
 
-            <Button
-                android:layout_gravity="center_horizontal"
-                android:id="@+id/engin_school"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <EditText
+                    android:id="@+id/high_school"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clickable="true"
+                    android:cursorVisible="false"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:inputType="none"
+                    android:text="@string/reg_high_school"
+                    android:textColor="@color/screenColorBackground"
+                    android:textSize="@dimen/text_size_secondary" />
+
+                <ImageView
+                    android:id="@+id/high_school_active"
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:layout_gravity="right|center_vertical"
+                    android:layout_marginRight="@dimen/simple_padding_small"
+                    android:adjustViewBounds="true"
+                    android:src="@drawable/ic_school_group_gray" />
+
+            </FrameLayout>
+
+            <FrameLayout
+
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:layout_marginEnd="8dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="20dp"
-                android:text="@string/reg_engineering_school"
-                android:textAllCaps="false" />
+                android:layout_marginTop="@dimen/simple_padding_medium">
+
+                <EditText
+                    android:id="@+id/prep_classes"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clickable="true"
+                    android:cursorVisible="false"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:inputType="none"
+                    android:text="@string/reg_preparatory_classes"
+                    android:textColor="@color/screenColorBackground"
+                    android:textSize="@dimen/text_size_secondary" />
+
+                <ImageView
+                    android:id="@+id/prep_classes_active"
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:layout_gravity="right|center_vertical"
+                    android:layout_marginRight="@dimen/simple_padding_small"
+                    android:adjustViewBounds="true"
+                    android:src="@drawable/ic_school_group_gray" />
+
+            </FrameLayout>
+
+            <FrameLayout
+
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/simple_padding_medium">
+
+                <EditText
+                    android:id="@+id/engin_school"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clickable="true"
+                    android:cursorVisible="false"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:inputType="none"
+                    android:text="@string/reg_engineering_school"
+                    android:textColor="@color/screenColorBackground"
+                    android:textSize="@dimen/text_size_secondary" />
+
+                <ImageView
+                    android:id="@+id/engin_school_active"
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:layout_gravity="right|center_vertical"
+                    android:layout_marginRight="@dimen/simple_padding_small"
+                    android:adjustViewBounds="true"
+                    android:src="@drawable/ic_school_group_gray" />
+
+            </FrameLayout>
+
+            <!--<Button-->
+            <!--android:id="@+id/high_school"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_gravity="center_horizontal"-->
+            <!--android:layout_marginEnd="8dp"-->
+            <!--android:layout_marginStart="8dp"-->
+            <!--android:layout_marginTop="10dp"-->
+            <!--android:text="@string/reg_high_school"-->
+            <!--android:textAllCaps="false" />-->
+
+            <!--<Button-->
+            <!--android:id="@+id/prep_classes"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_gravity="center_horizontal"-->
+            <!--android:layout_marginEnd="8dp"-->
+            <!--android:layout_marginStart="8dp"-->
+            <!--android:layout_marginTop="20dp"-->
+            <!--android:text="@string/reg_preparatory_classes"-->
+            <!--android:textAllCaps="false" />-->
+
+            <!--<Button-->
+            <!--android:id="@+id/engin_school"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_gravity="center_horizontal"-->
+            <!--android:layout_marginBottom="8dp"-->
+            <!--android:layout_marginEnd="8dp"-->
+            <!--android:layout_marginStart="8dp"-->
+            <!--android:layout_marginTop="20dp"-->
+            <!--android:text="@string/reg_engineering_school"-->
+            <!--android:textAllCaps="false" />-->
         </LinearLayout>
-
-    </android.support.v7.widget.CardView>
+    </FrameLayout>
+    <!--</android.support.v7.widget.CardView>-->
 
 
     <FrameLayout
@@ -71,12 +177,12 @@
 
         <Button
             android:id="@+id/next_btn"
+            style="@style/ButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal|bottom"
             android:layout_marginBottom="8dp"
             android:layout_marginEnd="8dp"
-            style="@style/ButtonStyle"
             android:layout_marginStart="8dp"
             android:text="@string/next_btn_caption" />
 
