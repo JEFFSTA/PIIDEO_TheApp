@@ -4,4 +4,5 @@
     <string name="chat_message_stub">Hello, avez vous 10 minutes?</string>
     <string name="req_from_stub">Connected\nBy</string>
     <string name="req_me_stub">Me</string>
+    <string name="reg_phone_length">Ton numéro doit être %1$d chiffres</string>
 </resources>

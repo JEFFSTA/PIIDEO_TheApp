@@ -108,13 +108,22 @@ public class SubjectFragment extends ButterFragment {
 
     @OnClick(R.id.next_btn)
     public void finishRegistration() {
-        next.setEnabled(false);
+
+        int permissionCheck = ContextCompat.checkSelfPermission(
+                getActivity(),
+                Manifest.permission.READ_CONTACTS);
+        if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.READ_CONTACTS}, REQUEST_CONTACTS);
+            return;
+        }
+
         String subject = mSubject.getText().toString().trim();
         if (subject.isEmpty()) {
             Toast.makeText(getActivity(), R.string.sch_subject_violation, Toast.LENGTH_SHORT)
                     .show();
             return;
         }
+        next.setEnabled(false);
         setSubjectIfExist();
         deleteOldSubjectRelationAndCreateNewMember();
     }

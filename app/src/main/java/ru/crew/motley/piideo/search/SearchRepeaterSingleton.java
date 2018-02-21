@@ -1,6 +1,8 @@
 package ru.crew.motley.piideo.search;
 
 import android.content.Context;
+import android.util.Log;
+import android.widget.Toast;
 
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -9,13 +11,22 @@ import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 
+import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subjects.BehaviorSubject;
+import ru.crew.motley.piideo.R;
 import ru.crew.motley.piideo.chat.db.ChatLab;
 import ru.crew.motley.piideo.fcm.FcmMessage;
 import ru.crew.motley.piideo.fcm.MessagingService;
 import ru.crew.motley.piideo.network.Member;
+import ru.crew.motley.piideo.network.neo.NeoApi;
+import ru.crew.motley.piideo.network.neo.NeoApiSingleton;
+import ru.crew.motley.piideo.network.neo.Parameters;
+import ru.crew.motley.piideo.network.neo.Request;
+import ru.crew.motley.piideo.network.neo.Statement;
+import ru.crew.motley.piideo.network.neo.Statements;
+import ru.crew.motley.piideo.network.neo.transaction.Data;
 import ru.crew.motley.piideo.util.TimeUtils;
 
 /**
@@ -51,10 +62,10 @@ public class SearchRepeaterSingleton {
 //    private static final int REQUEST_DELAY = 20;
 
     private Deque<Member> mMembers = new LinkedList<>();
-//    private Disposable mSearchRepeater;
+    //    private Disposable mSearchRepeater;
     private DatabaseReference mDatabase;
     private Member mMember;
-//    private WeakReference<Context> mWeakReference;
+    //    private WeakReference<Context> mWeakReference;
     private BehaviorSubject<Member> mMemberSubject;
 
     private SearchRepeaterSingleton() {
@@ -197,23 +208,42 @@ public class SearchRepeaterSingleton {
 
     public Observable<Member> searchObservable() {
         return mMemberSubject.map(item -> {
-            sendRequest(item);
+            findReceiverFriendAndRequest(item).subscribe();
             return item;
         }).subscribeOn(Schedulers.io());
     }
 
-//    private Statement searchRequest(String searchSubject) {
-//        if (TextUtils.isEmpty(searchSubject)) {
-//            throw new IllegalStateException("Search mSubject can't be null or empty");
-//        }
-//        Statement subject = new Statement();
-//        subject.setStatement(Request.FIND_QUESTION_TARGET);
-//        Parameters parameters = new Parameters();
-//        parameters.getProps().put(Request.Var.PHONE, mMember.getPhoneNumber());
-//        parameters.getProps().put(Request.Var.NAME, searchSubject);
-//        parameters.getProps().put(Request.Var.NAME_2, mMember.getSchool().getName());
-//        subject.setParameters(parameters);
-//        return subject;
-//    }
+    private Completable findReceiverFriendAndRequest(Member receiver) {
+        Statements statements = new Statements();
+        Statement statement = receiverFriendRequest(receiver);
+        statements.getValues().add(statement);
+        NeoApi api = NeoApiSingleton.getInstance();
+        return api.executeStatement(statements)
+                .subscribeOn(Schedulers.io())
+                .map(transaction -> {
+                    List<Data> responseData = transaction.getResults().get(0).getData();
+                    String receiverFriendJson = responseData.get(0)
+                            .getRow()
+                            .get(0)
+                            .getValue();
+                    return Member.fromJson(receiverFriendJson);
+                })
+                .map(rf -> {
+                    receiver.setReceivedFrom(rf);
+                    return receiver;
+                })
+                .flatMapCompletable(r ->
+                        Completable.fromAction(() -> sendRequest(r)));
+    }
+
+    private Statement receiverFriendRequest(Member receiver) {
+        Statement request = new Statement();
+        request.setStatement(Request.FIND_TARGET_FRIEND);
+        Parameters parameters = new Parameters();
+        parameters.getProps().put(Request.Var.PHONE, mMember.getPhoneNumber());
+        parameters.getProps().put(Request.Var.F_PHONE, receiver.getPhoneNumber());
+        request.setParameters(parameters);
+        return request;
+    }
 
 }

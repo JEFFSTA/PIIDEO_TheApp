@@ -19,6 +19,9 @@ class MessageLogger {
             throw RuntimeException("Log couldn't be saved due to writing problems")
             return
         }
+        if (!File(HOME_PATH).exists()) {
+            File(HOME_PATH).mkdir()
+        }
         if (!File(logFileName).exists()) {
             File(logFileName).createNewFile()
         }

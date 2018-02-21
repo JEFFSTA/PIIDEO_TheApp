@@ -10,6 +10,28 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_marginLeft="@dimen/simple_padding_medium"
+            android:id="@+id/photo_debug"
+            android:textSize="12sp"
+            android:textColor="@android:color/white"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        
+        <TextView
+            android:id="@+id/photo_size"
+            android:layout_marginTop="10dp"
+            android:layout_gravity="right"
+            android:textSize="12sp"
+            android:textColor="@android:color/white"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </FrameLayout>
+
     <Button
         android:id="@+id/btnTakePicture"
         android:layout_width="wrap_content"

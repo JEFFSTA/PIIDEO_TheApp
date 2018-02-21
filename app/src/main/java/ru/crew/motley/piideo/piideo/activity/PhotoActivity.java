@@ -24,6 +24,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.TextView;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -60,6 +61,9 @@ public class PhotoActivity extends AppCompatActivity {
 
     Button pictureButton;
 
+    private TextView debugPhoto;
+    private TextView photoSizes;
+
     private String mPiideoName;
 
     private Parcelable mMessage;
@@ -88,6 +92,9 @@ public class PhotoActivity extends AppCompatActivity {
         sv = findViewById(R.id.surfaceView);
         holder = sv.getHolder();
         holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+
+        debugPhoto = findViewById(R.id.photo_debug);
+        photoSizes = findViewById(R.id.photo_size);
 
         holderCallback = new HolderCallback();
 
@@ -172,14 +179,29 @@ public class PhotoActivity extends AppCompatActivity {
         Size size = getOptimalPreviewSize(previewsizes, maxPreviewWidth, maxPreviewHeight);
         p.setPreviewSize(size.width, size.height);
         p.setJpegQuality(100);
-        p.setPictureSize(pictureSizes.get(0).width, pictureSizes.get(0).height);
+        Camera.Size pictureSize = getPictureSize(pictureSizes);
+        p.setPictureSize(pictureSize.width, pictureSize.height);
+        for (Camera.Size size1 : pictureSizes) {
+            photoSizes.append("s w/s " + size1.width + " " + size1.height + "\n");
+        }
         camera.setParameters(p);
         setMyPreviewSize(size.width, size.height);
+    }
+
+    private Camera.Size getPictureSize(List<Camera.Size> pictureSizes) {
+        Camera.Size restult = pictureSizes.get(0);
+        for (Camera.Size size : pictureSizes) {
+            if (size.width > restult.width) {
+                restult = size;
+            }
+        }
+        return restult;
     }
 
     void setCameraDisplayOrientation(int cameraId) {
         // определяем насколько повернут экран от нормального положения
         int rotation = getWindowManager().getDefaultDisplay().getRotation();
+        photoSizes.append("DD r - " + rotation + "\n");
         int degrees = 0;
         switch (rotation) {
             case Surface.ROTATION_0:
@@ -300,17 +322,23 @@ public class PhotoActivity extends AppCompatActivity {
         int targetHeight = h;
         int targetWidth = w;
 
+        debugPhoto.append("tR " + targetRatio);
+
 //        if (  you want ratio as closed to what i asked for) {
         for (Size size : sizes) {
             Log.d("Camera", "Checking size " + size.width + "w " + size.height
-                    + "h");
+                    + "h\n");
+
+            debugPhoto.append("Ch.s " + size.width + "  w " + size.height + "h\n");
             double ratio = (double) size.width / size.height;
-            Log.d("Camera", "Checking size " + (Math.abs(ratio - targetRatio)));
+            Log.d("Camera", "Ch.s " + (Math.abs(ratio - targetRatio)));
+            debugPhoto.append("Ch.s " + (Math.abs(ratio - targetRatio)) + "\n");
             if (Math.abs(ratio - targetRatio) > ASPECT_TOLERANCE)
                 continue;
             if (Math.abs(size.height - targetHeight) < minDiff) {
                 optimalSize = size;
-                Log.d("Camera", " + + " + optimalSize.width + " " + optimalSize.height);
+                Log.d("Camera", " Opt.s " + optimalSize.width + " " + optimalSize.height);
+                debugPhoto.append(" Opt.s " + optimalSize.width + " " + optimalSize.height + "\n");
                 minDiff = Math.abs(size.height - targetHeight);
             }
         }

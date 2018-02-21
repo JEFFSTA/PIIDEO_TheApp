@@ -1,15 +1,35 @@
 package ru.crew.motley.piideo.registration.activity;
 
+import android.annotation.SuppressLint;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.IntentSender;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.annotation.IntDef;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.WindowManager;
 
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.credentials.Credential;
+import com.google.android.gms.auth.api.credentials.Credentials;
+import com.google.android.gms.auth.api.credentials.CredentialsClient;
+import com.google.android.gms.auth.api.credentials.HintRequest;
+import com.google.android.gms.auth.api.phone.SmsRetriever;
+import com.google.android.gms.auth.api.phone.SmsRetrieverClient;
+import com.google.android.gms.common.api.CommonStatusCodes;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -67,7 +87,7 @@ public class UserSetupActivity extends AppCompatActivity implements Registration
         }
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 //        if (user == null) {
-            currentStep = Page.PHONE_PAGE;
+        currentStep = Page.PHONE_PAGE;
 //        } else {
 //            currentStep = Page.SCHOOL_PAGE;
 //        }
@@ -161,32 +181,4 @@ public class UserSetupActivity extends AppCompatActivity implements Registration
                 .replace(R.id.container, fragment)
                 .commit();
     }
-
-//    private void showSearch() {
-//        startActivity(SearchActivity.getIntent(this));
-//        finish();
-//    }
-
-
-//    @Override
-//    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-//        switch (requestCode) {
-//            case REQUEST_CONTACTS:
-//                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
-//                    createContacts();
-//                else
-////                    showResponseDialog(getResources().getString(R.string.storage_permission_needed));
-//                    break;
-//            default:
-//                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-//                break;
-//        }
-//    }
-
-
-    private void showResponseDialog(String string) {
-//        Snackbar.make(view, string, Snackbar.LENGTH_SHORT).showChat();
-    }
-
-
 }

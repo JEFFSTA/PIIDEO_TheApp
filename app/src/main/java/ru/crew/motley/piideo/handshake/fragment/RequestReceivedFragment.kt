@@ -22,6 +22,7 @@ import android.provider.ContactsContract
 import android.provider.BaseColumns
 import android.net.Uri
 import kotlinx.android.synthetic.main.fragment_request_received_0.view.*
+import ru.crew.motley.piideo.registration.fragments.PhoneFragment.FRENCH_PREFIX
 
 
 /**
@@ -121,7 +122,16 @@ class RequestReceivedFragment : Fragment() {
     }
 
     private fun setMeFriendText(v: View, friendNumber: String) {
+        var contactName = findContactName(friendNumber)
+        if (contactName.isBlank()) {
+            contactName = findContactName(FRENCH_PREFIX + friendNumber)
+        }
+         v.meFriend.text = contactName
+    }
+
+    private fun findContactName(friendNumber: String): String {
         val uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(friendNumber))
+        String
         activity?.contentResolver
                 ?.query(
                         uri,
@@ -133,8 +143,9 @@ class RequestReceivedFragment : Fragment() {
                     if (contacts != null && contacts.count > 0) {
                         contacts.moveToNext()
                         val index = contacts.getColumnIndex(ContactsContract.Data.DISPLAY_NAME)
-                        v.meFriend.text = contacts.getString(index)
+                        return contacts.getString(index)
                     }
+                    return ""
                 }
     }
 }

@@ -1,9 +1,14 @@
 package ru.crew.motley.piideo.registration.fragments;
 
+import android.app.PendingIntent;
+import android.app.backup.BackupManager;
+import android.content.IntentSender;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -14,13 +19,21 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.credentials.HintRequest;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseException;
 import com.google.firebase.analytics.FirebaseAnalytics;
+import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.PhoneAuthCredential;
 import com.google.firebase.auth.PhoneAuthProvider;
+import com.google.firebase.database.FirebaseDatabase;
 import com.hbb20.CountryCodePicker;
 
 import java.util.concurrent.TimeUnit;
@@ -161,6 +174,7 @@ public class PhoneFragment extends ButterFragment {
         return v;
     }
 
+
     @OnClick(R.id.next_btn)
     public void nextStep() {
 
@@ -213,29 +227,82 @@ public class PhoneFragment extends ButterFragment {
             Toast.makeText(getActivity(), R.string.reg_phone_toast, Toast.LENGTH_SHORT).show();
             return false;
         }
+//        if (!mCCP.isValidFullNumber()) {
+//            Toast.makeText(getActivity(), R.string.reg_phone_format, Toast.LENGTH_SHORT).show();
+//            return false;
+//        }
+        String cc = mCCP.getSelectedCountryCode();
+        if (cc.equals("234") && getPhoneNumber().length() != NIGERIA_LENGTH) {
+            Resources res = getResources();
+            String text = res.getString(R.string.reg_phone_length, NIGERIA_LENGTH);
+            Toast.makeText(getActivity(), text, Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        if ((cc.equals("212") || cc.equals("213") || (cc.equals("33"))) && getPhoneNumber().length() != FRENCH_LENGTH) {
+            Resources res = getResources();
+            String text = res.getString(R.string.reg_phone_length, FRENCH_LENGTH);
+            Toast.makeText(getActivity(), text, Toast.LENGTH_SHORT).show();
+            return false;
+        }
         return true;
     }
 
+//    private void login(String fullNumber) {
+//        PhoneAuthProvider.getInstance().verifyPhoneNumber(
+//                fullNumber,
+//                60L,
+//                TimeUnit.SECONDS,
+//                getActivity(),
+//                mCallbacks);
+//
+//        Bundle params = new Bundle();
+//        params.putString("phone", fullNumber);
+//        params.putString("OS", OS);
+//        params.putString("SDK", SDK);
+//        params.putString("GMS", GOO_S);
+//        params.putString("MF", MF);
+//        FirebaseAnalytics.getInstance(getActivity()).logEvent("registration", params);
+//
+//
+//        mTimer = new TimerDelay();
+//        handler.postDelayed(mTimer, 1000);
+//    }
+
+
     private void login(String fullNumber) {
-        PhoneAuthProvider.getInstance().verifyPhoneNumber(
-                fullNumber,
-                60L,
-                TimeUnit.SECONDS,
-                getActivity(),
-                mCallbacks);
-
-        Bundle params = new Bundle();
-        params.putString("phone", fullNumber);
-        params.putString("OS", OS);
-        params.putString("SDK", SDK);
-        params.putString("GMS", GOO_S);
-        params.putString("MF", MF);
-        FirebaseAnalytics.getInstance(getActivity()).logEvent("registration", params);
-
-
-        mTimer = new TimerDelay();
-        handler.postDelayed(mTimer, 1000);
+        signInAnonymously();
     }
+
+    private void signInAnonymously() {
+        FirebaseAuth.getInstance()
+                .signInAnonymously()
+                .addOnCompleteListener(getActivity(), task -> {
+                    if (task.isSuccessful()) {
+                        // Sign in success, update UI with the signed-in user's information
+                        Log.d(TAG, "signInAnonymously:success");
+                        final FirebaseUser user = task.getResult().getUser();
+                        if (user != null) {
+
+                            Log.d(TAG, "Member uid " + user.getUid());
+                            mMember.setChatId(user.getUid());
+                            mRegistrationListener.onNextStep(mMember);
+                        } else {
+                            Toast.makeText(
+                                    getActivity(),
+                                    "Authentication failed",
+                                    Toast.LENGTH_SHORT)
+                                    .show();
+
+                        }
+
+                    } else {
+                        // If sign in fails, display a message to the user.
+                        Log.w(TAG, "signInAnonymously:failure", task.getException());
+                        throw new RuntimeException(task.getException());
+                    }
+                });
+    }
+
 
     Handler handler = new Handler();
     Runnable mTimer;
@@ -259,6 +326,7 @@ public class PhoneFragment extends ButterFragment {
             }
             handler.postDelayed(this, 1000);
         }
+
     }
 
     private void signIn() {

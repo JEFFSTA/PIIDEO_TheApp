@@ -25,8 +25,8 @@ android {
         applicationId "ru.crew.motley.piideo"
         minSdkVersion 16
         targetSdkVersion 27
-        versionCode 4
-        versionName "0.4"
+        versionCode 5
+        versionName "0.5"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
 //        multiDexEnabled true
@@ -76,7 +76,7 @@ dependencies {
     compile "com.google.dagger:dagger:$dagger_version"
     kapt "com.google.dagger:dagger-compiler:$dagger_version"
     implementation 'com.romandanylyk:pageindicatorview:0.2.0'
-    implementation 'com.hbb20:ccp:2.1.1'
+    implementation 'com.hbb20:ccp:2.1.4'
     implementation 'org.parceler:parceler-api:1.1.9'
     kapt 'org.parceler:parceler:1.1.9'
     implementation "com.google.firebase:firebase-core:$firebase_version"
@@ -88,6 +88,9 @@ dependencies {
     implementation('com.crashlytics.sdk.android:crashlytics:2.7.1@aar') {
         transitive = true
     }
+
+    implementation 'com.google.android.gms:play-services-auth:11.8.0'
+
     implementation 'com.squareup.picasso:picasso:2.5.2'
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }

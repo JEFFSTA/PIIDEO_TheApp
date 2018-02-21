@@ -83,9 +83,11 @@ public class PhotoActivity extends AppCompatActivity {
         camera = Camera.open(CAMERA_ID);
 
         Camera.Parameters params = camera.getParameters();
-        if (params.getSupportedFocusModes().contains(
-                Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO)) {
-            params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
+        List<String> focusModes = params.getSupportedFocusModes();
+        if (focusModes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
+            params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
+        } else if (focusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
+            params.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
         }
         params.setRotation(90);
         camera.setParameters(params);
@@ -286,7 +288,7 @@ public class PhotoActivity extends AppCompatActivity {
 
     private Size getOptimalPreviewSize(List<Size> sizes, int w, int h) {
         final double ASPECT_TOLERANCE = 0.2;
-        double targetRatio = (double) 4/ (double) 3;
+        double targetRatio = (double) 4 / (double) 3;
         if (sizes == null)
             return null;
 

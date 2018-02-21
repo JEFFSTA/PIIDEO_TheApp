@@ -46,7 +46,7 @@ public class ExampleUnitTest {
     @Before
     public void prepareStatements() {
         Statement subject = new Statement();
-        subject.setStatement(Request.FIND_QUESTION_TARGET_0);
+        subject.setStatement(Request.FIND_QUESTION_TARGET);
         Parameters parameters = new Parameters();
         parameters.getProps().put(Request.Var.PHONE, MY_PHONE);
         parameters.getProps().put(Request.Var.NAME, SUBJECT_NAME);

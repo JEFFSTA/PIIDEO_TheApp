@@ -8,6 +8,8 @@
     <string name="reg_subject_hint">e.g: calculus2, anatomy…</string>
     <string name="reg_phone_hint">Phone number…</string>
     <string name="reg_phone_toast">Make sure you fill phone number.</string>
+    <string name="reg_phone_format">Make sure entered phone correctly formatted.</string>
+    <string name="reg_phone_length">Your Number must be %1$d digits</string>
     <string name="reg_high_school">High School</string>
     <string name="reg_preparatory_classes">Preparatory Classes</string>
     <string name="reg_engineering_school">Engineering School</string>

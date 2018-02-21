@@ -16,7 +16,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -26,6 +25,7 @@ import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
+import com.google.firebase.database.ServerValue;
 import com.squareup.picasso.Picasso;
 
 import org.parceler.Parcels;
@@ -54,7 +54,6 @@ import ru.crew.motley.piideo.chat.MessagesAdapter;
 import ru.crew.motley.piideo.chat.db.ChatLab;
 import ru.crew.motley.piideo.chat.model.PiideoLoader;
 import ru.crew.motley.piideo.fcm.FcmMessage;
-import ru.crew.motley.piideo.fcm.MessagingService;
 import ru.crew.motley.piideo.fcm.Receiver;
 import ru.crew.motley.piideo.network.Member;
 import ru.crew.motley.piideo.network.neo.NeoApi;
@@ -67,6 +66,8 @@ import ru.crew.motley.piideo.piideo.activity.PhotoActivity;
 import ru.crew.motley.piideo.splash.SplashActivity;
 import ru.crew.motley.piideo.util.TimeUtils;
 
+import static ru.crew.motley.piideo.fcm.MessagingService.ACK;
+import static ru.crew.motley.piideo.fcm.MessagingService.SYN;
 import static ru.crew.motley.piideo.piideo.service.Recorder.HOME_PATH;
 
 /**
@@ -101,6 +102,7 @@ public class ChatFragment extends ButterFragment
     PiideoLoader mPiideoLoader;
 
     private String mMessageId;
+    private boolean mAckSent = false;
     private FcmMessage mFcmMessage;
 
     private DatabaseReference mDatabase;
@@ -416,8 +418,7 @@ public class ChatFragment extends ButterFragment
     }
 
     private void sendAcknowledge() {
-        if (mChatRecycler.getAdapter().getItemCount() == 1 &&
-                mChatRecycler.getAdapter().getItemViewType(0) == MessagesAdapter.VIEW_TYPE_HELLO) {
+        if (mFcmMessage.getType().equals(SYN) && !mAckSent) {
             long now = TimeUtils.Companion.gmtTimeInMillis();
             FcmMessage message = new FcmMessage(
                     now,
@@ -426,12 +427,13 @@ public class ChatFragment extends ButterFragment
                     mFcmMessage.getTo(),
                     mFcmMessage.getFrom(),
                     "",
-                    MessagingService.ACK,
+                    ACK,
                     mFcmMessage.getTo() + "_" + mFcmMessage.getFrom());
             mDatabase.child("notifications")
                     .child("handshake")
                     .push()
                     .setValue(message);
+            mAckSent = true;
         }
     }
 

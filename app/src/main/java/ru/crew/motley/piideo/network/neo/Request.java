@@ -43,6 +43,7 @@ public class Request {
     public static final class Var {
         public static final String ID = "id";
         public static final String PHONE = "phone";
+        public static final String F_PHONE = "friend_phone";
         public static final String NAME = "name";
         public static final String NAME_2 = "name_2";
         public static final String CHAT_ID = "chat_id";
@@ -134,7 +135,7 @@ public class Request {
                     " WHERE NOT p0." + PersonNode.PHONE + " IN ";
 
     public static final String NEW_SUBJECT =
-            "MATCH (g" + SchoolGroupNode.LABEL + " {" + SchoolGroupNode.NAME + " : {props}." + Var.NAME_2 + "}) " +
+            "MATCH (g" + SchoolGroupNode.LABEL + " {" + SchoolGroupNode.NAME + ":{props}." + Var.NAME_2 + "}) " +
                     "MERGE (s" + SubjectNode.LABEL +
                     " { " + SubjectNode.NAME + ": {props}." + Var.NAME + " })" +
                     "-[" + ContainsRelation.LABEL + "]" +
@@ -142,20 +143,29 @@ public class Request {
                     "RETURN s";
 
     public static final String FIND_QUESTION_TARGET =
-            "MATCH (me" + PersonNode.LABEL + " {" + PersonNode.PHONE + " : { props }." + Var.PHONE + " })" +
-                    "<-[" + KnowsRelation.LABEL + "*1..]-" +
-                    "(friendOfFriend" + PersonNode.LABEL + ")" +
+            "MATCH p=(me" + PersonNode.LABEL + " {" + PersonNode.PHONE + ":{props}." + Var.PHONE + " })" +
+                    "<-[" + KnowsRelation.LABEL + "*1..4]-" +
+                    "(fof" + PersonNode.LABEL + ")" +
+                    " WHERE fof." + PersonNode.PHONE + " <> {props}." + Var.PHONE +
+                    " WITH fof, min(length(p)) AS minLength ORDER BY minLength " +
+                    " WITH collect(fof) AS fofs UNWIND fofs as fof " +
+                    " MATCH (fof)" +
                     "-[" + StudiesRelation.LABEL + "]->" +
                     "(s" + SubjectNode.LABEL + " {" + SubjectNode.NAME + " : { props }." + Var.NAME + " })" +
                     "-[" + ContainsRelation.LABEL + "]->" +
                     "(" + SchoolGroupNode.LABEL + " { name : {props}." + Var.NAME_2 + "})" +
-                    " WHERE friendOfFriend." + PersonNode.PHONE + " <> { props }." + Var.PHONE +
-                    " AND NOT EXISTS(friendOfFriend." + PersonNode.DLG_TIME + ")" +
-                    " RETURN DISTINCT friendOfFriend LIMIT 7";
+                    " RETURN fof LIMIT 7";
+
+    public static final String FIND_TARGET_FRIEND =
+            "MATCH (me" + PersonNode.LABEL + " {" + PersonNode.PHONE + ":{props}." + Var.PHONE + "})," +
+                    " (t" + PersonNode.LABEL + " {" + PersonNode.PHONE + ":{props}." + Var.F_PHONE + "})," +
+                    " p = shortestPath((me)<-[" + KnowsRelation.LABEL + "*1..5]-(t)) " +
+                    " RETURN nodes(p)[size(nodes(p))-2]";
+
 
     public static final String FIND_QUESTION_TARGET_0 =
             "MATCH path=((me" + PersonNode.LABEL + " {" + PersonNode.PHONE + ":{props}." + Var.PHONE + "})" +
-                    "<-[" + KnowsRelation.LABEL + "*1..]-" +
+                    "<-[" + KnowsRelation.LABEL + "*1..5]-" +
                     "(friendOfFriend" + PersonNode.LABEL + ")" +
                     "-[" + StudiesRelation.LABEL + "]->" +
                     "(" + SubjectNode.LABEL + " {" + SubjectNode.NAME + ":{props}." + Var.NAME + "})" +
@@ -166,7 +176,7 @@ public class Request {
                     " endNode(last(filter(x IN relationships(path) WHERE type(x) = \"KNOWS\"))) AS nearest, friendOfFriend " +
                     " WITH head(collect([pathLength, nearest])) AS frst, friendOfFriend " +
                     " RETURN frst[1] AS nearest, friendOfFriend " +
-                    " ORDER BY frst[0] limit 7";
+                    " ORDER BY frst[0] limit 6";
 
     public static final String FIND_SUBJECTS_BY_SCHOOL =
             "MATCH (s" + SubjectNode.LABEL + ")" +

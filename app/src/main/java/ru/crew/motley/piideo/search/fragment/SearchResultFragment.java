@@ -123,14 +123,9 @@ public class SearchResultFragment extends ButterFragment implements SendRequestC
                             mMembers.clear();
                             for (Data item : responseData) {
                                 String targetFriendOfFriend = item.getRow()
-                                        .get(1)
-                                        .getValue();
-                                Member member = Member.fromJson(targetFriendOfFriend);
-                                String nearestToTarget = item.getRow()
                                         .get(0)
                                         .getValue();
-                                Member receivedFrom = Member.fromJson(nearestToTarget);
-                                member.setReceivedFrom(receivedFrom);
+                                Member member = Member.fromJson(targetFriendOfFriend);
                                 Log.d(TAG, member.toString());
                                 mMembers.add(member);
                             }
@@ -154,7 +149,7 @@ public class SearchResultFragment extends ButterFragment implements SendRequestC
             throw new IllegalStateException("Search mSubject can't be null or empty");
         }
         Statement subject = new Statement();
-        subject.setStatement(Request.FIND_QUESTION_TARGET_0);
+        subject.setStatement(Request.FIND_QUESTION_TARGET);
         Parameters parameters = new Parameters();
         parameters.getProps().put(Request.Var.PHONE, mMember.getPhoneNumber());
         parameters.getProps().put(Request.Var.NAME, searchSubject);
