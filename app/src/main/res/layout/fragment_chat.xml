@@ -27,9 +27,9 @@
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="@dimen/simple_padding_large"
+                    android:layout_marginBottom="@dimen/simple_padding_small"
                     android:layout_marginLeft="@dimen/simple_padding_large"
-                    android:layout_marginTop="@dimen/simple_padding_large"
+                    android:layout_marginTop="@dimen/simple_padding_small"
                     android:orientation="vertical">
 
                     <TextView
@@ -53,8 +53,8 @@
 
 
                 <FrameLayout
-                    android:layout_width="120dp"
-                    android:layout_height="60dp"
+                    android:layout_width="110dp"
+                    android:layout_height="55dp"
                     android:layout_gravity="center_vertical|right"
                     android:background="@drawable/shadow_1176">
 
@@ -65,7 +65,7 @@
                         android:layout_gravity="center"
 
                         android:textColor="@color/screenColorBackground"
-                        android:textSize="@dimen/text_size_primary_huge"
+                        android:textSize="22sp"
                         tools:text="00:00" />
 
                     <!--android:layout_marginBottom="@dimen/simple_padding_tiny"-->
@@ -131,7 +131,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="48dp"
                 android:background="@color/colorWhite"
-                android:ems="10"
+                android:ems="11"
                 android:hint="@string/chat_bar_hint"
                 android:paddingBottom="@dimen/simple_padding_largish"
                 android:paddingTop="@dimen/simple_padding_largish"

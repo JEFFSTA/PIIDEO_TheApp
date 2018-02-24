@@ -4,6 +4,7 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Parcelable;
@@ -13,6 +14,8 @@ import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.util.TypedValue;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,6 +25,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.firebase.ui.database.FirebaseRecyclerOptions;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
@@ -171,7 +175,6 @@ public class ChatFragment extends ButterFragment
                 new Date().getTime() - chatStartTime);
         mTimer = new TimerDelay(chatTimeout);
         handler.post(mTimer);
-
         Log.d("PiideoLoader", "onResume");
     }
 
@@ -227,6 +230,7 @@ public class ChatFragment extends ButterFragment
         }
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         layoutManager.setReverseLayout(true);
+        layoutManager.setStackFromEnd(true);
         mChatRecycler.setLayoutManager(layoutManager);
         attachRecyclerAdapter();
         attachTextWatcher();
@@ -266,6 +270,9 @@ public class ChatFragment extends ButterFragment
                 }
             }
         });
+        mMessageInput.setOnClickListener(v -> {
+            mChatRecycler.smoothScrollToPosition(0);
+        });
     }
 
     private void showPiideoButton() {
@@ -301,13 +308,14 @@ public class ChatFragment extends ButterFragment
         String body = mMessageInput.getText().toString().trim();
         FcmMessage message = new FcmMessage(
                 timestamp,
-                -timestamp,
+                -timestamp - TimeUnit.MINUTES.toMillis(10),
                 dayTimestamp,
                 mFcmMessage.getTo(),
                 mFcmMessage.getFrom(),
                 body,
                 "message",
-                mFcmMessage.getFrom() + "_" + mFcmMessage.getFrom());
+                mFcmMessage.getFrom() + "_" + mFcmMessage.getFrom()
+                , false);
         // 1 because there's stub hello message
         if (mChatRecycler.getAdapter().getItemCount() > 1 ||
                 mChatRecycler.getAdapter().getItemViewType(0) != MessagesAdapter.VIEW_TYPE_HELLO) {
@@ -322,14 +330,22 @@ public class ChatFragment extends ButterFragment
                 .child(mFcmMessage.getFrom())
                 .child(mFcmMessage.getTo())
                 .push()
-                .setValue(message);
+                .setValue(message, (e, ref) -> {
+                    ref.child("negatedTimestamp").setValue(-new Date().getTime());
+//                    mChatRecycler.postDelayed(() -> mChatRecycler.smoothScrollToPosition(0), 70);
+//                    mChatRecycler.smoothScrollToPosition(0);
+                });
         if (!mFcmMessage.getFrom().equals(mFcmMessage.getTo())) {
             mDatabase
                     .child("messages")
                     .child(mFcmMessage.getTo())
                     .child(mFcmMessage.getFrom())
                     .push()
-                    .setValue(message);
+                    .setValue(message, (e, ref) -> {
+                        ref.child("negatedTimestamp").setValue(-new Date().getTime());
+//                        mChatRecycler.postDelayed(() -> mChatRecycler.smoothScrollToPosition(0), 70);
+//                        mChatRecycler.smoothScrollToPosition(0);
+                    });
         }
         mMessageInput.setText("");
     }
@@ -350,10 +366,21 @@ public class ChatFragment extends ButterFragment
         adapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
             @Override
             public void onItemRangeInserted(int positionStart, int itemCount) {
-                mChatRecycler.smoothScrollToPosition(0);
+//                mChatRecycler.postDelayed(() -> mChatRecycler.smoothScrollToPosition(0), 70);
+            }
+
+            @Override
+            public void onItemRangeChanged(int positionStart, int itemCount) {
+                super.onItemRangeChanged(positionStart, itemCount);
+                mChatRecycler.postDelayed(() -> mChatRecycler.smoothScrollToPosition(0), 70);
             }
         });
         mChatRecycler.setAdapter(adapter);
+        mChatRecycler.addOnLayoutChangeListener((v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
+            if (bottom < oldBottom) {
+                mChatRecycler.postDelayed(() -> mChatRecycler.smoothScrollToPosition(0), 50);
+            }
+        });
     }
 
     @Override
@@ -390,6 +417,11 @@ public class ChatFragment extends ButterFragment
             piideoImage.setOnClickListener(v -> {
 //            mPiideoCallback.onClick(piideoFileName);
             });
+//            int widthInDp = getImageWithDp();
+//            int heightInDp = getImageHeightDp(widthInDp);
+//            piideoImage.getLayoutParams().height = 2000;
+//            piideoImage.getLayoutParams().width = 1080;
+//            piideoImage.requestLayout();
             Picasso.with(piideoImage.getContext())
                     .load(new File(filePath))
                     .fit()
@@ -398,6 +430,24 @@ public class ChatFragment extends ButterFragment
         } catch (IOException ex) {
             Log.e(TAG, "Read local piideo image error", ex);
         }
+    }
+
+//    private int getImageWithDp() {
+//        Display display = getActivity().getWindowManager().getDefaultDisplay();
+//        Point size = new Point();
+//        display.getSize(size);
+//        int width = size.x;
+//        int dimensionInDp = (int) TypedValue.applyDimension(
+//                TypedValue.COMPLEX_UNIT_PX,
+//                width,
+//                getResources().getDisplayMetrics());
+//        float margin = getResources().getDimension(R.dimen.chat_image_side_margin);
+//        int marginDp = (int) (margin / getResources().getDisplayMetrics().density);
+//        return dimensionInDp - 2 * marginDp;
+//    }
+
+    private int getImageHeightDp(int imageWidthDp) {
+        return imageWidthDp / 4;
     }
 
     @Override
@@ -428,7 +478,8 @@ public class ChatFragment extends ButterFragment
                     mFcmMessage.getFrom(),
                     "",
                     ACK,
-                    mFcmMessage.getTo() + "_" + mFcmMessage.getFrom());
+                    mFcmMessage.getTo() + "_" + mFcmMessage.getFrom(),
+                    false);
             mDatabase.child("notifications")
                     .child("handshake")
                     .push()

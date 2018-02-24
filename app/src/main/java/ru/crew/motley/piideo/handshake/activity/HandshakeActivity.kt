@@ -9,8 +9,9 @@ import ru.crew.motley.piideo.Appp
 import ru.crew.motley.piideo.R
 import ru.crew.motley.piideo.SharedPrefs
 import ru.crew.motley.piideo.fcm.MessagingService.Companion.MessageType
+import ru.crew.motley.piideo.handshake.NavigationCallback
+import ru.crew.motley.piideo.handshake.fragment.HandshakeTimeoutFragment
 import ru.crew.motley.piideo.handshake.fragment.RequestReceivedFragment
-import ru.crew.motley.piideo.search.activity.SearchActivity
 import ru.crew.motley.piideo.splash.SplashActivity
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -19,7 +20,7 @@ import java.util.concurrent.TimeUnit
  * Created by vas on 1/20/18.
  */
 
-class HandshakeActivity : AppCompatActivity() {
+class HandshakeActivity : AppCompatActivity(), NavigationCallback {
 
     companion object {
 
@@ -60,9 +61,7 @@ class HandshakeActivity : AppCompatActivity() {
         val endTime = startTime + TimeUnit.SECONDS.toMillis(HANDSHAKE_TIMEOUT)
         if (endTime < Date().time) {
             SharedPrefs.clearHandshakeStartTime(this)
-            val i = SplashActivity.getIntent(this)
-            startActivity(i)
-            finish()
+            showTimeoutMessage()
         } else {
             handler.postDelayed(timer, endTime - Date().time)
         }
@@ -73,6 +72,19 @@ class HandshakeActivity : AppCompatActivity() {
         super.onPause()
         handler.removeCallbacks(timer)
         (application as Appp).handshaekActivityPaused()
+    }
+
+    override fun end() {
+        val i = SplashActivity.getIntent(this)
+        startActivity(i)
+        finish()
+    }
+
+    fun showTimeoutMessage() {
+        val messageFragment = HandshakeTimeoutFragment.newInstance(this)
+        supportFragmentManager.beginTransaction()
+                .replace(R.id.container, messageFragment)
+                .commit()
     }
 
     inner class Timer : Runnable {

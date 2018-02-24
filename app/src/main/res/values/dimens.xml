@@ -15,4 +15,6 @@
     <dimen name="text_size_primary_big">20sp</dimen>
     <dimen name="text_size_primary_huge">26sp</dimen>
 
+    <dimen name="chat_image_side_margin">40dp</dimen>
+
 </resources>

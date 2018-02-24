@@ -185,7 +185,8 @@ public class PhotoImageFragment extends ButterFragment {
                 mFcmMessage.getFrom(),
                 mPiideoName,
                 MessagingService.PDO,
-                mFcmMessage.getTo() + "_" + mFcmMessage.getFrom());
+                mFcmMessage.getTo() + "_" + mFcmMessage.getFrom(),
+                false);
 
         FirebaseDatabase.getInstance()
                 .getReference()

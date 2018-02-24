@@ -55,6 +55,7 @@
                 android:completionHint="@string/reg_subject_hint"
                 android:completionThreshold="1"
                 android:inputType="textPersonName"
+                android:imeOptions="actionDone"
                 android:textSize="14sp" />
 
         </LinearLayout>

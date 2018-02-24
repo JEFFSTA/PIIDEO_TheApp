@@ -1,6 +1,5 @@
 package ru.crew.motley.piideo.chat;
 
-import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -53,7 +52,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
     @Override
     public ChatViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-        View v = inflater.inflate(R.layout.item_chat, parent, false);
+        View v = inflater.inflate(R.layout.item_piideo_received, parent, false);
         return new ChatViewHolder(v);
     }
 

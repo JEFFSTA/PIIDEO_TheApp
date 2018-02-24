@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/item_message_parent"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+
+    android:background="@android:color/transparent"
+    android:gravity="right"
+    android:orientation="vertical"
+    tools:ignore="RtlHardcoded">
+
+    <View
+        android:id="@+id/chat_gap"
+        android:layout_width="match_parent"
+        android:layout_height="4dp" />
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginBottom="4dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_gravity="center"
+            android:layout_margin="1dp"
+            android:background="@drawable/chat_piideo_border_white">
+
+            <ImageView
+                android:id="@+id/player_toggler"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:layout_margin="1dp"
+                android:scaleType="centerCrop" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_gravity="center"
+            android:background="@drawable/chat_piideo_border_white" />
+
+
+        <ProgressBar
+            android:id="@+id/piideo_progress"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_gravity="center" />
+
+    </FrameLayout>
+</LinearLayout>

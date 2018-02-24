@@ -189,13 +189,21 @@ public class PhotoActivity extends AppCompatActivity {
     }
 
     private Camera.Size getPictureSize(List<Camera.Size> pictureSizes) {
-        Camera.Size restult = pictureSizes.get(0);
-        for (Camera.Size size : pictureSizes) {
-            if (size.width > restult.width) {
-                restult = size;
+        Camera.Size result = pictureSizes.get(0);
+        if (result.width < result.height) {
+            for (Camera.Size size : pictureSizes) {
+                if (size.width > result.width) {
+                    result = size;
+                }
+            }
+        } else {
+            for (Camera.Size size : pictureSizes) {
+                if (size.height > result.height) {
+                    result = size;
+                }
             }
         }
-        return restult;
+        return result;
     }
 
     void setCameraDisplayOrientation(int cameraId) {
@@ -372,6 +380,23 @@ public class PhotoActivity extends AppCompatActivity {
         }
         // Commit the layout parameters
         sv.setLayoutParams(lp);
+    }
+
+    private Size getOptimalPictureSize(List<Size> sizes) {
+        int targetRatio = 0;
+        float tollerance = 0.2F;
+        if (sizes.get(0).height < sizes.get(0).width) {
+            targetRatio = 3 / 4;
+        } else {
+            targetRatio = 4 / 3;
+        }
+        int maxHeight = 0;
+        for (Size size : sizes) {
+            if (maxHeight < size.height) {
+                maxHeight = maxHeight;
+            }
+        }
+
     }
 
 

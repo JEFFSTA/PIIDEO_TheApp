@@ -15,7 +15,8 @@ class FcmMessage @ParcelConstructor constructor(
         val to: String? = null,
         val content: String? = null,
         val type: String? = null,
-        val ownerReceiver: String? = null) {
+        val ownerReceiver: String? = null,
+        val visible: Boolean = false) {
 
     constructor(): this(null)
 

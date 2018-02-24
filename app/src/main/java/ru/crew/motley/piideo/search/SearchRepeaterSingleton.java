@@ -138,7 +138,8 @@ public class SearchRepeaterSingleton {
                         receiver.getChatId(),
                         directRequestMarker + receiver.getReceivedFrom().getPhoneNumber(),
                         MessagingService.SYN,
-                        ownerId + "_" + receiver.getChatId());
+                        ownerId + "_" + receiver.getChatId(),
+                        false);
         mDatabase
                 .child("notifications")
                 .child("handshake")
