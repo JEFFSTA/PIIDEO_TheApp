@@ -140,6 +140,7 @@ public class ChatFragment extends ButterFragment
             if (seconds < 0) {
                 handler.removeCallbacks(mTimer);
                 showRateView();
+                deleteUselessFiles();
                 makeMeFree();
             }
             if (watchText != null && seconds >= 0) {
@@ -495,6 +496,16 @@ public class ChatFragment extends ButterFragment
         getActivity().finish();
         SharedPrefs.clearChatStartTime(getActivity());
         SharedPrefs.clearChatMessageId(getActivity());
+    }
+
+    private void deleteUselessFiles() {
+        File dir = new File(HOME_PATH);
+        if (dir.isDirectory()) {
+            String[] children = dir.list();
+            for (String aChildren : children) {
+                new File(dir, aChildren).delete();
+            }
+        }
     }
 
     private Statement createBusyRequest(long startChatTime) {

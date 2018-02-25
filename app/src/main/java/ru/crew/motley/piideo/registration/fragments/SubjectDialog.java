@@ -30,7 +30,7 @@ import ru.crew.motley.piideo.network.neo.Statements;
 import ru.crew.motley.piideo.network.neo.transaction.Data;
 import ru.crew.motley.piideo.network.neo.transaction.Result;
 import ru.crew.motley.piideo.network.neo.transaction.Row;
-import ru.crew.motley.piideo.registration.DialogListener;
+import ru.crew.motley.piideo.registration.SubjectDialogListener;
 
 /**
  * Created by vas on 2/17/18.
@@ -46,10 +46,10 @@ public class SubjectDialog extends DialogFragment {
     EditText subjectName;
 
     private Unbinder mUnbinder;
-    private DialogListener mListener;
+    private SubjectDialogListener mListener;
     private String mSchoolName;
 
-    public static SubjectDialog getInstance(String schoolName, DialogListener listener) {
+    public static SubjectDialog getInstance(String schoolName, SubjectDialogListener listener) {
         SubjectDialog dialog = new SubjectDialog();
         Bundle args = new Bundle();
         args.putString(ARG_SCHOOL_NAME, schoolName);

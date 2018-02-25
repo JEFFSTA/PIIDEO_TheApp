@@ -10,6 +10,7 @@ import java.util.List;
 
 import ru.crew.motley.piideo.R;
 import ru.crew.motley.piideo.network.Member;
+import ru.crew.motley.piideo.search.SendRequestCallback;
 
 public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.SearchViewHolder> {
 

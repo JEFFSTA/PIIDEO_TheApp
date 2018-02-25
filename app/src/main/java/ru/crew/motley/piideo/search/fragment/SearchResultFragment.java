@@ -1,5 +1,6 @@
 package ru.crew.motley.piideo.search.fragment;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
@@ -33,9 +34,10 @@ import ru.crew.motley.piideo.network.neo.Request;
 import ru.crew.motley.piideo.network.neo.Statement;
 import ru.crew.motley.piideo.network.neo.Statements;
 import ru.crew.motley.piideo.network.neo.transaction.Data;
+import ru.crew.motley.piideo.search.RequestDialogCallback;
 import ru.crew.motley.piideo.search.SearchRepeaterSingleton;
 import ru.crew.motley.piideo.search.adapter.SearchAdapter;
-import ru.crew.motley.piideo.search.adapter.SendRequestCallback;
+import ru.crew.motley.piideo.search.SendRequestCallback;
 
 /**
  * Created by vas on 12/18/17.
@@ -70,7 +72,6 @@ public class SearchResultFragment extends ButterFragment implements SendRequestC
         super.onResume();
         if (mSearchRepeaterSingleton == null) {
             mSearchRepeaterSingleton = SearchRepeaterSingleton.instance(getActivity());
-//            mSearchRepeaterSingleton.setContext(getActivity());
         }
     }
 
@@ -162,21 +163,21 @@ public class SearchResultFragment extends ButterFragment implements SendRequestC
     @Override
     public void onClick(String receiverId, View view) {
         view.setEnabled(false);
-        mProgressBar.setVisibility(View.VISIBLE);
         mSearchRepeaterSingleton.moveToFirstPosition(receiverId);
+        RequestDialog.getInstance(dialog -> onMessageInput())
+                .show(getActivity().getSupportFragmentManager(), "dialog");
+    }
+
+    private void onMessageInput() {
+        mProgressBar.setVisibility(View.VISIBLE);
         mSearchRepeaterSingleton.searchObservable()
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(next -> {
-                            Log.d(TAG, "First one passed");
-                        },
+                .subscribe(next -> Log.d(TAG, "First one passed"),
                         error -> {
                             Log.e(TAG, "Error subscription onCLick");
                             Log.e(TAG, "", error);
                         },
-                        () -> {
-                            mProgressBar.setVisibility(View.GONE);
-                        });
+                        () -> mProgressBar.setVisibility(View.GONE));
         mSearchRepeaterSingleton.next();
     }
-
 }

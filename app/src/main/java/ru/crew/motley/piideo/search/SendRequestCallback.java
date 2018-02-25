@@ -1,4 +1,4 @@
-package ru.crew.motley.piideo.search.adapter;
+package ru.crew.motley.piideo.search;
 
 import android.view.View;
 

@@ -8,7 +8,7 @@ public class SharedPrefs {
     private static final String PREFS = "prefs";
 
     private static final String SEARCH_SUBJECT = "searchSubject";
-
+    private static final String REQUEST_MESSAGE = "requestMessage";
 
     private static final String CHAT = "page";
     private static final String CHAT_START_TIME = "chatStartTime";
@@ -29,6 +29,25 @@ public class SharedPrefs {
     public static String getSearchSubject(Context context) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
         return prefs.getString(SEARCH_SUBJECT, null);
+    }
+
+    public static void requestMessage(String value, Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        prefs.edit()
+                .putString(REQUEST_MESSAGE, value)
+                .apply();
+    }
+
+    public static String getRequestMessage(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        return prefs.getString(REQUEST_MESSAGE, null);
+    }
+
+    public static void clearRequestMessage(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        prefs.edit()
+                .remove(REQUEST_MESSAGE)
+                .apply();
     }
 
     public static void verificationId(String value, Context context) {
