@@ -57,5 +57,6 @@ public class SplashActivity extends AppCompatActivity {
             Intent i = SearchActivity.getIntent(byPass, this);
             startActivity(i);
         }
+        finish();
     }
 }

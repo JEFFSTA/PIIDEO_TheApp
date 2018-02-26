@@ -9,6 +9,7 @@ public class SharedPrefs {
 
     private static final String SEARCH_SUBJECT = "searchSubject";
     private static final String REQUEST_MESSAGE = "requestMessage";
+    private static final String SEARCHING = "searching";
 
     private static final String CHAT = "page";
     private static final String CHAT_START_TIME = "chatStartTime";
@@ -48,6 +49,18 @@ public class SharedPrefs {
         prefs.edit()
                 .remove(REQUEST_MESSAGE)
                 .apply();
+    }
+
+    public static void setSearching(boolean value, Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        prefs.edit()
+                .putBoolean(SEARCHING, value)
+                .apply();
+    }
+
+    public static boolean isSearching(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        return prefs.getBoolean(SEARCHING, false);
     }
 
     public static void verificationId(String value, Context context) {

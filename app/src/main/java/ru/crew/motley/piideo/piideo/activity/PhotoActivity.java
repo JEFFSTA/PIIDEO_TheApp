@@ -382,22 +382,22 @@ public class PhotoActivity extends AppCompatActivity {
         sv.setLayoutParams(lp);
     }
 
-    private Size getOptimalPictureSize(List<Size> sizes) {
-        int targetRatio = 0;
-        float tollerance = 0.2F;
-        if (sizes.get(0).height < sizes.get(0).width) {
-            targetRatio = 3 / 4;
-        } else {
-            targetRatio = 4 / 3;
-        }
-        int maxHeight = 0;
-        for (Size size : sizes) {
-            if (maxHeight < size.height) {
-                maxHeight = maxHeight;
-            }
-        }
-
-    }
+//    private Size getOptimalPictureSize(List<Size> sizes) {
+//        int targetRatio = 0;
+//        float tollerance = 0.2F;
+//        if (sizes.get(0).height < sizes.get(0).width) {
+//            targetRatio = 3 / 4;
+//        } else {
+//            targetRatio = 4 / 3;
+//        }
+//        int maxHeight = 0;
+//        for (Size size : sizes) {
+//            if (maxHeight < size.height) {
+//                maxHeight = maxHeight;
+//            }
+//        }
+//
+//    }
 
 
     public void saveFile(Bitmap forSave) {

@@ -23,6 +23,8 @@ import java.util.List;
 
 import butterknife.BindView;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
 import ru.crew.motley.piideo.ButterFragment;
 import ru.crew.motley.piideo.R;
 import ru.crew.motley.piideo.SharedPrefs;
@@ -58,6 +60,7 @@ public class SearchResultFragment extends ButterFragment implements SendRequestC
     private Member mMember;
     private List<Member> mMembers = new ArrayList<>();
     private SearchRepeaterSingleton mSearchRepeaterSingleton;
+    private CompositeDisposable mDisposables  = new CompositeDisposable();
 
     public static SearchResultFragment newInstance(Parcelable member) {
         Bundle args = new Bundle();
@@ -73,12 +76,18 @@ public class SearchResultFragment extends ButterFragment implements SendRequestC
         if (mSearchRepeaterSingleton == null) {
             mSearchRepeaterSingleton = SearchRepeaterSingleton.instance(getActivity());
         }
+        if (SharedPrefs.isSearching(getContext())) {
+            subscribeOnSearch();
+        } else {
+            mProgressBar.setVisibility(View.GONE);
+        }
     }
 
     @Override
     public void onPause() {
         super.onPause();
         mSearchRepeaterSingleton = null;
+        mDisposables.dispose();
     }
 
     @Override
@@ -163,21 +172,30 @@ public class SearchResultFragment extends ButterFragment implements SendRequestC
     @Override
     public void onClick(String receiverId, View view) {
         view.setEnabled(false);
+        SharedPrefs.setSearching(true, getContext());
         mSearchRepeaterSingleton.moveToFirstPosition(receiverId);
         RequestDialog.getInstance(dialog -> onMessageInput())
                 .show(getActivity().getSupportFragmentManager(), "dialog");
     }
 
     private void onMessageInput() {
+        mSearchRepeaterSingleton.startSearch();
+        subscribeOnSearch();
+    }
+
+    private void subscribeOnSearch() {
         mProgressBar.setVisibility(View.VISIBLE);
-        mSearchRepeaterSingleton.searchObservable()
+        Disposable searchSubscription = mSearchRepeaterSingleton.repeatableSearchObservable()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(next -> Log.d(TAG, "First one passed"),
                         error -> {
                             Log.e(TAG, "Error subscription onCLick");
-                            Log.e(TAG, "", error);
+                            Log.e(TAG, "", (Throwable) error);
                         },
-                        () -> mProgressBar.setVisibility(View.GONE));
-        mSearchRepeaterSingleton.next();
+                        () -> {
+                            mProgressBar.setVisibility(View.GONE);
+                            SharedPrefs.setSearching(false, getContext());
+                        });
+        mDisposables.add(searchSubscription);
     }
 }

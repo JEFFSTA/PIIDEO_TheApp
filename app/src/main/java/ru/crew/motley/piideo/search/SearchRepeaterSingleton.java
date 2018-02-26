@@ -2,7 +2,6 @@ package ru.crew.motley.piideo.search;
 
 import android.content.Context;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -10,12 +9,16 @@ import com.google.firebase.database.FirebaseDatabase;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
-import io.reactivex.Completable;
 import io.reactivex.Observable;
+import io.reactivex.Single;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Predicate;
 import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subjects.BehaviorSubject;
-import ru.crew.motley.piideo.R;
+import io.reactivex.subjects.PublishSubject;
 import ru.crew.motley.piideo.chat.db.ChatLab;
 import ru.crew.motley.piideo.fcm.FcmMessage;
 import ru.crew.motley.piideo.fcm.MessagingService;
@@ -35,16 +38,19 @@ import ru.crew.motley.piideo.util.TimeUtils;
 
 public class SearchRepeaterSingleton {
 
+    private static final String TAG = SearchRepeaterSingleton.class.getSimpleName();
+    private static final int REQUEST_DELAY = 45;
+
     private static volatile SearchRepeaterSingleton INSTANCE;
 
-    public static SearchRepeaterSingleton instance(/*Member member, */Context context) {
+    public static SearchRepeaterSingleton instance(Context context) {
         SearchRepeaterSingleton local = INSTANCE;
         if (local == null) {
             synchronized (SearchRepeaterSingleton.class) {
                 local = INSTANCE;
                 if (local == null) {
                     Member member = ChatLab.get(context).getMember();
-                    local = new SearchRepeaterSingleton(member, context);
+                    local = new SearchRepeaterSingleton(member);
                     INSTANCE = local;
                 }
             }
@@ -54,34 +60,54 @@ public class SearchRepeaterSingleton {
 
     public static SearchRepeaterSingleton newInstance(Context context) {
         Member member = ChatLab.get(context).getMember();
-        SearchRepeaterSingleton local = new SearchRepeaterSingleton(member, context);
+        SearchRepeaterSingleton local = new SearchRepeaterSingleton(member);
         INSTANCE = local;
         return local;
     }
 
-//    private static final int REQUEST_DELAY = 20;
-
     private Deque<Member> mMembers = new LinkedList<>();
-    //    private Disposable mSearchRepeater;
+    private Observable<Long> mSearchRepeater;
+    private Observable<Single<Member>> mSearch;
+    private PublishSubject<Long> mContinuousChain;
+    private Disposable mSearchChainSubscription;
+    private CompositeDisposable mRequestSubscriptions;
     private DatabaseReference mDatabase;
     private Member mMember;
-    //    private WeakReference<Context> mWeakReference;
-    private BehaviorSubject<Member> mMemberSubject;
+
 
     private SearchRepeaterSingleton() {
         mDatabase = FirebaseDatabase.getInstance().getReference();
     }
 
-    private SearchRepeaterSingleton(Member member, Context context) {
+    private SearchRepeaterSingleton(Member member) {
         this();
         mMember = member;
-//        mWeakReference = new WeakReference(context);
-        mMemberSubject = BehaviorSubject.create();
-    }
+        mContinuousChain = PublishSubject.create();
+        mRequestSubscriptions = new CompositeDisposable();
+        mSearchRepeater = Observable.interval(0, REQUEST_DELAY, TimeUnit.SECONDS)
+                .takeUntil(aLong -> {
+                    return mMembers.isEmpty();
+                });
+//                .doOnNext(aLong -> mRequestSubscriptions.dispose());
+        mSearch = mSearchRepeater.map(item -> {
+            Member member1 = getNextMember();
+            Log.d(TAG, "" + (member1 == null));
+            return member1;
+        })
+                .map(item2 -> {
+                    Single<Member> single = findReceiverFriendAndRequest(item2).subscribeOn(Schedulers.io());
+                    return single;
+                })
+                .doOnNext(request -> {
+                            request.subscribeOn(Schedulers.io()).subscribe(member1 -> {},
+                                    error -> Log.e(TAG, "Error 1", error));
+                            Single subscription = request.doOnSuccess(member1 -> {}/*mMembers.poll()*/);
+                            mRequestSubscriptions.add(subscription.subscribe());
+                        }
+                );
+        mSearchRepeater.subscribe(mContinuousChain);
 
-//    public void setContext(Context context) {
-//        mWeakReference = new WeakReference<>(context);
-//    }
+    }
 
     public void moveToFirstPosition(String receiverId) {
         Member target = null;
@@ -98,26 +124,26 @@ public class SearchRepeaterSingleton {
         mMembers = new LinkedList<>(members);
     }
 
-//    private void startSearchChain() {
-//        stopSearchChain();
-//        mSearchRepeater =
-//                Observable.interval(0, REQUEST_DELAY, TimeUnit.SECONDS)
-//                        .map(item -> getNextMember())
-//                        .subscribe(member -> sendRequest(member.getChatId()),
-//                                error -> {
-//                                    Log.e(TAG, "Search Chain Exception", error);
-//                                });
-//    }
+    private void startSearchChain() {
+        stopSearchChain();
+        mSearchChainSubscription = mSearch.subscribe(o -> {
+            Log.d(TAG, "Emmit");
+        }, error -> {
+            Log.e(TAG, "Error 2", error);
+        });
+    }
 
-//    private void stopSearchChain() {
-//        if (mSearchRepeater != null && !mSearchRepeater.isDisposed()) {
-//            mSearchRepeater.dispose();
-//            mSearchRepeater = null;
-//        }
-//    }
+    private void stopSearchChain() {
+        if (mSearchChainSubscription != null && !mSearchChainSubscription.isDisposed()) {
+            mSearchChainSubscription.dispose();
+        }
+        if (!mRequestSubscriptions.isDisposed()) {
+            mRequestSubscriptions.dispose();
+        }
+    }
 
     private Member getNextMember() {
-        return mMembers.poll();
+        return mMembers.peek();
     }
 
     private void sendRequest(Member receiver) {
@@ -194,27 +220,40 @@ public class SearchRepeaterSingleton {
 //                        });
 //    }
 
-//    public void stopSearch() {
-//        stopSearchChain();
-//    }
+    public void startSearch() {
+        startSearchChain();
+    }
+
+    public void stopSearch() {
+        stopSearchChain();
+    }
 
     public void next() {
-//        stopSearchChain();
-        if (mMembers.isEmpty()) {
-            mMemberSubject.onComplete();
-            return;
-        }
-        mMemberSubject.onNext(getNextMember());
+        stopSearchChain();
+        startSearchChain();
     }
 
-    public Observable<Member> searchObservable() {
-        return mMemberSubject.map(item -> {
-            findReceiverFriendAndRequest(item).subscribe();
-            return item;
-        }).subscribeOn(Schedulers.io());
+//    public void next() {
+////        stopSearchChain();
+//        if (mMembers.isEmpty()) {
+//            mMemberSubject.onComplete();
+//            return;
+//        }
+//        mMemberSubject.onNext(getNextMember());
+//    }
+
+//    public Observable<Member> searchObservable() {
+//        return mMemberSubject.map(item -> {
+//            findReceiverFriendAndRequest(item).subscribe();
+//            return item;
+//        }).subscribeOn(Schedulers.io());
+//    }
+
+    public Observable<Long> repeatableSearchObservable() {
+        return mContinuousChain;
     }
 
-    private Completable findReceiverFriendAndRequest(Member receiver) {
+    private Single<Member> findReceiverFriendAndRequest(Member receiver) {
         Statements statements = new Statements();
         Statement statement = receiverFriendRequest(receiver);
         statements.getValues().add(statement);
@@ -233,8 +272,10 @@ public class SearchRepeaterSingleton {
                     receiver.setReceivedFrom(rf);
                     return receiver;
                 })
-                .flatMapCompletable(r ->
-                        Completable.fromAction(() -> sendRequest(r)));
+                .map(r -> {
+                    sendRequest(r);
+                    return r;
+                });
     }
 
     private Statement receiverFriendRequest(Member receiver) {

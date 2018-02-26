@@ -144,7 +144,7 @@ public class Request {
 
     public static final String FIND_QUESTION_TARGET =
             "MATCH p=(me" + PersonNode.LABEL + " {" + PersonNode.PHONE + ":{props}." + Var.PHONE + " })" +
-                    "<-[" + KnowsRelation.LABEL + "*1..4]-" +
+                    "<-[" + KnowsRelation.LABEL + "*1..6]-" +
                     "(fof" + PersonNode.LABEL + ")" +
                     " WHERE fof." + PersonNode.PHONE + " <> {props}." + Var.PHONE +
                     " WITH fof, min(length(p)) AS minLength ORDER BY minLength " +
@@ -165,7 +165,7 @@ public class Request {
 
     public static final String FIND_QUESTION_TARGET_0 =
             "MATCH path=((me" + PersonNode.LABEL + " {" + PersonNode.PHONE + ":{props}." + Var.PHONE + "})" +
-                    "<-[" + KnowsRelation.LABEL + "*1..5]-" +
+                    "<-[" + KnowsRelation.LABEL + "*1..6]-" +
                     "(friendOfFriend" + PersonNode.LABEL + ")" +
                     "-[" + StudiesRelation.LABEL + "]->" +
                     "(" + SubjectNode.LABEL + " {" + SubjectNode.NAME + ":{props}." + Var.NAME + "})" +

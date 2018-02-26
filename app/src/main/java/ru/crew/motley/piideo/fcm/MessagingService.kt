@@ -123,10 +123,13 @@ class MessagingService : FirebaseMessagingService() {
     }
 
     private fun showChatOrNotification(dbMessageId: String, @MessageType type: String, timestamp: Date) {
-
+        val searchRepeater = SearchRepeaterSingleton.instance(applicationContext)
+        searchRepeater.stopSearch()
+        SharedPrefs.setSearching(false, applicationContext)
         val app = application as Appp
         val params = Bundle()
         val date = Date()
+
 //        val visible  = if (app.searchActivityVisible()) 1L else 0L
 //        params.putLong("searchActivityVisible", visible )
 //        params.putLong("timeInMillis", date.time)
@@ -318,25 +321,25 @@ class Receiver : BroadcastReceiver() {
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.cancel(SYN_ID)
         val firstMessageId = intent.getStringExtra("DB_MESSAGE_ID")
-        if (SharedPrefs.loadChatMessageId(context) == null) {
-            val dbMessage = ChatLab.get(context).getReducedFcmMessage(firstMessageId)!!
-            val timestamp = System.currentTimeMillis()
-            val dayTimestamp = TimeUtils.gmtDayTimestamp(timestamp)
-            val message = FcmMessage(
-                    timestamp,
-                    -timestamp,
-                    dayTimestamp,
-                    dbMessage.to,
-                    dbMessage.from,
-                    "",
-                    MessagingService.REJ,
-                    dbMessage.to + "_" + dbMessage.from)
-            FirebaseDatabase.getInstance()
-                    .reference
-                    .child("notifications")
-                    .child("handshake")
-                    .push()
-                    .setValue(message)
-        }
+//        if (SharedPrefs.loadChatMessageId(context) == null) {
+//            val dbMessage = ChatLab.get(context).getReducedFcmMessage(firstMessageId)!!
+//            val timestamp = System.currentTimeMillis()
+//            val dayTimestamp = TimeUtils.gmtDayTimestamp(timestamp)
+//            val message = FcmMessage(
+//                    timestamp,
+//                    -timestamp,
+//                    dayTimestamp,
+//                    dbMessage.to,
+//                    dbMessage.from,
+//                    "",
+//                    MessagingService.REJ,
+//                    dbMessage.to + "_" + dbMessage.from)
+//            FirebaseDatabase.getInstance()
+//                    .reference
+//                    .child("notifications")
+//                    .child("handshake")
+//                    .push()
+//                    .setValue(message)
+//        }
     }
 }

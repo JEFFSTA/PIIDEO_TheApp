@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.util.Date;
 
 import ru.crew.motley.piideo.R;
+import ru.crew.motley.piideo.SharedPrefs;
 import ru.crew.motley.piideo.chat.db.ChatLab;
 import ru.crew.motley.piideo.fcm.User;
 import ru.crew.motley.piideo.handshake.activity.RequestListenerActivity;
@@ -120,6 +121,9 @@ public class SearchActivity extends RequestListenerActivity implements SearchLis
                     new String[]{WRITE_EXTERNAL_STORAGE, READ_EXTERNAL_STORAGE},
                     SD_PERMISSIONS);
         } else {
+            if (SharedPrefs.isSearching(this)) {
+                currentStep = Page.SEARCH_PAGE;
+            }
             showNextStep();
         }
     }
@@ -282,8 +286,12 @@ public class SearchActivity extends RequestListenerActivity implements SearchLis
     public void onBackPressed() {
         Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.container);
         if (fragment instanceof SearchResultFragment) {
-            currentStep = Page.SUBJECT_PAGE;
-            showNextStep();
+            if (SharedPrefs.isSearching(this)) {
+                super.onBackPressed();
+            } else {
+                currentStep = Page.SUBJECT_PAGE;
+                showNextStep();
+            }
         } else {
             super.onBackPressed();
         }
