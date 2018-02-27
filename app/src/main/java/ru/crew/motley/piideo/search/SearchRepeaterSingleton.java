@@ -6,7 +6,6 @@ import android.util.Log;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
-import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
@@ -18,7 +17,6 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subjects.BehaviorSubject;
-import io.reactivex.subjects.PublishSubject;
 import ru.crew.motley.piideo.chat.db.ChatLab;
 import ru.crew.motley.piideo.fcm.FcmMessage;
 import ru.crew.motley.piideo.fcm.MessagingService;
@@ -68,7 +66,7 @@ public class SearchRepeaterSingleton {
     private Deque<Member> mMembers = new LinkedList<>();
     private Observable<Long> mSearchRepeater;
     private Observable<Single<Member>> mSearch;
-    private PublishSubject<Long> mContinuousChain;
+    private BehaviorSubject<Long> mContinuousChain;
     private Disposable mSearchChainSubscription;
     private CompositeDisposable mRequestSubscriptions;
     private Disposable mSearchSubscription;
@@ -86,7 +84,7 @@ public class SearchRepeaterSingleton {
         mMember = member;
 //        mContinuousChain = BehaviorSubject.create();
 
-        createSearchRepeater();
+//        createSearchRepeater();
     }
 
     private void createSearchRepeater() {
@@ -96,15 +94,20 @@ public class SearchRepeaterSingleton {
                     Log.d(TAG, "222" + mMembers.isEmpty());
                     return mMembers.isEmpty();
                 });
-        mContinuousChain = PublishSubject.create();
+        mContinuousChain = BehaviorSubject.create();
         mSearchRepeater.subscribe(mContinuousChain);
-        mSearch = mSearchRepeater.map(item -> {
-            Member member1 = getNextMember();
-            Log.d(TAG, "" + (member1 == null));
-            return member1;
+        mSearch = mSearchRepeater.takeUntil(l -> {
+            Log.d(TAG, "members size" + mMembers.size());
+            return mMembers.isEmpty();
         })
+                .map(item -> {
+                    Member member1 = getNextMember();
+                    Log.d(TAG, "map next member" + (member1 == null));
+                    return member1;
+                })
                 .map(item2 -> {
                     Single<Member> single = findReceiverFriendAndRequest(item2).subscribeOn(Schedulers.io());
+                    Log.d(TAG, "map single" + (single == null));
                     return single;
                 })
                 .doOnNext(request -> {
@@ -112,9 +115,14 @@ public class SearchRepeaterSingleton {
                                         Log.e(TAG, "test");
                                     },
                                     error -> Log.e(TAG, "Error 1", error));
-                            Single subscription = request.doOnSuccess(member1 -> {
-                            }/* mMembers.poll()*/);
-                            mRequestSubscriptions.add(subscription.subscribe());
+                            Single<Member> subscription = request.doOnSuccess(member1 -> mMembers.poll());
+                            mRequestSubscriptions.add(subscription.subscribe(
+                                    m -> {
+                                    },
+                                    e -> {
+                                        Log.e(TAG, "Request send error", e);
+                                    }
+                            ));
                         }
                 );
 
@@ -139,18 +147,23 @@ public class SearchRepeaterSingleton {
         stopSearchChain();
         mOn = true;
         createSearchRepeater();
-        mSearchChainSubscription = mContinuousChain.subscribe(o -> {
-                    Log.d(TAG, "Emmit");
-                }, error -> {
-                    Log.e(TAG, "Error 2", error);
+//        mSearchChainSubscription = mContinuousChain.subscribe(o -> {
+//                    Log.d(TAG, "Emmit");
+//                }, error -> {
+//                    Log.e(TAG, "Error 2", error);
+//                },
+//                () -> {
+//                    Log.d(TAG, "complete chain");
+//                    createSearchRepeater();
+//                    mMembers = new LinkedList<>();
+//                    mOn = false;
+//                });
+        mSearchSubscription = mSearch.subscribe(memberSingle -> {
+                    Log.d(TAG, "mmember single");
                 },
-                () -> {
-                    Log.d(TAG, "complete chain");
-                    createSearchRepeater();
-                    mMembers = new LinkedList<>();
-                    mOn = false;
+                error -> {
+                    Log.e(TAG, "mSS error", error);
                 });
-        mSearchSubscription = mSearch.subscribe();
     }
 
     private void stopSearchChain() {
@@ -165,7 +178,7 @@ public class SearchRepeaterSingleton {
         if (!mRequestSubscriptions.isDisposed()) {
             mRequestSubscriptions.dispose();
         }
-//        mContinuousChain.onComplete();
+
     }
 
     public boolean isOn() {
@@ -173,7 +186,8 @@ public class SearchRepeaterSingleton {
     }
 
     private Member getNextMember() {
-        return mMembers.poll();
+        Log.d(TAG, "get member");
+        return mMembers.peek();
     }
 
     private void sendRequest(Member receiver) {
@@ -254,6 +268,73 @@ public class SearchRepeaterSingleton {
         parameters.getProps().put(Request.Var.F_PHONE, receiver.getPhoneNumber());
         request.setParameters(parameters);
         return request;
+    }
+
+
+    private BehaviorSubject<Long> mRepeaterSubject;
+    private Observable<Long> mTimer;
+    private Disposable mTimerSubs;
+    private CompositeDisposable mRequestSubss;
+
+    public Observable<Long> subject() {
+        if (mRepeaterSubject == null) {
+            mRepeaterSubject = BehaviorSubject.create();
+        }
+        return mRepeaterSubject;
+    }
+
+    public void skip() {
+        if (mRequestSubss != null) {
+            mRequestSubss.dispose();
+        }
+        mRequestSubss = new CompositeDisposable();
+        if (mTimerSubs != null) {
+            mTimerSubs.dispose();
+        }
+        mTimerSubs = newTask();
+    }
+
+    public void start() {
+        mOn = true;
+        mRepeaterSubject = BehaviorSubject.create();
+        mTimer = Observable.interval(0, REQUEST_DELAY, TimeUnit.SECONDS);
+        mRequestSubss = new CompositeDisposable();
+        mTimerSubs = newTask();
+    }
+
+    public void stop() {
+        mOn = false;
+        mTimerSubs.dispose();
+        mRequestSubss.dispose();
+    }
+
+    private Disposable newTask() {
+        return mTimer.takeWhile(
+                l -> {
+                    Log.d(TAG, "" + mMembers.isEmpty());
+                    return !mMembers.isEmpty();
+                })
+                .map(l -> {
+                    Log.d(TAG, "poll");
+                    return mMembers.poll();
+                })
+                .map(m -> {
+                    Single<Member> single = findReceiverFriendAndRequest(m).subscribeOn(Schedulers.io());
+                    Log.d(TAG, "map single " + (single == null));
+                    return single;
+                })
+                .map(s -> {
+                    mRequestSubss.add(s.subscribe());
+                    return 0L;
+                })
+                .subscribe(
+                        l -> mRepeaterSubject.onNext(l),
+                        e -> Log.e(TAG, "timer Task error", e),
+                        () -> {
+                            Log.d(TAG, "timer Task complete");
+                            mRepeaterSubject.onComplete();
+                            stop();
+                        });
     }
 
 }

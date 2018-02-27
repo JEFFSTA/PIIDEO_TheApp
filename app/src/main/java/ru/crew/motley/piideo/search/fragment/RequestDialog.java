@@ -48,13 +48,13 @@ public class RequestDialog extends DialogFragment {
 
     }
 
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.dialog_request, container, false);
-        mUnbinder = ButterKnife.bind(this, view);
-        return view;
-    }
+//    @Nullable
+//    @Override
+//    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+//        View view = inflater.inflate(R.layout.dialog_request, container, false);
+//        mUnbinder = ButterKnife.bind(this, view);
+//        return view;
+//    }
 
     @Override
     public void onDestroyView() {
@@ -70,6 +70,7 @@ public class RequestDialog extends DialogFragment {
 
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         View v = LayoutInflater.from(getActivity()).inflate(R.layout.dialog_request, null);
+        mUnbinder = ButterKnife.bind(this, v);
         return new AlertDialog.Builder(getActivity())
                 .setView(v)
                 .setPositiveButton("Send", (dialog, which) -> {

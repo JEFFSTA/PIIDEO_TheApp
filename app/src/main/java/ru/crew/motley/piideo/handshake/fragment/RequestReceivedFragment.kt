@@ -22,6 +22,7 @@ import android.provider.ContactsContract
 import android.provider.BaseColumns
 import android.net.Uri
 import kotlinx.android.synthetic.main.fragment_request_received_0.view.*
+import ru.crew.motley.piideo.SharedPrefs
 import ru.crew.motley.piideo.registration.fragments.PhoneFragment.FRENCH_PREFIX
 
 
@@ -55,11 +56,14 @@ class RequestReceivedFragment : Fragment() {
 //            sendAcknowledge()
             val i = ChatActivity.getIntent(messageId, activity)
             startActivity(i)
+            SharedPrefs.clearHandshakeStartTime(context)
             activity?.finish()
         }
         v.rejectRequest.setOnClickListener {
+
             cancelAlarm()
             sendReject()
+            SharedPrefs.clearHandshakeStartTime(context)
             activity?.finish()
         }
         if (friendNumber.startsWith("++")) {

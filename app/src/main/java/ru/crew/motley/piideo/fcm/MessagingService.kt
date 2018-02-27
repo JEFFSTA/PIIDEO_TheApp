@@ -13,8 +13,6 @@ import android.provider.Settings
 import android.support.annotation.StringDef
 import android.support.v4.app.NotificationCompat
 import android.util.Log
-import com.google.firebase.analytics.FirebaseAnalytics
-import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import dagger.android.AndroidInjection
@@ -28,7 +26,6 @@ import ru.crew.motley.piideo.chat.model.PiideoLoader
 import ru.crew.motley.piideo.fcm.MessagingService.Companion.SYN_ID
 import ru.crew.motley.piideo.handshake.activity.HandshakeActivity
 import ru.crew.motley.piideo.search.SearchRepeaterSingleton
-import ru.crew.motley.piideo.util.TimeUtils
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -56,7 +53,7 @@ class MessagingService : FirebaseMessagingService() {
         const val NOTIFICATION_CHANNEL_DEFAULT = "default"
 
         const val SYN_REQUEST_CODE = 100
-        const val ACK_REQUEST_CODE = 101
+        const val ACK_REQUEST_CODE = 109
         const val MSG_REQUEST_CODE = 102
         const val PDO_REQUEST_CODE = 103
 
@@ -124,7 +121,7 @@ class MessagingService : FirebaseMessagingService() {
 
     private fun showChatOrNotification(dbMessageId: String, @MessageType type: String, timestamp: Date) {
         val searchRepeater = SearchRepeaterSingleton.instance(applicationContext)
-        searchRepeater.stopSearch()
+        searchRepeater.stop()
 //        SharedPrefs.setSearching(false, applicationContext)
         val app = application as Appp
         val params = Bundle()
@@ -161,7 +158,9 @@ class MessagingService : FirebaseMessagingService() {
         if (chatIsActive()) return
         if (handShakeIsActive()) return
         val i = HandshakeActivity.getIntent(dbMessageId, type, applicationContext)
-        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+//        i.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+//        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+//        i.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
         val pI = notificationIntent(SYN_REQUEST_CODE, i)
         createChannelIfNeeded()
         showNotification(SYN_ID, pI, "", dateFormatter.format(timestamp) + " New request")
@@ -171,7 +170,7 @@ class MessagingService : FirebaseMessagingService() {
 
     private fun showAcknowledgeNotification(dbMessageId: String, timestamp: Date) {
         val i = ChatActivity.getIntent(dbMessageId, applicationContext)
-        i.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+//        i.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
         val pI = notificationIntent(ACK_REQUEST_CODE, i)
         showNotification(ACK_ID, pI, "", dateFormatter.format(timestamp) + " Approve")
     }
@@ -185,7 +184,7 @@ class MessagingService : FirebaseMessagingService() {
 
     private fun sendNewRequest() {
         val searchRepeater = SearchRepeaterSingleton.instance(applicationContext)
-        searchRepeater.next()
+        searchRepeater.skip()
     }
 
     private fun showNothingOrNotification(messageId: String) {
@@ -199,6 +198,7 @@ class MessagingService : FirebaseMessagingService() {
         val lab = ChatLab.get(applicationContext)
         val content = lab.getReducedFcmMessage(dbMessageId).content!!
         val i = ChatActivity.getIntent(dbMessageId, applicationContext)
+//        i.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
         val pI = notificationIntent(MSG_REQUEST_CODE, i)
         createChannelIfNeeded()
         showNotification(MSG_ID, pI, "", content)

@@ -182,7 +182,8 @@ public class SearchResultFragment extends ButterFragment implements SendRequestC
 //        SharedPrefs.setSearching(true, getContext());
 
         RequestDialog.getInstance(dialog -> onMessageInput(receiverId))
-                .show(getActivity().getSupportFragmentManager(), "dialog");
+//                .show(getActivity().getSupportFragmentManager(), "dialog");
+                .show(getChildFragmentManager(), "dialog");
     }
 
     View mView;
@@ -190,30 +191,31 @@ public class SearchResultFragment extends ButterFragment implements SendRequestC
     private void onMessageInput(String receiverId) {
         mSearchRepeaterSingleton.setMembers(mMembers);
         mSearchRepeaterSingleton.moveToFirstPosition(receiverId);
-        mSearchRepeaterSingleton.startSearch();
+        mSearchRepeaterSingleton.start();
         subscribeOnSearch();
     }
 
     private void subscribeOnSearch() {
-        mProgressBar.setVisibility(View.VISIBLE);
-        Disposable searchSubscription = mSearchRepeaterSingleton.repeatableSearchObservable()
+        Disposable searchSubscription = mSearchRepeaterSingleton.subject()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(next -> {
+                            if (mProgressBar != null) {
+                                mProgressBar.setVisibility(View.VISIBLE);
+                            }
                             Log.d(TAG, "First one passed");
-
-                        }
-                        ,
+                        },
                         error -> {
                             Log.e(TAG, "Error subscription onCLick");
                             Log.e(TAG, "", error);
                         },
                         () -> {
                             Log.d(TAG, "OnComplete");
-                            mProgressBar.setVisibility(View.GONE);
+                            if (mProgressBar != null) {
+                                mProgressBar.setVisibility(View.GONE);
+                            }
                             if (mView != null) {
                                 mView.setEnabled(true);
                             }
-//                            SharedPrefs.setSearching(false, getContext());
                         });
         mDisposables.add(searchSubscription);
     }
