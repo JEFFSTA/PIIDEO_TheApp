@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import ru.crew.motley.piideo.R;
 import ru.crew.motley.piideo.handshake.NavigationCallback;
 
 /**
@@ -17,7 +18,7 @@ import ru.crew.motley.piideo.handshake.NavigationCallback;
 
 public class HandshakeTimeoutFragment extends Fragment {
 
-    private static final int NEXT_SCREEN_TIMEOUT = 2;
+    private static final int NEXT_SCREEN_TIMEOUT = 2_000;
 
     private NavigationCallback mCallback;
     private Runnable mRedirectCall = () -> mCallback.end();
@@ -46,7 +47,7 @@ public class HandshakeTimeoutFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View v = inflater.inflate(null,null, false);
+        View v = inflater.inflate(R.layout.fragment_handshake_timeout, container, false);
         return v;
     }
 

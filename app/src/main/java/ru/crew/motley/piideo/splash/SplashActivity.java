@@ -18,6 +18,7 @@ import ru.crew.motley.piideo.chat.activity.ChatActivity;
 import ru.crew.motley.piideo.chat.db.ChatLab;
 import ru.crew.motley.piideo.network.Member;
 import ru.crew.motley.piideo.registration.activity.UserSetupActivity;
+import ru.crew.motley.piideo.search.SearchRepeaterSingleton;
 import ru.crew.motley.piideo.search.activity.SearchActivity;
 
 public class SplashActivity extends AppCompatActivity {
@@ -33,6 +34,7 @@ public class SplashActivity extends AppCompatActivity {
         ChatLab lab = ChatLab.get(this);
         Member member = lab.getMember();
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
         // TODO: 1/19/18 swap block comment/uncomment
         if (user == null || member == null) {
             startRegistration();
@@ -50,7 +52,10 @@ public class SplashActivity extends AppCompatActivity {
     private void skipRegistration(Member member) {
         Parcelable byPass = Parcels.wrap(member);
         String chatMessageId = SharedPrefs.loadChatMessageId(this);
-        if (chatMessageId != null) {
+        if (SearchRepeaterSingleton.instance(this).isOn()) {
+            Intent i = SearchActivity.getIntent(byPass, this);
+            startActivity(i);
+        } else if (chatMessageId != null) {
             Intent i = ChatActivity.getIntent(chatMessageId, this);
             startActivity(i);
         } else {

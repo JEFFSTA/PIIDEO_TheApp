@@ -125,7 +125,7 @@ class MessagingService : FirebaseMessagingService() {
     private fun showChatOrNotification(dbMessageId: String, @MessageType type: String, timestamp: Date) {
         val searchRepeater = SearchRepeaterSingleton.instance(applicationContext)
         searchRepeater.stopSearch()
-        SharedPrefs.setSearching(false, applicationContext)
+//        SharedPrefs.setSearching(false, applicationContext)
         val app = application as Appp
         val params = Bundle()
         val date = Date()

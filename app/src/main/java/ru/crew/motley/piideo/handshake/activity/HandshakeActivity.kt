@@ -90,7 +90,7 @@ class HandshakeActivity : AppCompatActivity(), NavigationCallback {
     inner class Timer : Runnable {
         override fun run() {
             SharedPrefs.clearHandshakeStartTime(applicationContext)
-            this@HandshakeActivity.finish()
+            showTimeoutMessage()
         }
     }
 }

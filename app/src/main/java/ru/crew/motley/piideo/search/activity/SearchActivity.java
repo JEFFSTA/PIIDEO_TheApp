@@ -41,6 +41,7 @@ import ru.crew.motley.piideo.handshake.activity.RequestListenerActivity;
 import ru.crew.motley.piideo.network.Member;
 import ru.crew.motley.piideo.registration.activity.UserSetupActivity;
 import ru.crew.motley.piideo.search.SearchListener;
+import ru.crew.motley.piideo.search.SearchRepeaterSingleton;
 import ru.crew.motley.piideo.search.fragment.SearchResultFragment;
 import ru.crew.motley.piideo.search.fragment.SearchSubjectFragment;
 import ru.crew.motley.piideo.search.fragment.UselessFragment;
@@ -121,7 +122,7 @@ public class SearchActivity extends RequestListenerActivity implements SearchLis
                     new String[]{WRITE_EXTERNAL_STORAGE, READ_EXTERNAL_STORAGE},
                     SD_PERMISSIONS);
         } else {
-            if (SharedPrefs.isSearching(this)) {
+            if (SearchRepeaterSingleton.instance(this).isOn()) {
                 currentStep = Page.SEARCH_PAGE;
             }
             showNextStep();
@@ -286,7 +287,7 @@ public class SearchActivity extends RequestListenerActivity implements SearchLis
     public void onBackPressed() {
         Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.container);
         if (fragment instanceof SearchResultFragment) {
-            if (SharedPrefs.isSearching(this)) {
+            if (SearchRepeaterSingleton.instance(this).isOn()) {
                 super.onBackPressed();
             } else {
                 currentStep = Page.SUBJECT_PAGE;

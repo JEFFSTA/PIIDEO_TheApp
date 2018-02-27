@@ -51,17 +51,17 @@ public class SharedPrefs {
                 .apply();
     }
 
-    public static void setSearching(boolean value, Context context) {
-        SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-        prefs.edit()
-                .putBoolean(SEARCHING, value)
-                .apply();
-    }
+//    public static void setSearching(boolean value, Context context) {
+//        SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+//        prefs.edit()
+//                .putBoolean(SEARCHING, value)
+//                .apply();
+//    }
 
-    public static boolean isSearching(Context context) {
-        SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-        return prefs.getBoolean(SEARCHING, false);
-    }
+//    public static boolean isSearching(Context context) {
+//        SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+//        return prefs.getBoolean(SEARCHING, false);
+//    }
 
     public static void verificationId(String value, Context context) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);

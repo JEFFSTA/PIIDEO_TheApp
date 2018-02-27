@@ -1,6 +1,5 @@
 package ru.crew.motley.piideo.search.fragment;
 
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
@@ -36,10 +35,9 @@ import ru.crew.motley.piideo.network.neo.Request;
 import ru.crew.motley.piideo.network.neo.Statement;
 import ru.crew.motley.piideo.network.neo.Statements;
 import ru.crew.motley.piideo.network.neo.transaction.Data;
-import ru.crew.motley.piideo.search.RequestDialogCallback;
 import ru.crew.motley.piideo.search.SearchRepeaterSingleton;
-import ru.crew.motley.piideo.search.adapter.SearchAdapter;
 import ru.crew.motley.piideo.search.SendRequestCallback;
+import ru.crew.motley.piideo.search.adapter.SearchAdapter;
 
 /**
  * Created by vas on 12/18/17.
@@ -60,7 +58,7 @@ public class SearchResultFragment extends ButterFragment implements SendRequestC
     private Member mMember;
     private List<Member> mMembers = new ArrayList<>();
     private SearchRepeaterSingleton mSearchRepeaterSingleton;
-    private CompositeDisposable mDisposables  = new CompositeDisposable();
+    private CompositeDisposable mDisposables = new CompositeDisposable();
 
     public static SearchResultFragment newInstance(Parcelable member) {
         Bundle args = new Bundle();
@@ -73,14 +71,19 @@ public class SearchResultFragment extends ButterFragment implements SendRequestC
     @Override
     public void onResume() {
         super.onResume();
+        mDisposables = new CompositeDisposable();
         if (mSearchRepeaterSingleton == null) {
             mSearchRepeaterSingleton = SearchRepeaterSingleton.instance(getActivity());
         }
-        if (SharedPrefs.isSearching(getContext())) {
-            subscribeOnSearch();
-        } else {
-            mProgressBar.setVisibility(View.GONE);
-        }
+        showProgress();
+    }
+
+    private void showProgress() {
+//        if (SharedPrefs.isSearching(getContext())) {
+        subscribeOnSearch();
+//        } else {
+//            mProgressBar.setVisibility(View.GONE);
+//        }
     }
 
     @Override
@@ -88,12 +91,15 @@ public class SearchResultFragment extends ButterFragment implements SendRequestC
         super.onPause();
         mSearchRepeaterSingleton = null;
         mDisposables.dispose();
+        mDisposables = null;
     }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mSearchRepeaterSingleton = SearchRepeaterSingleton.newInstance(getActivity());
+        if (mSearchRepeaterSingleton == null) {
+            mSearchRepeaterSingleton = SearchRepeaterSingleton.instance(getActivity());
+        }
         mMember = Parcels.unwrap(getArguments().getParcelable(ARG_MEMBER));
         mSearchAdapter = new SearchAdapter(mMembers, this);
     }
@@ -112,7 +118,7 @@ public class SearchResultFragment extends ButterFragment implements SendRequestC
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mProgressBar.setVisibility(View.GONE);
+        showProgress();
     }
 
     private void startSearch() {
@@ -140,9 +146,9 @@ public class SearchResultFragment extends ButterFragment implements SendRequestC
                                 mMembers.add(member);
                             }
                             mSearchAdapter.notifyDataSetChanged();
-                            if (mSearchRepeaterSingleton != null) {
-                                mSearchRepeaterSingleton.setMembers(mMembers);
-                            }
+//                            if (mSearchRepeaterSingleton != null) {
+//                                mSearchRepeaterSingleton.setMembers(mMembers);
+//                            }
                         },
                         error -> {
                             Log.e(TAG, "Request target search problem", error);
@@ -172,13 +178,18 @@ public class SearchResultFragment extends ButterFragment implements SendRequestC
     @Override
     public void onClick(String receiverId, View view) {
         view.setEnabled(false);
-        SharedPrefs.setSearching(true, getContext());
-        mSearchRepeaterSingleton.moveToFirstPosition(receiverId);
-        RequestDialog.getInstance(dialog -> onMessageInput())
+        mView = view;
+//        SharedPrefs.setSearching(true, getContext());
+
+        RequestDialog.getInstance(dialog -> onMessageInput(receiverId))
                 .show(getActivity().getSupportFragmentManager(), "dialog");
     }
 
-    private void onMessageInput() {
+    View mView;
+
+    private void onMessageInput(String receiverId) {
+        mSearchRepeaterSingleton.setMembers(mMembers);
+        mSearchRepeaterSingleton.moveToFirstPosition(receiverId);
         mSearchRepeaterSingleton.startSearch();
         subscribeOnSearch();
     }
@@ -187,14 +198,22 @@ public class SearchResultFragment extends ButterFragment implements SendRequestC
         mProgressBar.setVisibility(View.VISIBLE);
         Disposable searchSubscription = mSearchRepeaterSingleton.repeatableSearchObservable()
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(next -> Log.d(TAG, "First one passed"),
+                .subscribe(next -> {
+                            Log.d(TAG, "First one passed");
+
+                        }
+                        ,
                         error -> {
                             Log.e(TAG, "Error subscription onCLick");
-                            Log.e(TAG, "", (Throwable) error);
+                            Log.e(TAG, "", error);
                         },
                         () -> {
+                            Log.d(TAG, "OnComplete");
                             mProgressBar.setVisibility(View.GONE);
-                            SharedPrefs.setSearching(false, getContext());
+                            if (mView != null) {
+                                mView.setEnabled(true);
+                            }
+//                            SharedPrefs.setSearching(false, getContext());
                         });
         mDisposables.add(searchSubscription);
     }
