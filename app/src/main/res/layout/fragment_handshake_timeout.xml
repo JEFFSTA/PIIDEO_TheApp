@@ -1,11 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent" android:layout_height="match_parent">
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
 
     <TextView
-        android:layout_width="wrap_content"
+        android:id="@+id/oops_text"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:text="Oops message."/>
+        android:background="@color/colorOopsBg"
+        android:gravity="center"
+        android:padding="@dimen/simple_padding_large"
+        android:text="@string/hsh_oops"
+        android:textColor="@color/screenColorBackground"
+        android:textSize="@dimen/text_size_primary_huge"
+        app:layout_constraintBottom_toTopOf="@+id/time_up_text"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed" />
 
-</FrameLayout>
+    <TextView
+        android:layout_marginTop="40dp"
+        android:id="@+id/time_up_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/hsh_time_up"
+        android:textColor="@color/colorWhite"
+        android:textSize="32sp"
+        app:layout_constraintBottom_toTopOf="@+id/heart_image"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/oops_text" />
+
+
+    <ImageView
+        android:id="@+id/heart_image"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:paddingLeft="52dp"
+        android:src="@drawable/oops_heart"
+        app:layout_constraintBottom_toTopOf="@+id/another_time_text"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/time_up_text" />
+
+    <TextView
+        android:id="@+id/another_time_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="@string/hsh_help_another_time"
+        android:textColor="@color/colorWhite"
+        android:textSize="@dimen/text_size_primary_huge"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/heart_image" />
+
+</android.support.constraint.ConstraintLayout>

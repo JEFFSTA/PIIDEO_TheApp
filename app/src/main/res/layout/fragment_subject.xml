@@ -5,28 +5,42 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <android.support.v7.widget.CardView
-        android:id="@+id/school_group"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+    <!--<android.support.v7.widget.CardView-->
+    <!--android:id="@+id/school_group"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="wrap_content"-->
 
-        android:layout_marginBottom="8dp"
-        android:layout_marginRight="48dp"
-        android:layout_marginLeft="48dp"
-        android:layout_marginTop="8dp"
-        app:layout_constraintBottom_toTopOf="@+id/textView2"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintVertical_chainStyle="packed"
-        app:layout_constraintStart_toStartOf="parent"
+    <!--android:layout_marginBottom="8dp"-->
+    <!--android:layout_marginRight="48dp"-->
+    <!--android:layout_marginLeft="48dp"-->
+    <!--android:layout_marginTop="8dp"-->
+    <!--app:layout_constraintBottom_toTopOf="@+id/textView2"-->
+    <!--app:layout_constraintEnd_toEndOf="parent"-->
+    <!--app:layout_constraintVertical_chainStyle="packed"-->
+    <!--app:layout_constraintStart_toStartOf="parent"-->
+    <!--app:layout_constraintTop_toTopOf="parent">-->
+
+    <FrameLayout
+        android:id="@+id/frameLayout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
         app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="40dp"
+            android:adjustViewBounds="true"
+            android:src="@drawable/registration_card_background" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="38dp"
-            android:layout_marginLeft="38dp"
-            android:layout_marginRight="38dp"
+            android:layout_gravity="center_horizontal|bottom"
+            android:layout_marginLeft="98dp"
+            android:layout_marginRight="98dp"
+            android:layout_marginBottom="68dp"
             android:orientation="vertical">
 
             <!--<TextView-->
@@ -39,11 +53,11 @@
             <!--android:textSize="18sp" />-->
 
             <ImageView
-                android:layout_marginTop="20dp"
-                android:layout_gravity="center_horizontal"
-                android:src="@drawable/earth"
                 android:layout_width="134dp"
-                android:layout_height="110dp" />
+                android:layout_height="110dp"
+                android:layout_gravity="center_horizontal"
+
+                android:src="@drawable/earth" />
 
 
             <AutoCompleteTextView
@@ -51,15 +65,17 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                android:layout_marginTop="40dp"
+                android:layout_marginTop="10dp"
                 android:completionHint="@string/reg_subject_hint"
                 android:completionThreshold="1"
-                android:inputType="textPersonName"
                 android:imeOptions="actionDone"
+                android:inputType="textPersonName"
                 android:textSize="14sp" />
 
         </LinearLayout>
-    </android.support.v7.widget.CardView>
+
+    </FrameLayout>
+    <!--</android.support.v7.widget.CardView>-->
 
     <TextView
         android:id="@+id/textView2"
@@ -75,8 +91,7 @@
         app:layout_constraintBottom_toTopOf="@+id/step_container"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/school_group" />
+        app:layout_constraintStart_toStartOf="parent" />
 
     <FrameLayout
         android:id="@+id/step_container"
@@ -87,12 +102,12 @@
 
         <Button
             android:id="@+id/next_btn"
+            style="@style/ButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal|bottom"
             android:layout_marginBottom="8dp"
             android:layout_marginEnd="8dp"
-            style="@style/ButtonStyle"
             android:layout_marginStart="8dp"
             android:text="@string/next_btn_caption" />
 
