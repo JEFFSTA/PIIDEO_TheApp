@@ -304,8 +304,12 @@ public class SearchRepeaterSingleton {
 
     public void stop() {
         mOn = false;
-        mTimerSubs.dispose();
-        mRequestSubss.dispose();
+        if (mTimerSubs != null) {
+            mTimerSubs.dispose();
+        }
+        if (mRequestSubss != null) {
+            mRequestSubss.dispose();
+        }
     }
 
     private Disposable newTask() {

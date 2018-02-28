@@ -40,4 +40,11 @@
     <string name="hsh_time_up"><b>Time Up!</b></string>
     <string name="hsh_oops">oops</string>
     <string name="hsh_help_another_time">You can help another\ntime.</string>
+
+
+    <string name="nty_request">New Request</string>
+    <string name="nty_accepted">Request Accepted</string>
+    <string name="nty_rejected">Request Rejected</string>
+    <string name="nty_piideo">You got PIIDEO</string>
+    <string name="nty_message">You got MESSAGE</string>
 </resources>

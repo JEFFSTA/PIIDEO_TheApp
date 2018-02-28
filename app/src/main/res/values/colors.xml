@@ -13,8 +13,11 @@
 
     <color name="colorBorder">#efefef</color>
 
+    <color name="colorPiideoButtonBackground">#7f9fc6</color>
 
     <color name="colorOopsBg">#eaeaea</color>
+
+    <color name="colorPush">#2d2d2d</color>
 
 
     <!--text colors-->

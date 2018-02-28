@@ -24,6 +24,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import java.io.File;
@@ -59,7 +60,7 @@ public class PhotoActivity extends AppCompatActivity {
     HolderCallback holderCallback;
     Camera camera;
 
-    Button pictureButton;
+    ImageButton pictureButton;
 
     private TextView debugPhoto;
     private TextView photoSizes;

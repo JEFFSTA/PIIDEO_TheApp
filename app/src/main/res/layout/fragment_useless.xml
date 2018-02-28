@@ -5,7 +5,6 @@
 
     <Button
         android:id="@+id/next"
-
         android:textAllCaps="false"
         android:text="Choose Subject"
         style="@style/ButtonStyle"

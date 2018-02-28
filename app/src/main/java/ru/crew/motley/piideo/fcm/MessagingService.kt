@@ -7,12 +7,15 @@ import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.graphics.BitmapFactory
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.support.annotation.StringDef
 import android.support.v4.app.NotificationCompat
 import android.util.Log
+import android.view.View
+import android.widget.RemoteViews
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import dagger.android.AndroidInjection
@@ -163,16 +166,25 @@ class MessagingService : FirebaseMessagingService() {
 //        i.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
         val pI = notificationIntent(SYN_REQUEST_CODE, i)
         createChannelIfNeeded()
-        showNotification(SYN_ID, pI, "", dateFormatter.format(timestamp) + " New request")
+        val title = resources.getString(R.string.nty_request)
+        val content = ownSubject()
+        showCustomNotification(SYN_ID, pI, title, content)
         SharedPrefs.saveHandshakeStartTime(Date().time, applicationContext)
         setAlarm(dbMessageId)
+    }
+
+    private fun ownSubject(): String {
+        val lab = ChatLab.get(applicationContext)
+        return lab.member.subject.name
     }
 
     private fun showAcknowledgeNotification(dbMessageId: String, timestamp: Date) {
         val i = ChatActivity.getIntent(dbMessageId, applicationContext)
 //        i.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
         val pI = notificationIntent(ACK_REQUEST_CODE, i)
-        showNotification(ACK_ID, pI, "", dateFormatter.format(timestamp) + " Approve")
+        val title = resources.getString(R.string.nty_accepted)
+//        showNotification(ACK_ID, pI, title, "")
+        showCustomNotification(ACK_ID, pI, title, "")
     }
 
 //    private fun showRejectNotification(dbMessageId: String, timestamp: Date) {
@@ -198,10 +210,10 @@ class MessagingService : FirebaseMessagingService() {
         val lab = ChatLab.get(applicationContext)
         val content = lab.getReducedFcmMessage(dbMessageId).content!!
         val i = ChatActivity.getIntent(dbMessageId, applicationContext)
-//        i.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
         val pI = notificationIntent(MSG_REQUEST_CODE, i)
         createChannelIfNeeded()
-        showNotification(MSG_ID, pI, "", content)
+        val title = resources.getString(R.string.nty_message)
+        showCustomNotification(MSG_ID, pI, title, content)
     }
 
     private fun showPiideoNotyOrSkip(dbMessageId: String) {
@@ -223,7 +235,8 @@ class MessagingService : FirebaseMessagingService() {
         val i = ChatActivity.getIntent(dbMessageId, applicationContext)
         val pI = notificationIntent(PDO_REQUEST_CODE, i)
         createChannelIfNeeded()
-        showNotification(PDO_ID, pI, "", content)
+        val title = resources.getString(R.string.nty_piideo)
+        showCustomNotification(PDO_ID, pI, title, "")
     }
 
     private fun loadPiideo(dbMessageId: String) {
@@ -275,13 +288,15 @@ class MessagingService : FirebaseMessagingService() {
 
     private fun showNotification(id: Int, intent: PendingIntent?, title: String = "", content: String) {
         val manager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val largeIcon = BitmapFactory.decodeResource(resources, R.mipmap.ic_launcher_new)
         val notification = NotificationCompat.Builder(
                 applicationContext,
                 NOTIFICATION_CHANNEL_DEFAULT)
-                .setContentTitle(applicationContext.getString(R.string.app_name))
+                .setContentTitle(title)
                 .setContentText(content)
-                .setStyle(NotificationCompat.BigTextStyle().bigText(content))
+//                .setStyle(NotificationCompat.BigTextStyle().bigText(content))
                 .setSmallIcon(android.R.mipmap.sym_def_app_icon)
+                .setLargeIcon(largeIcon)
                 .setSound(Settings.System.DEFAULT_NOTIFICATION_URI)
                 .setContentIntent(intent)
                 .setAutoCancel(true)
@@ -314,6 +329,40 @@ class MessagingService : FirebaseMessagingService() {
                     pendingIntent)
         }
     }
+
+    private fun showCustomNotification(id: Int, intent: PendingIntent?, title: String = "", content: String) {
+        val manager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val contentView = createCustomNotification(title, content)
+        val notification = NotificationCompat.Builder(
+                applicationContext,
+                NOTIFICATION_CHANNEL_DEFAULT)
+                .setSmallIcon(android.R.mipmap.sym_def_app_icon)
+                .setSound(Settings.System.DEFAULT_NOTIFICATION_URI)
+                .setContent(contentView)
+                .setContentIntent(intent)
+                .setAutoCancel(true)
+                .build()
+        manager.notify(id, notification)
+    }
+
+    private fun createCustomNotification(title: String, content: String = ""): RemoteViews {
+        val contentView = RemoteViews(packageName, R.layout.custom_push)
+        contentView.setImageViewResource(R.id.image, R.mipmap.ic_launcher_new)
+        contentView.setTextViewText(R.id.title, title)
+        var reducedContent = content.split("\n")[0]
+        if (reducedContent.length > 15) {
+            reducedContent = reducedContent.substringAfter(" ", reducedContent.substring(15))
+        }
+        contentView.setTextViewText(R.id.text, reducedContent)
+        if (content.isBlank()) {
+            contentView.setViewVisibility(R.id.text, View.GONE)
+        } else {
+            contentView.setViewVisibility(R.id.text, View.VISIBLE)
+
+        }
+        return contentView
+    }
+
 }
 
 class Receiver : BroadcastReceiver() {
