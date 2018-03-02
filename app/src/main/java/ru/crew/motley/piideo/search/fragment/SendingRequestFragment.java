@@ -117,12 +117,14 @@ public class SendingRequestFragment extends ButterFragment {
             if (getContext() == null) {
                 return;
             }
-            int value = startProgress(SharedPrefs.loadProgressTime(getContext()));
-            if (value < 1000) {
-                progressCounter.postDelayed(this, 200);
-            }
-            if (mProgressBar != null) {
-                mProgressBar.setProgress(value);
+            if (mSearchRepeaterSingleton != null) {
+                int value = startProgress(SharedPrefs.loadProgressTime(getContext()));
+                if (value < 1000) {
+                    progressCounter.postDelayed(this, 200);
+                }
+                if (mProgressBar != null) {
+                    mProgressBar.setProgress(value);
+                }
             }
         }
 
