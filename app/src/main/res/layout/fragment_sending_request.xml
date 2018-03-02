@@ -31,7 +31,8 @@
         android:layout_gravity="center"
         android:layout_marginLeft="40dp"
         android:layout_marginRight="40dp"
-        app:mpb_indeterminateTint="@color/colorWhite"
+        app:mpb_progressTint="@color/colorWhite"
+        app:mpb_progressBackgroundTint="#A9D18E"
         android:layout_marginTop="80dp"
         app:mpb_progressStyle="horizontal" />
 </FrameLayout>
