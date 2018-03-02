@@ -1,6 +1,8 @@
 package ru.crew.motley.piideo.search;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 
 import com.google.firebase.database.DatabaseReference;
@@ -49,6 +51,7 @@ public class SearchRepeaterSingleton {
                 if (local == null) {
                     Member member = ChatLab.get(context).getMember();
                     local = new SearchRepeaterSingleton(member);
+                    local.mContext = context.getApplicationContext();
                     INSTANCE = local;
                 }
             }
@@ -59,9 +62,12 @@ public class SearchRepeaterSingleton {
     public static SearchRepeaterSingleton newInstance(Context context) {
         Member member = ChatLab.get(context).getMember();
         SearchRepeaterSingleton local = new SearchRepeaterSingleton(member);
+        local.mContext = context.getApplicationContext();
         INSTANCE = local;
         return local;
     }
+
+    private Context mContext;
 
     private Deque<Member> mMembers = new LinkedList<>();
     private Observable<Long> mSearchRepeater;
@@ -336,9 +342,19 @@ public class SearchRepeaterSingleton {
                         e -> Log.e(TAG, "timer Task error", e),
                         () -> {
                             Log.d(TAG, "timer Task complete");
-                            mRepeaterSubject.onComplete();
+                            if (mMembers.isEmpty()) {
+                                mRepeaterSubject.onComplete();
+                            }
                             stop();
+                            // next string and its code smell like shit
+                            mOn = true;
+                            sendCompleteNotification();
                         });
     }
 
+    private void sendCompleteNotification() {
+        Intent broadcast = new Intent();
+        broadcast.setAction(Events.BROADCAST_NO_HELP);
+        mContext.sendOrderedBroadcast(broadcast, null);
+    }
 }

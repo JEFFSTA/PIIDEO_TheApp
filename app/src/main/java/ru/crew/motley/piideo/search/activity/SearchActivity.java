@@ -1,11 +1,12 @@
 package ru.crew.motley.piideo.search.activity;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Parcelable;
 import android.support.annotation.IntDef;
@@ -34,16 +35,18 @@ import java.io.IOException;
 import java.util.Date;
 
 import ru.crew.motley.piideo.R;
-import ru.crew.motley.piideo.SharedPrefs;
 import ru.crew.motley.piideo.chat.db.ChatLab;
 import ru.crew.motley.piideo.fcm.User;
 import ru.crew.motley.piideo.handshake.activity.RequestListenerActivity;
 import ru.crew.motley.piideo.network.Member;
 import ru.crew.motley.piideo.registration.activity.UserSetupActivity;
+import ru.crew.motley.piideo.search.Events;
 import ru.crew.motley.piideo.search.SearchListener;
 import ru.crew.motley.piideo.search.SearchRepeaterSingleton;
-import ru.crew.motley.piideo.search.fragment.SearchResultFragment;
+import ru.crew.motley.piideo.search.fragment.NoHelpFragment;
+import ru.crew.motley.piideo.search.fragment.SearchHelpersFragment;
 import ru.crew.motley.piideo.search.fragment.SearchSubjectFragment;
+import ru.crew.motley.piideo.search.fragment.SendingRequestFragment;
 import ru.crew.motley.piideo.search.fragment.UselessFragment;
 import ru.crew.motley.piideo.splash.SplashActivity;
 
@@ -63,45 +66,27 @@ public class SearchActivity extends RequestListenerActivity implements SearchLis
     private FirebaseAuth.AuthStateListener mAuthListener;
     private DatabaseReference mDatabase;
 
-//    private ShowDialogReceiver mDialogReceiver;
-
     /**
      * Page order
      */
-    @IntDef({Page.SUBJECT_PAGE, Page.BUTTON_PAGE, Page.SEARCH_PAGE, Page.COMPLETE})
+    @IntDef({Page.SUBJECT, Page.BUTTON, Page.HELPERS, Page.REQUEST, Page.REJECT, Page.COMPLETE})
     private @interface Page {
-        int BUTTON_PAGE = 0;
-        int SUBJECT_PAGE = 1;
-        int SEARCH_PAGE = 2;
+        int BUTTON = 0;
+        int SUBJECT = 1;
+        int HELPERS = 2;
+        int REQUEST = 3;
+        int REJECT = 4;
         int COMPLETE = 10;
     }
 
     @Page
-    private int currentStep = Page.BUTTON_PAGE;
+    private int currentStep = Page.BUTTON;
 
     public static Intent getIntent(Parcelable member, Context context) {
         Intent i = new Intent(context, SearchActivity.class);
         i.putExtra(EXTRA_MEMBER, member);
         return i;
     }
-
-//    @Override
-//    protected void onResume() {
-//        super.onResume();
-//        ((Appp) getApplication()).searchActivityResumed();
-//        if (mDialogReceiver == null) {
-//            mDialogReceiver = new ShowDialogReceiver(this);
-//        }
-//        IntentFilter filter = new IntentFilter(ShowDialogReceiver.Companion.getBROADCAST_ACTION());
-//        registerReceiver(mDialogReceiver, filter);
-//    }
-//
-//    @Override
-//    protected void onPause() {
-//        unregisterReceiver(mDialogReceiver);
-//        ((Appp) getApplication()).searchActivityPaused();
-//        super.onPause();
-//    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -110,20 +95,18 @@ public class SearchActivity extends RequestListenerActivity implements SearchLis
         initializeFirebaseAuthListener();
         Parcelable member = getIntent().getParcelableExtra(EXTRA_MEMBER);
         mMember = Parcels.unwrap(member);
-//        Fragment fragment = SearchSubjectFragment.newInstance(member, this);
         int sdCardCheckWrite = ContextCompat.checkSelfPermission(this,
                 WRITE_EXTERNAL_STORAGE);
         int sdCardCheckRead = ContextCompat.checkSelfPermission(this,
                 READ_EXTERNAL_STORAGE);
         if (sdCardCheckWrite != PackageManager.PERMISSION_GRANTED || sdCardCheckRead != PackageManager.PERMISSION_GRANTED) {
-
             ActivityCompat.requestPermissions(
                     this,
                     new String[]{WRITE_EXTERNAL_STORAGE, READ_EXTERNAL_STORAGE},
                     SD_PERMISSIONS);
         } else {
             if (SearchRepeaterSingleton.instance(this).isOn()) {
-                currentStep = Page.SEARCH_PAGE;
+                currentStep = Page.REQUEST;
             }
             showNextStep();
         }
@@ -184,41 +167,15 @@ public class SearchActivity extends RequestListenerActivity implements SearchLis
             logFile.delete();
         }
         try {
-            String[] cmd = new String[] { "logcat", "-f", logFile.getAbsolutePath(), "-v", "time", "*:D"};
+            String[] cmd = new String[]{"logcat", "-f", logFile.getAbsolutePath(), "-v", "time", "*:D"};
             Runtime.getRuntime().exec(cmd);
             Toast.makeText(this, "Log generated to: " + filename, Toast.LENGTH_SHORT);
             return logFile;
-        }
-        catch (IOException ioEx) {
+        } catch (IOException ioEx) {
             ioEx.printStackTrace();
         }
         return null;
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
     private void showFragment(Fragment fragment) {
@@ -237,19 +194,23 @@ public class SearchActivity extends RequestListenerActivity implements SearchLis
 
     private void nextStep() {
         switch (currentStep) {
-            case Page.BUTTON_PAGE:
-                currentStep = Page.SUBJECT_PAGE;
+            case Page.BUTTON:
+                currentStep = Page.SUBJECT;
                 break;
-            case Page.SUBJECT_PAGE:
-                currentStep = Page.SEARCH_PAGE;
+            case Page.SUBJECT:
+                currentStep = Page.HELPERS;
                 break;
-            case Page.SEARCH_PAGE:
+            case Page.HELPERS:
+                currentStep = Page.REQUEST;
+                break;
+            case Page.REQUEST:
+                currentStep = Page.REJECT;
+                break;
+            case Page.REJECT:
                 currentStep = Page.COMPLETE;
                 break;
             case Page.COMPLETE:
                 throw new IllegalStateException("Page you want to go out is final, just use onComplete.");
-//                currentStep = Page.COMPLETE;
-//                return;
             default:
                 throw new IllegalStateException("Page you want to showChat is unsupported. Current step is " + currentStep);
         }
@@ -259,24 +220,26 @@ public class SearchActivity extends RequestListenerActivity implements SearchLis
     private void showNextStep() {
         Fragment fragment;
         switch (currentStep) {
-            case Page.BUTTON_PAGE:
+            case Page.BUTTON:
                 fragment = UselessFragment.Companion.newInstance(this);
                 break;
-            case Page.SUBJECT_PAGE:
+            case Page.SUBJECT:
                 Parcelable memberForVerification = Parcels.wrap(mMember);
                 fragment = SearchSubjectFragment.newInstance(memberForVerification, this);
                 break;
-            case Page.SEARCH_PAGE:
+            case Page.HELPERS:
                 Parcelable memberForSchool = Parcels.wrap(mMember);
-                fragment = SearchResultFragment.newInstance(memberForSchool);
+                fragment = SearchHelpersFragment.newInstance(memberForSchool, this);
+                break;
+            case Page.REQUEST:
+                fragment = SendingRequestFragment.newInstance(this);
+                break;
+            case Page.REJECT:
+                fragment = NoHelpFragment.newInstance(this);
                 break;
             case Page.COMPLETE:
                 // do nothing
-//                if (!mMember.isRegistered()) {
-//                    createNewMember();
-//                } else {
-//                    showSearch();
-//                }
+                return;
             default:
                 throw new IllegalStateException("Page you want to showChat is unsupported");
         }
@@ -285,16 +248,21 @@ public class SearchActivity extends RequestListenerActivity implements SearchLis
 
     @Override
     public void onBackPressed() {
-        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.container);
-        if (fragment instanceof SearchResultFragment) {
-            if (SearchRepeaterSingleton.instance(this).isOn()) {
-                super.onBackPressed();
-            } else {
-                currentStep = Page.SUBJECT_PAGE;
+//        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.container);
+//        if (fragment instanceof SearchHelpersFragment) {
+        switch (currentStep) {
+            case Page.HELPERS:
+                currentStep = Page.SUBJECT;
                 showNextStep();
-            }
-        } else {
-            super.onBackPressed();
+                break;
+            case Page.BUTTON:
+            case Page.REQUEST:
+                super.onBackPressed();
+                break;
+            case Page.REJECT:
+                SearchRepeaterSingleton.instance(this).stop();
+                currentStep = Page.BUTTON;
+                showNextStep();
         }
     }
 
@@ -320,15 +288,10 @@ public class SearchActivity extends RequestListenerActivity implements SearchLis
     }
 
     private void addUserToDatabase(FirebaseUser firebaseUser) {
-        User user = new User(
-//                firebaseUser.getDisplayName(),
-//                firebaseUser.getEmail(),
-                firebaseUser.getUid()
-//                firebaseUser.getPhotoUrl() == null ? "" : firebaseUser.getPhotoUrl().toString()
-        );
-
+        User user = new User(firebaseUser.getUid());
         mDatabase.child("users")
-                .child(user.getUid()).setValue(user);
+                .child(user.getUid())
+                .setValue(user);
 
         String instanceId = FirebaseInstanceId.getInstance().getToken();
         if (instanceId != null) {
@@ -351,6 +314,31 @@ public class SearchActivity extends RequestListenerActivity implements SearchLis
         if (mAuthListener != null) {
             mAuth.removeAuthStateListener(mAuthListener);
         }
+    }
+
+    private BroadcastReceiver mRejectReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            abortBroadcast();
+        }
+    };
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        IntentFilter filter = new IntentFilter(Events.BROADCAST_NO_HELP);
+        filter.setPriority(1);
+        registerReceiver(mRejectReceiver, filter);
+        if (SearchRepeaterSingleton.instance(this).isOn()) {
+            currentStep = Page.REQUEST;
+            showNextStep();
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(mRejectReceiver);
     }
 
     @Override

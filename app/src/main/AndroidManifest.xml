@@ -30,8 +30,8 @@
 
         <activity
             android:name=".search.activity.SearchActivity"
-            android:screenOrientation="portrait"
             android:noHistory="true"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme">
 
         </activity>
@@ -45,8 +45,7 @@
             android:name=".chat.activity.ChatActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.ChatTheme"
-            android:windowSoftInputMode="adjustResize|stateHidden"
-            >
+            android:windowSoftInputMode="adjustResize|stateHidden">
 
         </activity>
 
@@ -67,8 +66,6 @@
 
         <activity
             android:name=".handshake.activity.HandshakeActivity"
-            android:exported="true"
-            android:launchMode="singleTop"
             android:screenOrientation="portrait" />
 
         <service android:name=".piideo.service.Recorder" />
@@ -83,7 +80,8 @@
             </intent-filter>
         </service>
 
-        <service android:name=".fcm.MessagingService"
+        <service
+            android:name=".fcm.MessagingService"
             android:stopWithTask="false"
             tools:ignore="ExportedService">
             <intent-filter>
@@ -91,11 +89,24 @@
             </intent-filter>
         </service>
 
+        <service
+            android:name=".search.service.PushBroadcastHandler"
+            android:exported="false" />
+
         <receiver
             android:name=".fcm.Receiver"
             android:enabled="true">
             <intent-filter>
                 <action android:name="action" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".search.receiver.PushBroadcastReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter android:priority="0">
+                <action android:name="ru.crew.motley.piideo.BROADCAST_NO_HELP" />
             </intent-filter>
         </receiver>
 
