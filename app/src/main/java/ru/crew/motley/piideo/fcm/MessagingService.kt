@@ -105,7 +105,7 @@ class MessagingService : FirebaseMessagingService() {
         logger.saveToLogFile("onMessageReceived", date.time)
         logger.saveToLogFile(message.data["type"]!!, date.time)
         when (message.data["type"]) {
-            SYN -> showRequestNotification(dbMessageId, message.data["type"]!!, calendar!!.time)
+            SYN -> showRequestNotification(dbMessageId, message.data["type"]!!, calendar!!.time, message.data["content"]!!)
             ACK -> showChatOrNotification(dbMessageId, message.data["type"]!!, calendar!!.time)
             REJ -> sendNewRequest()
             MSG -> showNothingOrNotification(dbMessageId)
@@ -156,7 +156,7 @@ class MessagingService : FirebaseMessagingService() {
 //        FirebaseAnalytics.getInstance(this).logEvent("broadCastToHandshake", logBundle)
     }
 
-    private fun showRequestNotification(dbMessageId: String, @MessageType type: String, timestamp: Date) {
+    private fun showRequestNotification(dbMessageId: String, @MessageType type: String, timestamp: Date, content: String) {
         clearChatTimeout()
 //        clearHandShakeTimeout()
         if (chatIsActive()) return
@@ -169,9 +169,22 @@ class MessagingService : FirebaseMessagingService() {
         val pI = notificationIntent(SYN_REQUEST_CODE, i)
         createChannelIfNeeded()
         val title = resources.getString(R.string.nty_request)
-        val content = ownSubject()
-        showCustomNotification(SYN_ID, pI, title, content)
+//        val content = ownSubject()
+        showCustomNotification(SYN_ID, pI, title, ownSubject())
         SharedPrefs.saveHandshakeStartTime(Date().time, applicationContext)
+        val topicArr = content.split("||")
+        val subject = if (topicArr.size == 1) {
+            topicArr[0].split("|")[0]
+        } else {
+            topicArr[1].split("|")[0]
+        }
+        val explaination = if (topicArr.size == 1) {
+            topicArr[0].split("|")[1]
+        } else {
+            topicArr[1].split("|")[1]
+        }
+        SharedPrefs.searchSubject(subject, applicationContext)
+        SharedPrefs.requestMessage(explaination, applicationContext)
         setAlarm(dbMessageId)
     }
 

@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -48,36 +49,34 @@ public class RequestDialog extends DialogFragment {
 
     }
 
-//    @Nullable
-//    @Override
-//    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-//        View view = inflater.inflate(R.layout.dialog_request, container, false);
-//        mUnbinder = ButterKnife.bind(this, view);
-//        return view;
-//    }
-
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         mUnbinder.unbind();
     }
 
-//    @OnClick(R.id.send_request)
-//    public void sendRequest() {
-//        SharedPrefs.requestMessage(requestMessage.getText().toString(), getContext());
-//        mCallback.onMessageInput();
-//    }
+    @OnClick(R.id.send_request)
+    public void sendRequest() {
+        if (validate()) {
+            SharedPrefs.requestMessage(requestMessage.getText().toString(), getContext());
+            dismiss();
+            mCallback.onDismiss(getDialog());
+        }
+    }
+
+    private boolean validate() {
+        if (requestMessage.getText().toString().isEmpty()) {
+            Toast.makeText(getContext(), R.string.req_dlg_empty_warn, Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        return true;
+    }
 
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         View v = LayoutInflater.from(getActivity()).inflate(R.layout.dialog_request, null);
         mUnbinder = ButterKnife.bind(this, v);
         return new AlertDialog.Builder(getActivity())
                 .setView(v)
-                .setPositiveButton("Send", (dialog, which) -> {
-                    SharedPrefs.requestMessage(requestMessage.getText().toString(), getContext());
-                    dismiss();
-                    mCallback.onDismiss(getDialog());
-                })
                 .create();
     }
 

@@ -69,7 +69,7 @@
                 android:completionHint="@string/reg_subject_hint"
                 android:completionThreshold="1"
                 android:imeOptions="actionDone"
-                android:inputType="textPersonName"
+                android:inputType="textCapSentences"
                 android:textSize="14sp" />
 
         </LinearLayout>

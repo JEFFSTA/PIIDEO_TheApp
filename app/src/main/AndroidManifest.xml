@@ -66,6 +66,7 @@
 
         <activity
             android:name=".handshake.activity.HandshakeActivity"
+            android:noHistory="true"
             android:screenOrientation="portrait" />
 
         <service android:name=".piideo.service.Recorder" />

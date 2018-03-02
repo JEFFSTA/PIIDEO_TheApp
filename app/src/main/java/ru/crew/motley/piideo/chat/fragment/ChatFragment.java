@@ -86,7 +86,7 @@ public class ChatFragment extends ButterFragment
     }
 
     private static final String TAG = ChatFragment.class.getSimpleName();
-    public static final long CHAT_TIMEOUT = 300L;
+    public static final long CHAT_TIMEOUT = 30L;
     private static final String ARG_DB_MESSAGE_ID = "local_db_id";
 
     @BindView(R.id.chat_recycler)
@@ -101,6 +101,9 @@ public class ChatFragment extends ButterFragment
     ImageButton piideoButton;
     @BindView(R.id.sendMessage)
     ImageButton messageButton;
+
+    @BindView(R.id.subject)
+    TextView subject;
 
     @Inject
     PiideoLoader mPiideoLoader;
@@ -235,6 +238,8 @@ public class ChatFragment extends ButterFragment
         mChatRecycler.setLayoutManager(layoutManager);
         attachRecyclerAdapter();
         attachTextWatcher();
+        topicText.setText(SharedPrefs.getSearchSubject(getContext()));
+        subject.setText(SharedPrefs.getRequestMessage(getContext()));
         return v;
     }
 

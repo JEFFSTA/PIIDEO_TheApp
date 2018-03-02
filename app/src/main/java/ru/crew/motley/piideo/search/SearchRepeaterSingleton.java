@@ -1,6 +1,5 @@
 package ru.crew.motley.piideo.search;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
@@ -19,6 +18,7 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subjects.BehaviorSubject;
+import ru.crew.motley.piideo.SharedPrefs;
 import ru.crew.motley.piideo.chat.db.ChatLab;
 import ru.crew.motley.piideo.fcm.FcmMessage;
 import ru.crew.motley.piideo.fcm.MessagingService;
@@ -78,7 +78,12 @@ public class SearchRepeaterSingleton {
     private Disposable mSearchSubscription;
     private DatabaseReference mDatabase;
     private Member mMember;
+    private int membersAtStart;
     private boolean mOn;
+
+    public int count() {
+        return membersAtStart;
+    }
 
 
     private SearchRepeaterSingleton() {
@@ -147,6 +152,7 @@ public class SearchRepeaterSingleton {
 
     public void setMembers(List<Member> members) {
         mMembers = new LinkedList<>(members);
+        membersAtStart = mMembers.size();
     }
 
     private void startSearchChain() {
@@ -205,6 +211,9 @@ public class SearchRepeaterSingleton {
             directRequestMarker = "++";
         }
 
+        String subject = "||" + SharedPrefs.getSearchSubject(mContext);
+        String explanation = "|" + SharedPrefs.getRequestMessage(mContext);
+
         FcmMessage message =
                 new FcmMessage(
                         timestamp,
@@ -212,7 +221,7 @@ public class SearchRepeaterSingleton {
                         dayTimestamp,
                         ownerId,
                         receiver.getChatId(),
-                        directRequestMarker + receiver.getReceivedFrom().getPhoneNumber(),
+                        directRequestMarker + receiver.getReceivedFrom().getPhoneNumber() + subject + explanation,
                         MessagingService.SYN,
                         ownerId + "_" + receiver.getChatId(),
                         false);

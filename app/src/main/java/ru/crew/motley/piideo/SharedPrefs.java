@@ -19,6 +19,8 @@ public class SharedPrefs {
 
     private static final String VERIFICATION_ID = "verificationId";
 
+    private static final String PROGRESS_TIME = "progressTime";
+
 
     public static void searchSubject(String value, Context context) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
@@ -144,5 +146,18 @@ public class SharedPrefs {
         prefs.edit()
                 .remove(HANDSHAKE_START_TIME)
                 .apply();
+    }
+
+    public static void progressTime(long millis, Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        prefs.edit()
+                .putLong(HANDSHAKE_START_TIME, millis)
+                .apply();
+    }
+
+    public static long loadProgressTime(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        long result = prefs.getLong(HANDSHAKE_START_TIME, -1);
+        return result;
     }
 }

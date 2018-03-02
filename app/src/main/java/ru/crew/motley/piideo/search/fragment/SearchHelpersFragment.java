@@ -18,6 +18,7 @@ import org.parceler.Parcels;
 
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import butterknife.BindView;
@@ -149,6 +150,7 @@ public class SearchHelpersFragment extends ButterFragment implements SendRequest
         SearchRepeaterSingleton searchRepeater = SearchRepeaterSingleton.instance(getContext());
         searchRepeater.setMembers(mMembers);
         searchRepeater.moveToFirstPosition(receiverId);
+        SharedPrefs.progressTime(new Date().getTime(), getContext());
         mCallback.onNext();
     }
 

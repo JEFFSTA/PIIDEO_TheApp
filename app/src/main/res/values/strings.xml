@@ -37,6 +37,11 @@
     
     <string name="req_from_stub">Connected\nBy</string>
     <string name="req_me_stub">Me</string>
+
+    <string name="req_dlg_title">The Topic</string>
+    <string name="req_dlg_hint">Ex: Charles Law, Double Integrals…</string>
+    <string name="req_dlg_empty_warn">Enter brief explanation</string>
+
     <string name="hsh_time_up"><b>Time Up!</b></string>
     <string name="hsh_oops">oops</string>
     <string name="hsh_help_another_time">You can help another\ntime.</string>

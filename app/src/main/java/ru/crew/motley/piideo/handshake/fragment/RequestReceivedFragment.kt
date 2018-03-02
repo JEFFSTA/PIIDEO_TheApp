@@ -67,9 +67,9 @@ class RequestReceivedFragment : Fragment() {
             activity?.finish()
         }
         if (friendNumber.startsWith("++")) {
-            setMeFriendText(v, friendNumber.substring(2))
+            setMeFriendText(v, friendNumber.substring(2).split("||")[0])
         } else {
-            setMeFriendText(v, message.content!!)
+            setMeFriendText(v, message.content!!.split("||")[0])
         }
         return v
     }
