@@ -82,9 +82,7 @@
         </service>
 
         <service
-            android:name=".fcm.MessagingService"
-            android:stopWithTask="false"
-            tools:ignore="ExportedService">
+            android:name=".fcm.MessagingService">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>

@@ -14,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
 import io.reactivex.Single;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
@@ -56,6 +57,7 @@ public class SearchRepeaterSingleton {
                 }
             }
         }
+        Log.d(TAG, local.toString());
         return local;
     }
 
@@ -93,6 +95,7 @@ public class SearchRepeaterSingleton {
     private SearchRepeaterSingleton(Member member) {
         this();
         mMember = member;
+        mTimer = Observable.interval(0, REQUEST_DELAY, TimeUnit.SECONDS);
 //        mContinuousChain = BehaviorSubject.create();
 
 //        createSearchRepeater();
@@ -286,19 +289,19 @@ public class SearchRepeaterSingleton {
     }
 
 
-    private BehaviorSubject<Long> mRepeaterSubject;
-    private Observable<Long> mTimer;
+    private volatile BehaviorSubject<Long> mRepeaterSubject;
+    private volatile Observable<Long> mTimer;
     private Disposable mTimerSubs;
     private CompositeDisposable mRequestSubss;
 
-    public Observable<Long> subject() {
+    public synchronized Observable<Long> subject() {
         if (mRepeaterSubject == null) {
             mRepeaterSubject = BehaviorSubject.create();
         }
         return mRepeaterSubject;
     }
 
-    public void skip() {
+    public synchronized void skip() {
         if (mRequestSubss != null) {
             mRequestSubss.dispose();
         }
@@ -309,10 +312,11 @@ public class SearchRepeaterSingleton {
         mTimerSubs = newTask();
     }
 
-    public void start() {
+    public synchronized void start() {
         mOn = true;
         mRepeaterSubject = BehaviorSubject.create();
-        mTimer = Observable.interval(0, REQUEST_DELAY, TimeUnit.SECONDS);
+        Log.d(TAG, "MTIMER " + Thread.currentThread().getName());
+
         mRequestSubss = new CompositeDisposable();
         mTimerSubs = newTask();
     }
@@ -328,6 +332,7 @@ public class SearchRepeaterSingleton {
     }
 
     private Disposable newTask() {
+        Log.d(TAG, "new TASK " + Thread.currentThread().getName());
         return mTimer.takeWhile(
                 l -> {
                     Log.d(TAG, "" + mMembers.isEmpty());
@@ -346,11 +351,12 @@ public class SearchRepeaterSingleton {
                     mRequestSubss.add(s.subscribe());
                     return 0L;
                 })
+//                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         l -> mRepeaterSubject.onNext(l),
                         e -> Log.e(TAG, "timer Task error", e),
                         () -> {
-                            Log.d(TAG, "timer Task complete");
+                            Log.d(TAG, "timer Task complete" + Thread.currentThread());
                             if (mMembers.isEmpty()) {
                                 mRepeaterSubject.onComplete();
                             }

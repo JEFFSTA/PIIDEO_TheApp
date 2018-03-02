@@ -162,7 +162,7 @@ class MessagingService : FirebaseMessagingService() {
         if (chatIsActive()) return
         if (handShakeIsActive()) return
         val i = HandshakeActivity.getIntent(dbMessageId, type, applicationContext)
-        i.action = System.currentTimeMillis().toString()
+//        i.action = System.currentTimeMillis().toString()
 //        i.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
 //        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_CLEAR_TASK)
         i.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP
@@ -293,12 +293,14 @@ class MessagingService : FirebaseMessagingService() {
         }
     }
 
-    private fun notificationIntent(requestCode: Int, intent: Intent): PendingIntent =
-            PendingIntent.getActivity(
-                    applicationContext,
-                    requestCode,
-                    intent,
-                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_ONE_SHOT)
+    private fun notificationIntent(requestCode: Int, intent: Intent): PendingIntent {
+        intent.action = System.currentTimeMillis().toString()
+        return PendingIntent.getActivity(
+                applicationContext,
+                requestCode,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_ONE_SHOT)
+    }
 
 
     private fun showNotification(id: Int, intent: PendingIntent?, title: String = "", content: String) {

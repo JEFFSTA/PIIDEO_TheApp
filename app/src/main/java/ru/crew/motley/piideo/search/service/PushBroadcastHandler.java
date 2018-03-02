@@ -44,6 +44,7 @@ public class PushBroadcastHandler extends IntentService {
         Member member = lab.getMember();
         Parcelable memberParceled = Parcels.wrap(member);
         Intent i = SearchActivity.getIntent(memberParceled, getApplicationContext());
+        i.setAction(Long.toString(System.currentTimeMillis()));
         PendingIntent pI = notificationIntent(MSG_REQUEST_CODE, i);
         createChannelIfNeeded();
         String title = getResources().getString(R.string.nty_rejected);
