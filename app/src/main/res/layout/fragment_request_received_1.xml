@@ -1,44 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-
-    <!--<FrameLayout-->
-        <!--android:id="@+id/cardView3"-->
-        <!--android:layout_width="96dp"-->
-        <!--android:layout_height="96dp"-->
-        <!--android:layout_gravity="left|top"-->
-
-        <!--android:background="@drawable/circle_small"-->
-        <!--app:layout_constraintBottom_toTopOf="@+id/guideline5"-->
-        <!--app:layout_constraintEnd_toStartOf="@+id/guideline2"-->
-        <!--app:layout_constraintStart_toStartOf="@+id/guideline2"-->
-        <!--app:layout_constraintTop_toTopOf="@+id/guideline5">-->
-
-        <!--<TextView-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_gravity="center"-->
-            <!--android:layout_marginRight="@dimen/simple_padding_tiny"-->
-            <!--android:gravity="center"-->
-            <!--android:text="@string/req_from_stub" />-->
-
-    <!--</FrameLayout>-->
-
-    <!--<ImageView-->
-        <!--android:id="@+id/topLine"-->
-        <!--android:layout_width="0dp"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_marginBottom="8dp"-->
-
-        <!--android:layout_marginTop="8dp"-->
-        <!--android:adjustViewBounds="true"-->
-        <!--app:layout_constraintBottom_toTopOf="@+id/cardView"-->
-        <!--app:layout_constraintEnd_toStartOf="@+id/guideline"-->
-        <!--app:layout_constraintStart_toStartOf="@+id/guideline2"-->
-        <!--app:layout_constraintTop_toBottomOf="@+id/cardView3"-->
-        <!--app:srcCompat="@drawable/ic_request_received_line" />-->
 
 
     <FrameLayout
@@ -125,12 +90,9 @@
         app:layout_constraintGuide_percent="0.8" />
 
     <android.support.v7.widget.CardView
-        android:id="@+id/explanation"
-        android:layout_width="0dp"
+        android:layout_width="220dp"
         android:layout_height="60dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
-        android:thicknessRatio="1.9"
+
         app:cardCornerRadius="10dp"
         app:cardElevation="4dp"
         app:cardPreventCornerOverlap="false"
@@ -140,12 +102,68 @@
         app:layout_constraintTop_toTopOf="@+id/guideline5"
         app:layout_goneMarginLeft="-50dp">
 
-        <FrameLayout
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@drawable/cardview_border">
+            android:background="@drawable/cardview_border_white"
+            android:orientation="horizontal">
 
-        </FrameLayout>
+            <LinearLayout
+                android:layout_gravity="center_vertical"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1.8"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_horizontal"
+                    android:text="I have a"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+
+                    android:gravity="center_horizontal"
+                    android:text="Question on"
+                    android:textSize="10sp" />
+
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_weight="4"
+                android:layout_marginRight="8dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/subject"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_horizontal"
+                    android:textAllCaps="true"
+                    android:textSize="14sp"
+                    tools:text="Thermodynamique" />
+
+                <TextView
+                    android:id="@+id/explanation"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:gravity="center_horizontal"
+                    android:textSize="10sp"
+                    tools:text="(Charles gas law)" />
+            </LinearLayout>
+
+        </LinearLayout>
 
     </android.support.v7.widget.CardView>
 

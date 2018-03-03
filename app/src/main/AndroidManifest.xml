@@ -90,7 +90,8 @@
 
         <service
             android:name=".search.service.PushBroadcastHandler"
-            android:exported="false" />
+            android:exported="true"
+            android:enabled="true"/>
 
         <receiver
             android:name=".fcm.Receiver"

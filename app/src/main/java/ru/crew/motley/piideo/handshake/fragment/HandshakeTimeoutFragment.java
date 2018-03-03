@@ -18,7 +18,7 @@ import ru.crew.motley.piideo.handshake.NavigationCallback;
 
 public class HandshakeTimeoutFragment extends Fragment {
 
-    private static final int NEXT_SCREEN_TIMEOUT = 2_000;
+    private static final int NEXT_SCREEN_TIMEOUT = 1_200;
 
     private NavigationCallback mCallback;
     private Runnable mRedirectCall = () -> mCallback.end();

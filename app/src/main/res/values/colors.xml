@@ -10,6 +10,7 @@
     <color name="screenColorBackground">#7290c9</color>
 
     <color name="colorButton">#f16264</color>
+    <color name="colorOopsButton">#7792CC</color>
 
     <color name="colorBorder">#efefef</color>
 
@@ -20,6 +21,8 @@
     <color name="colorPush">#2d2d2d</color>
 
     <color name="colorRequestDialogBorder">#41719C</color>
+
+    <color name="colorProgressBackground">#A9D18E</color>
 
 
     <!--text colors-->

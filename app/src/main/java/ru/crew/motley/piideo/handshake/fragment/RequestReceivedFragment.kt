@@ -68,8 +68,12 @@ class RequestReceivedFragment : Fragment() {
         }
         if (friendNumber.startsWith("++")) {
             setMeFriendText(v, friendNumber.substring(2).split("||")[0])
+            v.subject.text = friendNumber.substring(2).split("||")[1].split("|")[0]
+            v.explanation.text = friendNumber.substring(2).split("||")[1].split("|")[1]
         } else {
             setMeFriendText(v, message.content!!.split("||")[0])
+            v.subject.text = message.content!!.split("||")[1].split("|")[0]
+            v.subject.text = message.content!!.split("||")[1].split("|")[1]
         }
         return v
     }

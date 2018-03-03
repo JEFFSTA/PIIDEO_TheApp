@@ -10,6 +10,8 @@ import android.content.Intent
 import android.graphics.BitmapFactory
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.provider.Settings
 import android.support.annotation.StringDef
 import android.support.v4.app.NotificationCompat
@@ -211,7 +213,8 @@ class MessagingService : FirebaseMessagingService() {
 
     private fun sendNewRequest() {
         val searchRepeater = SearchRepeaterSingleton.instance(applicationContext)
-        searchRepeater.skip()
+        Handler(mainLooper).post { searchRepeater.skip() }
+
     }
 
     private fun showNothingOrNotification(messageId: String) {

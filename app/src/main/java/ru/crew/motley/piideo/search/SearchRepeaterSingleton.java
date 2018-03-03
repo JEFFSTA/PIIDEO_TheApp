@@ -294,14 +294,14 @@ public class SearchRepeaterSingleton {
     private Disposable mTimerSubs;
     private CompositeDisposable mRequestSubss;
 
-    public synchronized Observable<Long> subject() {
+    public Observable<Long> subject() {
         if (mRepeaterSubject == null) {
             mRepeaterSubject = BehaviorSubject.create();
         }
         return mRepeaterSubject;
     }
 
-    public synchronized void skip() {
+    public void skip() {
         if (mRequestSubss != null) {
             mRequestSubss.dispose();
         }
@@ -312,11 +312,10 @@ public class SearchRepeaterSingleton {
         mTimerSubs = newTask();
     }
 
-    public synchronized void start() {
+    public void start() {
         mOn = true;
         mRepeaterSubject = BehaviorSubject.create();
         Log.d(TAG, "MTIMER " + Thread.currentThread().getName());
-
         mRequestSubss = new CompositeDisposable();
         mTimerSubs = newTask();
     }
@@ -348,10 +347,10 @@ public class SearchRepeaterSingleton {
                     return single;
                 })
                 .map(s -> {
-                    mRequestSubss.add(s.subscribe());
+                    mRequestSubss.add(s.observeOn(AndroidSchedulers.mainThread()).subscribe());
                     return 0L;
                 })
-//                .observeOn(AndroidSchedulers.mainThread())
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         l -> mRepeaterSubject.onNext(l),
                         e -> Log.e(TAG, "timer Task error", e),

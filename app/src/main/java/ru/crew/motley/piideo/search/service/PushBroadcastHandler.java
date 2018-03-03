@@ -11,6 +11,7 @@ import android.os.Parcelable;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
+import android.util.Log;
 import android.view.View;
 import android.widget.RemoteViews;
 
@@ -40,6 +41,7 @@ public class PushBroadcastHandler extends IntentService {
 
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
+        Log.d(TAG, "Handle intent");
         ChatLab lab = ChatLab.get(getApplicationContext());
         Member member = lab.getMember();
         Parcelable memberParceled = Parcels.wrap(member);

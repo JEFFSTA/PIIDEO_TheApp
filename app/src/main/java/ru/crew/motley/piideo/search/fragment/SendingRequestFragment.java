@@ -54,6 +54,7 @@ public class SendingRequestFragment extends ButterFragment {
         if (mSearchRepeaterSingleton == null) {
             mSearchRepeaterSingleton = SearchRepeaterSingleton.instance(getActivity());
         }
+
         int progressPosition = startProgress(SharedPrefs.loadProgressTime(getContext()));
         mProgressBar.setMax(1000);
         mProgressBar.setProgress(progressPosition);

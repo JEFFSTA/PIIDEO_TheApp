@@ -56,6 +56,8 @@ import static ru.crew.motley.piideo.piideo.service.Recorder.HOME_PATH;
 
 public class SearchActivity extends RequestListenerActivity implements SearchListener {
 
+    private static final String TAG = SearchActivity.class.getSimpleName();
+
     private static final String EXTRA_MEMBER = "member";
 
     private static final int SD_PERMISSIONS = 1001;
@@ -319,6 +321,7 @@ public class SearchActivity extends RequestListenerActivity implements SearchLis
     private BroadcastReceiver mRejectReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            Log.d(TAG, "Abort notification");
             abortBroadcast();
         }
     };
@@ -326,6 +329,7 @@ public class SearchActivity extends RequestListenerActivity implements SearchLis
     @Override
     protected void onResume() {
         super.onResume();
+        Log.d(TAG, "onResume");
         IntentFilter filter = new IntentFilter(Events.BROADCAST_NO_HELP);
         filter.setPriority(1);
         registerReceiver(mRejectReceiver, filter);
@@ -338,6 +342,7 @@ public class SearchActivity extends RequestListenerActivity implements SearchLis
     @Override
     protected void onPause() {
         super.onPause();
+        Log.d(TAG, "onPause");
         unregisterReceiver(mRejectReceiver);
     }
 
