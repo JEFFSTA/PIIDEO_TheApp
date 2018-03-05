@@ -11,6 +11,7 @@ import static ru.crew.motley.piideo.chat.db.PiideoSchema.MemberTable;
 import static ru.crew.motley.piideo.chat.db.PiideoSchema.SchoolTable;
 import static ru.crew.motley.piideo.chat.db.PiideoSchema.SubjectTable;
 import static ru.crew.motley.piideo.chat.db.PiideoSchema.MessageTable;
+import static ru.crew.motley.piideo.chat.db.PiideoSchema.MemberQueue;
 
 public class ChatDBHelper extends SQLiteOpenHelper {
 
@@ -54,6 +55,14 @@ public class ChatDBHelper extends SQLiteOpenHelper {
                 MessageTable.Cols.SENDER_ID + " TEXT, " +
                 MessageTable.Cols.RECEIVER_ID + " TEXT, " +
                 MessageTable.Cols.MSG_TYPE + " TEXT)");
+
+        db.execSQL("create table " + MemberQueue.NAME + "(" +
+                " _id integer primary key autoincrement, " +
+                MemberQueue.Cols.NEO_ID + " TEXT," +
+                MemberQueue.Cols.PHONE_NUM + " TEXT, " +
+                MemberQueue.Cols.PHONE_PR + " TEXT, " +
+                MemberQueue.Cols.CHAT_ID + " TEXT," +
+                MemberQueue.Cols.C_CODE + " TEXT)");
     }
 
     @Override

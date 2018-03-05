@@ -1,8 +1,9 @@
 package ru.crew.motley.piideo.search.fragment;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -19,15 +20,15 @@ import org.parceler.Parcels;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
 import butterknife.BindView;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.disposables.Disposable;
 import ru.crew.motley.piideo.ButterFragment;
 import ru.crew.motley.piideo.R;
 import ru.crew.motley.piideo.SharedPrefs;
+import ru.crew.motley.piideo.chat.db.ChatLab;
 import ru.crew.motley.piideo.network.Member;
 import ru.crew.motley.piideo.network.neo.NeoApi;
 import ru.crew.motley.piideo.network.neo.NeoApiSingleton;
@@ -40,6 +41,7 @@ import ru.crew.motley.piideo.search.SearchListener;
 import ru.crew.motley.piideo.search.SearchRepeaterSingleton;
 import ru.crew.motley.piideo.search.SendRequestCallback;
 import ru.crew.motley.piideo.search.adapter.SearchAdapter;
+import ru.crew.motley.piideo.search.service.RequestService;
 
 /**
  * Created by vas on 12/18/17.
@@ -50,7 +52,9 @@ public class SearchHelpersFragment extends ButterFragment implements SendRequest
     private static final String TAG = SearchHelpersFragment.class.getSimpleName();
     private static final String ARG_MEMBER = "arg_member";
 
+
     private SearchListener mCallback;
+    private NoHelpersCallback mHelpersCallback;
 
     @BindView(R.id.searchRecycler)
     RecyclerView mSearchRecycler;
@@ -60,7 +64,12 @@ public class SearchHelpersFragment extends ButterFragment implements SendRequest
     private SearchAdapter mSearchAdapter;
 
     private Member mMember;
-    private List<Member> mMembers = new ArrayList<>();
+    private List<Member> mMembers = new LinkedList<>();
+
+    public interface NoHelpersCallback {
+        void showNoOneCanHelp();
+    }
+
 
     public static SearchHelpersFragment newInstance(Parcelable member, SearchListener listener) {
         Bundle args = new Bundle();
@@ -68,6 +77,7 @@ public class SearchHelpersFragment extends ButterFragment implements SendRequest
         SearchHelpersFragment fragment = new SearchHelpersFragment();
         fragment.setArguments(args);
         fragment.mCallback = listener;
+        fragment.mHelpersCallback = (NoHelpersCallback) listener;
         return fragment;
     }
 
@@ -113,7 +123,11 @@ public class SearchHelpersFragment extends ButterFragment implements SendRequest
                                 Log.d(TAG, member.toString());
                                 mMembers.add(member);
                             }
-                            mSearchAdapter.notifyDataSetChanged();
+                            if (mMembers.isEmpty()) {
+                                mHelpersCallback.showNoOneCanHelp();
+                            } else {
+                                mSearchAdapter.notifyDataSetChanged();
+                            }
                         },
                         error -> {
                             Log.e(TAG, "Request target search problem", error);
@@ -147,10 +161,22 @@ public class SearchHelpersFragment extends ButterFragment implements SendRequest
     }
 
     private void onMessageInput(String receiverId) {
-        SearchRepeaterSingleton searchRepeater = SearchRepeaterSingleton.instance(getContext());
-        searchRepeater.setMembers(mMembers);
-        searchRepeater.moveToFirstPosition(receiverId);
+        Member target = null;
+        for (Member member : mMembers) {
+            if (receiverId.equals(member.getChatId())) {
+                target = member;
+            }
+        }
+        mMembers.remove(target);
+        mMembers.add(0, target);
+        ChatLab.get(getContext()).enqueue(mMembers);
+//        RequestService.setMembers(mMembers);
+//        RequestService.moveToFirstPosition(receiverId);
+        Intent i = new Intent(getContext(), RequestService.class);
+        SharedPrefs.setSearching(true, getContext());
+        SharedPrefs.setSearchCount(mMembers.size(), getContext());
         SharedPrefs.progressTime(new Date().getTime(), getContext());
+        getActivity().startService(i);
         mCallback.onNext();
     }
 

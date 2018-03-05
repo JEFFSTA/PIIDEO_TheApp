@@ -14,11 +14,11 @@ import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
 import io.reactivex.Single;
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subjects.BehaviorSubject;
+import io.reactivex.subjects.PublishSubject;
 import ru.crew.motley.piideo.SharedPrefs;
 import ru.crew.motley.piideo.chat.db.ChatLab;
 import ru.crew.motley.piideo.fcm.FcmMessage;
@@ -40,7 +40,7 @@ import ru.crew.motley.piideo.util.TimeUtils;
 public class SearchRepeaterSingleton {
 
     private static final String TAG = SearchRepeaterSingleton.class.getSimpleName();
-    private static final int REQUEST_DELAY = 50;
+    private static final int REQUEST_DELAY = 20;
 
     private static volatile SearchRepeaterSingleton INSTANCE;
 
@@ -96,6 +96,8 @@ public class SearchRepeaterSingleton {
         this();
         mMember = member;
         mTimer = Observable.interval(0, REQUEST_DELAY, TimeUnit.SECONDS);
+        mRepeaterSubject = PublishSubject.create();
+        Log.d(TAG, "Calling construct");
 //        mContinuousChain = BehaviorSubject.create();
 
 //        createSearchRepeater();
@@ -235,29 +237,30 @@ public class SearchRepeaterSingleton {
                 .setValue(message);
     }
 
-    public void startSearch() {
-        startSearchChain();
-    }
+//    public void startSearch() {
+//        startSearchChain();
+//    }
 
-    public void stopSearch() {
-        stopSearchChain();
-    }
+//    public void stopSearch() {
+//        stopSearchChain();
+//    }
 
-    public void next() {
-        stopSearchChain();
-        startSearchChain();
-    }
+//    public void next() {
+//        stopSearchChain();
+//        startSearchChain();
+//    }
 
-    public Observable<Long> repeatableSearchObservable() {
-        Log.d(TAG, mContinuousChain.toString());
-        return mContinuousChain;
-    }
+//    public Observable<Long> repeatableSearchObservable() {
+//        Log.d(TAG, mContinuousChain.toString());
+//        return mContinuousChain;
+//    }
 
     private Single<Member> findReceiverFriendAndRequest(Member receiver) {
         Statements statements = new Statements();
         Statement statement = receiverFriendRequest(receiver);
         statements.getValues().add(statement);
         NeoApi api = NeoApiSingleton.getInstance();
+
         return api.executeStatement(statements)
                 .subscribeOn(Schedulers.io())
                 .map(transaction -> {
@@ -289,77 +292,78 @@ public class SearchRepeaterSingleton {
     }
 
 
-    private volatile BehaviorSubject<Long> mRepeaterSubject;
-    private volatile Observable<Long> mTimer;
+    private PublishSubject<Long> mRepeaterSubject;
+    private Observable<Long> mTimer;
     private Disposable mTimerSubs;
     private CompositeDisposable mRequestSubss;
 
     public Observable<Long> subject() {
-        if (mRepeaterSubject == null) {
-            mRepeaterSubject = BehaviorSubject.create();
-        }
         return mRepeaterSubject;
     }
 
-    public void skip() {
-        if (mRequestSubss != null) {
-            mRequestSubss.dispose();
-        }
-        mRequestSubss = new CompositeDisposable();
-        if (mTimerSubs != null) {
-            mTimerSubs.dispose();
-        }
-        mTimerSubs = newTask();
-    }
+//    public void skip() {
+//        if (mRequestSubss != null) {
+//            mRequestSubss.dispose();
+//        }
+//        mRequestSubss = new CompositeDisposable();
+//        if (mTimerSubs != null) {
+//            mTimerSubs.dispose();
+//        }
+//        mTimerSubs = newTask();
+//    }
 
-    public void start() {
-        mOn = true;
-        mRepeaterSubject = BehaviorSubject.create();
-        Log.d(TAG, "MTIMER " + Thread.currentThread().getName());
-        mRequestSubss = new CompositeDisposable();
-        mTimerSubs = newTask();
-    }
+//    public void start() {
+//        mOn = true;
+////        mRepeaterSubject = BehaviorSubject.create();
+//        Log.d(TAG, "MTIMER " + Thread.currentThread().getName());
+//        mRequestSubss = new CompositeDisposable();
+//        mTimerSubs = newTask();
+//    }
 
-    public void stop() {
-        mOn = false;
-        if (mTimerSubs != null) {
-            mTimerSubs.dispose();
-        }
-        if (mRequestSubss != null) {
-            mRequestSubss.dispose();
-        }
-    }
+//    public void stop() {
+//        mOn = false;
+//        if (mTimerSubs != null) {
+//            mTimerSubs.dispose();
+//        }
+//        if (mRequestSubss != null) {
+//            mRequestSubss.dispose();
+//        }
+//    }
 
     private Disposable newTask() {
         Log.d(TAG, "new TASK " + Thread.currentThread().getName());
-        return mTimer.takeWhile(
-                l -> {
-                    Log.d(TAG, "" + mMembers.isEmpty());
-                    return !mMembers.isEmpty();
-                })
-                .map(l -> {
-                    Log.d(TAG, "poll");
-                    return mMembers.poll();
-                })
-                .map(m -> {
-                    Single<Member> single = findReceiverFriendAndRequest(m).subscribeOn(Schedulers.io());
-                    Log.d(TAG, "map single " + (single == null));
-                    return single;
-                })
-                .map(s -> {
-                    mRequestSubss.add(s.observeOn(AndroidSchedulers.mainThread()).subscribe());
-                    return 0L;
-                })
-                .observeOn(AndroidSchedulers.mainThread())
+        return mTimer
+//                .takeWhile(
+//                l -> {
+//                    Log.d(TAG, "" + mMembers.isEmpty());
+//                    return !mMembers.isEmpty();
+//                })
+//                .map(l -> {
+//                    Log.d(TAG, "poll");
+//                    return mMembers.poll();
+//                })
+//                .map(m -> {
+//                    Single<Member> single = findReceiverFriendAndRequest(m);
+//                    Log.d(TAG, "map single " + (single == null));
+//                    return single;
+//                })
+//                .map(s -> {
+//                    mRequestSubss.add(s.subscribe());
+//                    return 0L;
+//                })
+
                 .subscribe(
-                        l -> mRepeaterSubject.onNext(l),
+                        l -> {
+                            mRepeaterSubject.onNext(l);
+                            Log.d(TAG, "onNext");
+                        },
                         e -> Log.e(TAG, "timer Task error", e),
                         () -> {
                             Log.d(TAG, "timer Task complete" + Thread.currentThread());
                             if (mMembers.isEmpty()) {
                                 mRepeaterSubject.onComplete();
                             }
-                            stop();
+//                            stop();
                             // next string and its code smell like shit
                             mOn = true;
                             sendCompleteNotification();
@@ -371,4 +375,40 @@ public class SearchRepeaterSingleton {
         broadcast.setAction(Events.BROADCAST_NO_HELP);
         mContext.sendOrderedBroadcast(broadcast, null);
     }
+
+
+//    public void setAlarm() {
+//        AlarmManager alarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
+//        Intent intent = new Intent(mContext, RequestService.class);
+//        intent.setAction("ru.crew.motley.piideo.BROADCAST_REQUEST");
+////        intent.putExtra("DB_MESSAGE_ID", dbMessageId)
+//
+//
+//        Intent serviceIntent = new Intent(mContext, RequestService.class);
+//// make sure you **don't** use *PendingIntent.getBroadcast*, it wouldn't work
+//        PendingIntent servicePendingIntent =
+//                PendingIntent.getService(mContext,
+//                        RequestService.SERVICE_ID, // integer constant used to identify the service
+//                        serviceIntent,
+//                        PendingIntent.FLAG_CANCEL_CURRENT);  // FLAG to avoid creating a second service if there's already one running
+//
+//
+////        PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, 99, intent, 0);
+//        long executeAt = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(50);
+////
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//            alarmManager.setExactAndAllowWhileIdle(
+//                    AlarmManager.RTC_WAKEUP,
+//                    executeAt,
+//                    servicePendingIntent);
+//        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+//            alarmManager.setExact(AlarmManager.RTC_WAKEUP,
+//                    executeAt,
+//                    servicePendingIntent);
+//        } else {
+//            alarmManager.set(AlarmManager.RTC_WAKEUP,
+//                    executeAt,
+//                    servicePendingIntent);
+//        }
+//    }
 }

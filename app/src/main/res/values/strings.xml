@@ -52,4 +52,11 @@
     <string name="nty_rejected">Request Rejected</string>
     <string name="nty_piideo">You got PIIDEO</string>
     <string name="nty_message">You got MESSAGE</string>
+
+    <string name="usl_hint">name of the subject</string>
+    <string name="usl_sub_hint">You have a question in what subject?</string>
+
+    <string name="no_title">ELARGIT VOTRE RESEAU</string>
+    <string name="no_info">Dèsloè,\nPersonne dans votre\nRèseau meitrise bien\ncette matière</string>
+    <string name="no_btn">arrière</string>
 </resources>

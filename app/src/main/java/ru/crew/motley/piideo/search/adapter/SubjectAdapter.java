@@ -52,7 +52,11 @@ public class SubjectAdapter extends RecyclerView.Adapter<SubjectAdapter.SubjectV
         }
 
         public void bind(String subject) {
-            mSubject.setText(subject);
+            String subjectCap = new StringBuilder()
+                    .append(subject.substring(0, 1).toUpperCase())
+                    .append(subject.substring(1))
+                    .toString();
+            mSubject.setText(subjectCap);
             itemView.setOnClickListener(l -> mSubjectListener.onClick(subject));
         }
     }

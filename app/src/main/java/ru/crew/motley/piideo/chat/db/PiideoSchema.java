@@ -31,6 +31,18 @@ public final class PiideoSchema {
         }
     }
 
+    public static final class MemberQueue {
+        public static final String NAME = "user_queue";
+
+        public static final class Cols {
+            public static final String NEO_ID = "neo_id";
+            public static final String PHONE_NUM = "phone";
+            public static final String PHONE_PR = "phone_prefix";
+            public static final String CHAT_ID = "chat_id";
+            public static final String C_CODE = "country_code";
+        }
+    }
+
     public static final class SubjectTable {
         public static final String NAME = "subject";
 

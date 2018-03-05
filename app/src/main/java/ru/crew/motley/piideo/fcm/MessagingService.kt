@@ -10,8 +10,6 @@ import android.content.Intent
 import android.graphics.BitmapFactory
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.provider.Settings
 import android.support.annotation.StringDef
 import android.support.v4.app.NotificationCompat
@@ -30,7 +28,7 @@ import ru.crew.motley.piideo.chat.fragment.ChatFragment
 import ru.crew.motley.piideo.chat.model.PiideoLoader
 import ru.crew.motley.piideo.fcm.MessagingService.Companion.SYN_ID
 import ru.crew.motley.piideo.handshake.activity.HandshakeActivity
-import ru.crew.motley.piideo.search.SearchRepeaterSingleton
+import ru.crew.motley.piideo.search.service.RequestService
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -126,8 +124,10 @@ class MessagingService : FirebaseMessagingService() {
     }
 
     private fun showChatOrNotification(dbMessageId: String, @MessageType type: String, timestamp: Date) {
-        val searchRepeater = SearchRepeaterSingleton.instance(applicationContext)
-        searchRepeater.stop()
+        RequestService.stopRestarting0(applicationContext)
+        SharedPrefs.setSearching(false, applicationContext)
+        SharedPrefs.setSearchCount(-1, applicationContext)
+        ChatLab.get(applicationContext).clearQueue()
 //        SharedPrefs.setSearching(false, applicationContext)
         val app = application as Appp
         val params = Bundle()
@@ -212,8 +212,11 @@ class MessagingService : FirebaseMessagingService() {
 //    }
 
     private fun sendNewRequest() {
-        val searchRepeater = SearchRepeaterSingleton.instance(applicationContext)
-        Handler(mainLooper).post { searchRepeater.skip() }
+        RequestService.stopRestarting0(applicationContext)
+        val i = Intent(applicationContext, RequestService::class.java)
+        startService(i)
+//        val searchRepeater = SearchRepeaterSingleton.instance(applicationContext)
+//        Handler(mainLooper).post { searchRepeater.skip() }
 
     }
 

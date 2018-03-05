@@ -18,7 +18,6 @@ import ru.crew.motley.piideo.chat.activity.ChatActivity;
 import ru.crew.motley.piideo.chat.db.ChatLab;
 import ru.crew.motley.piideo.network.Member;
 import ru.crew.motley.piideo.registration.activity.UserSetupActivity;
-import ru.crew.motley.piideo.search.SearchRepeaterSingleton;
 import ru.crew.motley.piideo.search.activity.SearchActivity;
 
 public class SplashActivity extends AppCompatActivity {
@@ -52,7 +51,7 @@ public class SplashActivity extends AppCompatActivity {
     private void skipRegistration(Member member) {
         Parcelable byPass = Parcels.wrap(member);
         String chatMessageId = SharedPrefs.loadChatMessageId(this);
-        if (SearchRepeaterSingleton.instance(this).isOn()) {
+        if (SharedPrefs.isSearching(this)) {
             Intent i = SearchActivity.getIntent(byPass, this);
             startActivity(i);
         } else if (chatMessageId != null) {

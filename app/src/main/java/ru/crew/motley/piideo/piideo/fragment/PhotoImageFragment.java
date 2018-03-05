@@ -198,7 +198,7 @@ public class PhotoImageFragment extends ButterFragment {
     }
 
     private void startRecord(Intent intent) {
-        mShutterFiller.setVisibility(View.VISIBLE);
+//        mShutterFiller.setVisibility(View.VISIBLE);
         getActivity().startService(intent);
         getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }

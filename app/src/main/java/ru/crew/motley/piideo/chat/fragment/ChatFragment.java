@@ -86,7 +86,7 @@ public class ChatFragment extends ButterFragment
     }
 
     private static final String TAG = ChatFragment.class.getSimpleName();
-    public static final long CHAT_TIMEOUT = 30L;
+    public static final long CHAT_TIMEOUT = 300L;
     private static final String ARG_DB_MESSAGE_ID = "local_db_id";
 
     @BindView(R.id.chat_recycler)

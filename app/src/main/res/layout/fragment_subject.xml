@@ -69,6 +69,7 @@
                 android:completionHint="@string/reg_subject_hint"
                 android:completionThreshold="1"
                 android:imeOptions="actionDone"
+                android:textAllCaps="true"
                 android:inputType="textCapSentences"
                 android:textSize="14sp" />
 
@@ -105,10 +106,7 @@
             style="@style/ButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal|bottom"
-            android:layout_marginBottom="8dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginStart="8dp"
+            android:layout_gravity="center"
             android:text="@string/next_btn_caption" />
 
     </FrameLayout>

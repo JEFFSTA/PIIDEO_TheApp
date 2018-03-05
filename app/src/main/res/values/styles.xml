@@ -42,7 +42,7 @@
 
     <style name="OopsButtonStyle" parent="Widget.AppCompat.Button">
         <item name="colorButtonNormal">@color/colorOopsButton</item>
-        <item name="android:background">@drawable/button_oval</item>
+        <item name="android:background">@drawable/button_oval_blue</item>
         <item name="android:textColor">@android:color/white</item>
         <item name="android:minHeight">30dp</item>
         <item name="android:minWidth">70dp</item>

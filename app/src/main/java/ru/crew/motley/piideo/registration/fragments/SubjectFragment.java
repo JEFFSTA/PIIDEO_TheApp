@@ -10,6 +10,7 @@ import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
+import android.text.InputFilter;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -253,7 +254,7 @@ public class SubjectFragment extends ButterFragment {
 
     private void setSubjectIfExist() {
         for (Subject subject : mSubjects) {
-            if (subject.getName().equals(mSubject.getText().toString().trim())) {
+            if (subject.getName().toLowerCase().equals(mSubject.getText().toString().toLowerCase().trim())) {
                 mMember.setSubject(subject);
             }
         }
@@ -292,7 +293,7 @@ public class SubjectFragment extends ButterFragment {
         } finally {
             managedCursor.close();
         }
-        for (String phone: phones) {
+        for (String phone : phones) {
             mPhones.add(phone.replaceAll("\\D", ""));
         }
     }
@@ -332,7 +333,11 @@ public class SubjectFragment extends ButterFragment {
     private void fillAutocomplete() {
         List<String> subjects = new ArrayList<>();
         for (Subject subject : mSubjects) {
-            subjects.add(subject.getName());
+            String subjectName = new StringBuilder()
+                    .append(subject.getName().substring(0, 1).toUpperCase())
+                    .append(subject.getName().substring(1))
+                    .toString();
+            subjects.add(subjectName);
         }
         ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(),
                 android.R.layout.simple_dropdown_item_1line, subjects);

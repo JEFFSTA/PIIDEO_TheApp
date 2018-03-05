@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.util.Date;
 
 import ru.crew.motley.piideo.R;
+import ru.crew.motley.piideo.SharedPrefs;
 import ru.crew.motley.piideo.chat.db.ChatLab;
 import ru.crew.motley.piideo.fcm.User;
 import ru.crew.motley.piideo.handshake.activity.RequestListenerActivity;
@@ -42,19 +43,23 @@ import ru.crew.motley.piideo.network.Member;
 import ru.crew.motley.piideo.registration.activity.UserSetupActivity;
 import ru.crew.motley.piideo.search.Events;
 import ru.crew.motley.piideo.search.SearchListener;
-import ru.crew.motley.piideo.search.SearchRepeaterSingleton;
+import ru.crew.motley.piideo.search.fragment.NoCanHelp;
 import ru.crew.motley.piideo.search.fragment.NoHelpFragment;
 import ru.crew.motley.piideo.search.fragment.SearchHelpersFragment;
 import ru.crew.motley.piideo.search.fragment.SearchSubjectFragment;
 import ru.crew.motley.piideo.search.fragment.SendingRequestFragment;
 import ru.crew.motley.piideo.search.fragment.UselessFragment;
+import ru.crew.motley.piideo.search.service.RequestService;
 import ru.crew.motley.piideo.splash.SplashActivity;
 
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static ru.crew.motley.piideo.piideo.service.Recorder.HOME_PATH;
 
-public class SearchActivity extends RequestListenerActivity implements SearchListener {
+public class SearchActivity extends RequestListenerActivity
+        implements SearchListener,
+        SearchHelpersFragment.NoHelpersCallback,
+        NoCanHelp.NoOneCanHelpCallback {
 
     private static final String TAG = SearchActivity.class.getSimpleName();
 
@@ -86,6 +91,7 @@ public class SearchActivity extends RequestListenerActivity implements SearchLis
 
     public static Intent getIntent(Parcelable member, Context context) {
         Intent i = new Intent(context, SearchActivity.class);
+        i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         i.putExtra(EXTRA_MEMBER, member);
         return i;
     }
@@ -107,9 +113,9 @@ public class SearchActivity extends RequestListenerActivity implements SearchLis
                     new String[]{WRITE_EXTERNAL_STORAGE, READ_EXTERNAL_STORAGE},
                     SD_PERMISSIONS);
         } else {
-            if (SearchRepeaterSingleton.instance(this).isOn()) {
-                currentStep = Page.REQUEST;
-            }
+//            if (SharedPrefs.isSearching(this)) {
+//                currentStep = Page.REQUEST;
+//            }
             showNextStep();
         }
     }
@@ -262,9 +268,12 @@ public class SearchActivity extends RequestListenerActivity implements SearchLis
                 super.onBackPressed();
                 break;
             case Page.REJECT:
-                SearchRepeaterSingleton.instance(this).stop();
+//                SearchRepeaterSingleton.instance(this).stop();
                 currentStep = Page.BUTTON;
                 showNextStep();
+                break;
+            case Page.SUBJECT:
+                super.onBackPressed();
         }
     }
 
@@ -333,7 +342,7 @@ public class SearchActivity extends RequestListenerActivity implements SearchLis
         IntentFilter filter = new IntentFilter(Events.BROADCAST_NO_HELP);
         filter.setPriority(1);
         registerReceiver(mRejectReceiver, filter);
-        if (SearchRepeaterSingleton.instance(this).isOn()) {
+        if (SharedPrefs.isSearching(this)) {
             currentStep = Page.REQUEST;
             showNextStep();
         }
@@ -363,5 +372,19 @@ public class SearchActivity extends RequestListenerActivity implements SearchLis
                 }
                 break;
         }
+    }
+
+    @Override
+    public void showNoOneCanHelp() {
+        Fragment fragment = NoCanHelp.newInstance(this);
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.container, fragment)
+                .commit();
+    }
+
+    @Override
+    public void showStartSearch() {
+        currentStep = Page.SUBJECT;
+        showNextStep();
     }
 }

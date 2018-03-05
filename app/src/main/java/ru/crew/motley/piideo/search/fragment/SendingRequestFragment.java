@@ -1,5 +1,6 @@
 package ru.crew.motley.piideo.search.fragment;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
@@ -20,6 +21,7 @@ import ru.crew.motley.piideo.R;
 import ru.crew.motley.piideo.SharedPrefs;
 import ru.crew.motley.piideo.search.SearchListener;
 import ru.crew.motley.piideo.search.SearchRepeaterSingleton;
+import ru.crew.motley.piideo.search.service.RequestService;
 
 /**
  * Created by vas on 3/1/18.
@@ -30,8 +32,6 @@ public class SendingRequestFragment extends ButterFragment {
     private static final String TAG = SendingRequestFragment.class.getSimpleName();
 
     private SearchListener mCallback;
-    private SearchRepeaterSingleton mSearchRepeaterSingleton;
-    private CompositeDisposable mDisposables = new CompositeDisposable();
 
     private Handler progressCounter = new Handler();
     private Timer progressUpdater;
@@ -50,27 +50,28 @@ public class SendingRequestFragment extends ButterFragment {
     @Override
     public void onResume() {
         super.onResume();
-        mDisposables = new CompositeDisposable();
-        if (mSearchRepeaterSingleton == null) {
-            mSearchRepeaterSingleton = SearchRepeaterSingleton.instance(getActivity());
+        RequestService.fragmentCallback(this);
+        if (!SharedPrefs.isSearching(getContext())) {
+            complete();
         }
 
         int progressPosition = startProgress(SharedPrefs.loadProgressTime(getContext()));
         mProgressBar.setMax(1000);
         mProgressBar.setProgress(progressPosition);
         progressUpdater = new Timer();
-        if (!mSearchRepeaterSingleton.isOn()) {
-            mSearchRepeaterSingleton.start();
-        }
         progressCounter.postDelayed(progressUpdater, 200);
-        subscribeOnSearch();
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        mSearchRepeaterSingleton = null;
-        mDisposables.dispose();
+        RequestService.fragmentCallback(null);
+        progressCounter.removeCallbacks(progressUpdater);
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
     }
 
     @Nullable
@@ -80,34 +81,18 @@ public class SendingRequestFragment extends ButterFragment {
         return super.onCreateView(inflater, container, savedInstanceState);
     }
 
-    private void subscribeOnSearch() {
-        Disposable searchSubscription = mSearchRepeaterSingleton.subject()
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(next -> {
-                            Log.d(TAG, "First one passed");
-                        },
-                        error -> {
-                            Log.e(TAG, "Error subscription onCLick");
-                            Log.e(TAG, "", error);
-                        },
-                        () -> {
-                            Log.d(TAG, "OnComplete");
-                            onSearchComplete();
-                        });
-        mDisposables.add(searchSubscription);
-    }
 
-    private void onSearchComplete() {
+    public void complete() {
         mCallback.onNext();
     }
 
+//    private void onSearchComplete() {
+//        mCallback.onNext();
+//    }
+
     private int startProgress(long startTime) {
         long timeLeft = new Date().getTime() - startTime;
-        return 1000 * (int) timeLeft / (mSearchRepeaterSingleton.count() * 50 * 1000);
-    }
-
-    private int secondsToEnd(long startTIme) {
-        return (int) (startTIme - new Date().getTime()) / 60;
+        return 1000 * (int) timeLeft / (SharedPrefs.getSearchCount(getContext()) * 50 * 1000);
     }
 
 
@@ -118,7 +103,7 @@ public class SendingRequestFragment extends ButterFragment {
             if (getContext() == null) {
                 return;
             }
-            if (mSearchRepeaterSingleton != null) {
+
                 int value = startProgress(SharedPrefs.loadProgressTime(getContext()));
                 if (value < 1000) {
                     progressCounter.postDelayed(this, 200);
@@ -126,23 +111,8 @@ public class SendingRequestFragment extends ButterFragment {
                 if (mProgressBar != null) {
                     mProgressBar.setProgress(value);
                 }
-            }
+
         }
 
-        private String timeMin(long seconds) {
-            long min = seconds / 60;
-            if (min > 9) {
-                return "" + min;
-            }
-            return "0" + min;
-        }
-
-        private String timeSec(long seconds) {
-            long sec = seconds % 60;
-            if (sec > 9) {
-                return "" + sec;
-            }
-            return "0" + sec;
-        }
     }
 }

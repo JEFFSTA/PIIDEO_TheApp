@@ -10,6 +10,7 @@ public class SharedPrefs {
     private static final String SEARCH_SUBJECT = "searchSubject";
     private static final String REQUEST_MESSAGE = "requestMessage";
     private static final String SEARCHING = "searching";
+    private static final String SEARCHING_COUNT = "searching_count";
 
     private static final String CHAT = "page";
     private static final String CHAT_START_TIME = "chatStartTime";
@@ -53,17 +54,29 @@ public class SharedPrefs {
                 .apply();
     }
 
-//    public static void setSearching(boolean value, Context context) {
-//        SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-//        prefs.edit()
-//                .putBoolean(SEARCHING, value)
-//                .apply();
-//    }
+    public static void setSearching(boolean value, Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        prefs.edit()
+                .putBoolean(SEARCHING, value)
+                .apply();
+    }
 
-//    public static boolean isSearching(Context context) {
-//        SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-//        return prefs.getBoolean(SEARCHING, false);
-//    }
+    public static void setSearchCount(int value, Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        prefs.edit()
+                .putInt(SEARCHING_COUNT, value)
+                .apply();
+    }
+
+    public static int getSearchCount(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        return prefs.getInt(SEARCHING_COUNT, -1);
+    }
+
+    public static boolean isSearching(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        return prefs.getBoolean(SEARCHING, false);
+    }
 
     public static void verificationId(String value, Context context) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);

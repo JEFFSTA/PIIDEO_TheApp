@@ -28,7 +28,7 @@ public class ChatLab {
 
     public static ChatLab get(Context context) {
         if (sEventLab == null) {
-            sEventLab = new ChatLab(context);
+            sEventLab = new ChatLab(context.getApplicationContext());
         }
         return sEventLab;
     }
@@ -118,7 +118,7 @@ public class ChatLab {
         return new SchoolCursorWrapper(cursor);
     }
 
-    private MemberCursorWrapper queryMember(String whereClause, String[] whereArgs) {
+    private MemberCursorWrapper queryMember(String whereClause, String[] whereArgs, String orderBy) {
         Cursor cursor = mDataBase.query(
                 PiideoSchema.MemberTable.NAME,
                 null,
@@ -126,7 +126,20 @@ public class ChatLab {
                 whereArgs,
                 null,
                 null,
-                null
+                orderBy
+        );
+        return new MemberCursorWrapper(cursor);
+    }
+
+    private MemberCursorWrapper queryQueueMember(String whereClause, String[] whereArgs, String orderBy) {
+        Cursor cursor = mDataBase.query(
+                PiideoSchema.MemberQueue.NAME,
+                null,
+                whereClause,
+                whereArgs,
+                null,
+                null,
+                orderBy
         );
         return new MemberCursorWrapper(cursor);
     }
@@ -184,6 +197,42 @@ public class ChatLab {
         mDataBase.insert(PiideoSchema.ChatTable.NAME, null, values);
     }
 
+    public void enqueue(List<Member> items) {
+        List<ContentValues> cv = new ArrayList<>();
+        for (Member member : items) {
+            cv.add(ChatLab.getContentValues(member));
+        }
+//        mDataBase.beginTransaction();
+        for (ContentValues values : cv) {
+            long error = mDataBase.insertOrThrow(PiideoSchema.MemberQueue.NAME, null, values);
+            Log.d("ENQUE", "" + error );
+        }
+//        mDataBase.endTransaction();
+    }
+
+    public Member pollNext() {
+//        mDataBase.beginTransaction();
+        Member member;
+        try (MemberCursorWrapper cursor = queryQueueMember(null, null, null)) {
+            if (cursor.getCount() == 0) {
+                return null;
+            }
+            cursor.moveToFirst();
+            member = cursor.getMember(null, null);
+        }
+        mDataBase.delete(
+                PiideoSchema.MemberQueue.NAME,
+                PiideoSchema.MemberQueue.Cols.CHAT_ID + " = ?",
+                new String[]{"" + member.getChatId()}
+        );
+//        mDataBase.endTransaction();
+        return member;
+    }
+
+    public void clearQueue() {
+        mDataBase.delete(PiideoSchema.MemberQueue.NAME, null, null);
+    }
+
     public PiideoRow searchBy(String piideoName) {
         try (ChatRowCursorWrapper cursor = queryChat(
                 PiideoSchema.ChatTable.Cols.PIIDEO_FILE + " = ?",
@@ -218,7 +267,7 @@ public class ChatLab {
     public Member getMember() {
         Subject subject = getSubject();
         School school = getSchool();
-        try (MemberCursorWrapper cursor = queryMember(null, null)) {
+        try (MemberCursorWrapper cursor = queryMember(null, null, null)) {
             if (cursor.getCount() > 1) {
                 throw new RuntimeException("More then one Member in DB");
             }

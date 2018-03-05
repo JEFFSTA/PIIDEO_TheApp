@@ -9,7 +9,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import io.reactivex.android.schedulers.AndroidSchedulers
-import kotlinx.android.synthetic.main.fragment_useless.view.*
+import kotlinx.android.synthetic.main.fragment_search_subject_input.view.*
+
 import ru.crew.motley.piideo.R
 import ru.crew.motley.piideo.chat.db.ChatLab
 import ru.crew.motley.piideo.network.Member
@@ -46,7 +47,7 @@ class UselessFragment : Fragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_useless, container, false)
+        return inflater.inflate(R.layout.fragment_search_subject_input, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

@@ -15,15 +15,17 @@
 
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="60dp"
             android:background="@drawable/cardview_border">
 
             <TextView
+                android:gravity="center_horizontal"
                 android:id="@+id/subjectName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_margin="20dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="8dp"
+                android:layout_gravity="center"
                 android:textColor="@android:color/darker_gray" />
         </FrameLayout>
 

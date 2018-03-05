@@ -81,8 +81,7 @@
             </intent-filter>
         </service>
 
-        <service
-            android:name=".fcm.MessagingService">
+        <service android:name=".fcm.MessagingService">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
@@ -90,8 +89,13 @@
 
         <service
             android:name=".search.service.PushBroadcastHandler"
-            android:exported="true"
-            android:enabled="true"/>
+            android:enabled="true"
+            android:exported="true" />
+
+        <service
+            android:name=".search.service.RequestService"
+            android:enabled="true"
+            android:exported="false" />
 
         <receiver
             android:name=".fcm.Receiver"
@@ -107,6 +111,15 @@
             android:exported="true">
             <intent-filter android:priority="0">
                 <action android:name="ru.crew.motley.piideo.BROADCAST_NO_HELP" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".search.receiver.RequestReceiver"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="ru.crew.motley.piideo.BROADCAST_REPEAT" />
             </intent-filter>
         </receiver>
 

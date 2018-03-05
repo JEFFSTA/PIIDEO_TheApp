@@ -6,22 +6,45 @@
     android:layout_height="match_parent">
 
 
-    <TextView
+    <FrameLayout
         android:id="@+id/oops_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
         android:background="@color/colorOopsBg"
-        android:gravity="center"
-        android:padding="@dimen/simple_padding_large"
-        android:text="@string/hsh_oops"
-        android:textColor="@color/screenColorBackground"
-        android:textSize="@dimen/text_size_primary_huge"
         app:layout_constraintBottom_toTopOf="@+id/time_up_text"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_chainStyle="packed" />
+        app:layout_constraintVertical_chainStyle="packed" >
+
+        <ImageView
+
+            android:layout_width="80dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="18dp"
+            android:layout_marginBottom="10dp"
+            android:adjustViewBounds="true"
+            android:src="@drawable/oops" />
+
+    </FrameLayout>
+
+    <!--<TextView-->
+        <!--android:id="@+id/oops_text"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_gravity="center"-->
+        <!--android:background="@color/colorOopsBg"-->
+        <!--android:gravity="center"-->
+        <!--android:padding="@dimen/simple_padding_large"-->
+        <!--android:text="@string/hsh_oops"-->
+        <!--android:textColor="@color/screenColorBackground"-->
+        <!--android:textSize="@dimen/text_size_primary_huge"-->
+        <!--app:layout_constraintBottom_toTopOf="@+id/time_up_text"-->
+        <!--app:layout_constraintEnd_toEndOf="parent"-->
+        <!--app:layout_constraintStart_toStartOf="parent"-->
+        <!--app:layout_constraintTop_toTopOf="parent"-->
+        <!--app:layout_constraintVertical_chainStyle="packed" />-->
 
     <TextView
         android:layout_marginTop="40dp"
