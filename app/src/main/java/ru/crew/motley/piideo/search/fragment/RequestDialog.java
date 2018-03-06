@@ -3,6 +3,8 @@ package ru.crew.motley.piideo.search.fragment;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -10,6 +12,7 @@ import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -72,12 +75,29 @@ public class RequestDialog extends DialogFragment {
         return true;
     }
 
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = LayoutInflater.from(getActivity()).inflate(R.layout.dialog_request, null);
         mUnbinder = ButterKnife.bind(this, v);
-        return new AlertDialog.Builder(getActivity())
-                .setView(v)
-                .create();
+//        Dialog dialog = new AlertDialog.Builder(getActivity())
+//                .setView(v)
+//                .create();
+        if (getDialog() != null && getDialog().getWindow() != null) {
+            getDialog().getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
+        }
+        return v;
     }
+
+//    public Dialog onCreateDialog(Bundle savedInstanceState) {
+//        View v = LayoutInflater.from(getActivity()).inflate(R.layout.dialog_request, null);
+//        mUnbinder = ButterKnife.bind(this, v);
+//        Dialog dialog = new AlertDialog.Builder(getActivity())
+//                .setView(v)
+//                .create();
+//        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+//        return dialog;
+//    }
 
 }

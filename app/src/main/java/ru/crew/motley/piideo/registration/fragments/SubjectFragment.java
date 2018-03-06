@@ -4,21 +4,18 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.Parcelable;
 import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
-import android.text.InputFilter;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -37,7 +34,6 @@ import butterknife.OnClick;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import ru.crew.motley.piideo.ButterFragment;
 import ru.crew.motley.piideo.R;
-import ru.crew.motley.piideo.SharedPrefs;
 import ru.crew.motley.piideo.network.Member;
 import ru.crew.motley.piideo.network.Subject;
 import ru.crew.motley.piideo.network.neo.NeoApi;
@@ -46,10 +42,8 @@ import ru.crew.motley.piideo.network.neo.Parameters;
 import ru.crew.motley.piideo.network.neo.Request;
 import ru.crew.motley.piideo.network.neo.Statement;
 import ru.crew.motley.piideo.network.neo.Statements;
-import ru.crew.motley.piideo.network.neo.transaction.Data;
-import ru.crew.motley.piideo.network.neo.transaction.Result;
-import ru.crew.motley.piideo.network.neo.transaction.Row;
 import ru.crew.motley.piideo.registration.RegistrationListener;
+import ru.crew.motley.piideo.registration.SubjectDialogListener;
 
 import static ru.crew.motley.piideo.registration.fragments.PhoneFragment.FRENCH_LENGTH;
 import static ru.crew.motley.piideo.registration.fragments.PhoneFragment.FRENCH_PREFIX;
@@ -58,11 +52,8 @@ import static ru.crew.motley.piideo.registration.fragments.PhoneFragment.MOROCCO
 import static ru.crew.motley.piideo.registration.fragments.PhoneFragment.NIGERIA_LENGTH;
 import static ru.crew.motley.piideo.registration.fragments.PhoneFragment.NIGERIA_PREFIX;
 
-/**
- * Created by vas on 12/17/17.
- */
 
-public class SubjectFragment extends ButterFragment {
+public class SubjectFragment extends ButterFragment implements SubjectDialogListener{
 
     private static final String TAG = SubjectFragment.class.getSimpleName();
 
@@ -72,11 +63,11 @@ public class SubjectFragment extends ButterFragment {
     @BindView(R.id.next_btn)
     Button next;
     @BindView(R.id.subject)
-    AutoCompleteTextView mSubject;
+    TextView mSubject;
 
     private Member mMember;
     private Set<String> mPhones;
-    private List<Subject> mSubjects;
+//    private List<Subject> mSubjects;
 
     private RegistrationListener mRegistrationListener;
 
@@ -95,7 +86,7 @@ public class SubjectFragment extends ButterFragment {
         mMember = Parcels.unwrap(getArguments().getParcelable(ARGS_MEMBER));
         mPhones = new HashSet<>();
         requestPermissionAndLoad();
-        loadSubjects();
+//        loadSubjects();
     }
 
     @Nullable
@@ -104,7 +95,25 @@ public class SubjectFragment extends ButterFragment {
         fragmentLayout = R.layout.fragment_subject;
         View v = super.onCreateView(inflater, container, savedInstanceState);
         next.setEnabled(true);
+//        ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, new String[]{"...", "''''"});
+//        mSubject.setAdapter(adapter);
+//        mSubject.setOnTouchListener((v1, event) -> {
+//            showSubjectDialog();
+//            return false;
+//        });
         return v;
+    }
+
+    @OnClick(R.id.subject)
+    public void showSubjectDialog() {
+        SubjectDialog.getInstance(mMember.getSchool().getName(), this)
+                .show(getChildFragmentManager(), "dialog");
+    }
+
+    @Override
+    public void onSubjectSelected(Subject subject) {
+        mSubject.setText(subject.getName());
+        mMember.setSubject(subject);
     }
 
     @OnClick(R.id.next_btn)
@@ -118,23 +127,22 @@ public class SubjectFragment extends ButterFragment {
             return;
         }
 
-        String subject = mSubject.getText().toString().trim();
-        if (subject.isEmpty()) {
+        if (mMember.getSubject() == null) {
             Toast.makeText(getActivity(), R.string.sch_subject_violation, Toast.LENGTH_SHORT)
                     .show();
             return;
         }
         next.setEnabled(false);
-        setSubjectIfExist();
+//        setSubjectIfExist();
         deleteOldSubjectRelationAndCreateNewMember();
     }
 
     private void prepareAndCreateNewMember() {
-        if (mMember.getSubject() == null) {
-            createNewSubjectAndMember();
-        } else {
+//        if (mMember.getSubject() == null) {
+//            createNewSubjectAndMember();
+//        } else {
             createNewMember();
-        }
+//        }
     }
 
     private void createNewMember() {
@@ -216,49 +224,49 @@ public class SubjectFragment extends ButterFragment {
                         });
     }
 
-    private void createNewSubjectAndMember() {
-        Statements statements = new Statements();
-        statements.getValues().add(subjectRequest());
-        NeoApi api = NeoApiSingleton.getInstance();
-        api.executeStatement(statements)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(transaction -> {
-                            Subject subject = Subject.fromJson(
-                                    transaction.getResults()
-                                            .get(0)
-                                            .getData()
-                                            .get(0)
-                                            .getRow()
-                                            .get(0)
-                                            .getValue());
-                            subject.setId(
-                                    (long) transaction.getResults()
-                                            .get(0)
-                                            .getData()
-                                            .get(0)
-                                            .getMeta()
-                                            .get(0)
-                                            .getId());
-                            mMember.setSubject(subject);
-                            createNewMember();
-                        },
-                        error -> {
-                            Log.e(TAG, "Neo Request exception", error);
-                            Toast.makeText(getActivity(), R.string.ex_network, Toast.LENGTH_SHORT)
-                                    .show();
-                            if (!(error instanceof SocketTimeoutException)) {
-                                throw new RuntimeException(error);
-                            }
-                        });
-    }
+//    private void createNewSubjectAndMember() {
+//        Statements statements = new Statements();
+//        statements.getValues().add(subjectRequest());
+//        NeoApi api = NeoApiSingleton.getInstance();
+//        api.executeStatement(statements)
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe(transaction -> {
+//                            Subject subject = Subject.fromJson(
+//                                    transaction.getResults()
+//                                            .get(0)
+//                                            .getData()
+//                                            .get(0)
+//                                            .getRow()
+//                                            .get(0)
+//                                            .getValue());
+//                            subject.setId(
+//                                    (long) transaction.getResults()
+//                                            .get(0)
+//                                            .getData()
+//                                            .get(0)
+//                                            .getMeta()
+//                                            .get(0)
+//                                            .getId());
+//                            mMember.setSubject(subject);
+//                            createNewMember();
+//                        },
+//                        error -> {
+//                            Log.e(TAG, "Neo Request exception", error);
+//                            Toast.makeText(getActivity(), R.string.ex_network, Toast.LENGTH_SHORT)
+//                                    .show();
+//                            if (!(error instanceof SocketTimeoutException)) {
+//                                throw new RuntimeException(error);
+//                            }
+//                        });
+//    }
 
-    private void setSubjectIfExist() {
-        for (Subject subject : mSubjects) {
-            if (subject.getName().toLowerCase().equals(mSubject.getText().toString().toLowerCase().trim())) {
-                mMember.setSubject(subject);
-            }
-        }
-    }
+//    private void setSubjectIfExist() {
+//        for (Subject subject : mSubjects) {
+//            if (subject.getName().toLowerCase().equals(mSubject.get.toString().toLowerCase().trim())) {
+//                mMember.setSubject(subject);
+//            }
+//        }
+//    }
 
     private void requestPermissionAndLoad() {
         int permissionCheck = ContextCompat.checkSelfPermission(
@@ -298,53 +306,53 @@ public class SubjectFragment extends ButterFragment {
         }
     }
 
-    private void loadSubjects() {
-        Statements statements = new Statements();
-        statements.getValues().add(subjectsRequest());
-        NeoApi api = NeoApiSingleton.getInstance();
-        api.executeStatement(statements)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(transaction -> {
-                            mSubjects = new ArrayList<>();
-                            Log.d(TAG, "" + transaction.toString());
-                            for (Result result : transaction.getResults()) {
-                                List<Data> data = result.getData();
-                                for (Data datum : data) {
-                                    List<Row> rows = datum.getRow();
-                                    for (int i = 0; i < rows.size(); i++) {
-                                        Subject subject = Subject.fromJson(rows.get(i).getValue());
-                                        subject.setId((long) datum.getMeta().get(i).getId());
-                                        mSubjects.add(subject);
-                                    }
-                                }
-                            }
-                            fillAutocomplete();
-                        },
-                        error -> {
-                            Log.e(TAG, "Loading subjects while registration problem", error);
-                            Toast.makeText(getActivity(), R.string.ex_network, Toast.LENGTH_SHORT)
-                                    .show();
-                            if (!(error instanceof SocketTimeoutException)) {
-                                throw new RuntimeException(error);
-                            }
-                        });
-    }
+//    private void loadSubjects() {
+//        Statements statements = new Statements();
+//        statements.getValues().add(subjectsRequest());
+//        NeoApi api = NeoApiSingleton.getInstance();
+//        api.executeStatement(statements)
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe(transaction -> {
+//                            mSubjects = new ArrayList<>();
+//                            Log.d(TAG, "" + transaction.toString());
+//                            for (Result result : transaction.getResults()) {
+//                                List<Data> data = result.getData();
+//                                for (Data datum : data) {
+//                                    List<Row> rows = datum.getRow();
+//                                    for (int i = 0; i < rows.size(); i++) {
+//                                        Subject subject = Subject.fromJson(rows.get(i).getValue());
+//                                        subject.setId((long) datum.getMeta().get(i).getId());
+//                                        mSubjects.add(subject);
+//                                    }
+//                                }
+//                            }
+////                            fillAutocomplete();
+//                        },
+//                        error -> {
+//                            Log.e(TAG, "Loading subjects while registration problem", error);
+//                            Toast.makeText(getActivity(), R.string.ex_network, Toast.LENGTH_SHORT)
+//                                    .show();
+//                            if (!(error instanceof SocketTimeoutException)) {
+//                                throw new RuntimeException(error);
+//                            }
+//                        });
+//    }
 
-    private void fillAutocomplete() {
-        List<String> subjects = new ArrayList<>();
-        for (Subject subject : mSubjects) {
-            String subjectName = new StringBuilder()
-                    .append(subject.getName().substring(0, 1).toUpperCase())
-                    .append(subject.getName().substring(1))
-                    .toString();
-            subjects.add(subjectName);
-        }
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(),
-                android.R.layout.simple_dropdown_item_1line, subjects);
-        mSubject.setAdapter(adapter);
-        mSubject.setThreshold(1);
+//    private void fillAutocomplete() {
+//        List<String> subjects = new ArrayList<>();
+//        for (Subject subject : mSubjects) {
+//            String subjectName = new StringBuilder()
+//                    .append(subject.getName().substring(0, 1).toUpperCase())
+//                    .append(subject.getName().substring(1))
+//                    .toString();
+//            subjects.add(subjectName);
+//        }
+//        ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(),
+//                android.R.layout.simple_dropdown_item_1line, subjects);
+//        mSubject.setAdapter(adapter);
+//        mSubject.setThreshold(1);
 //        adapter.notifyDataSetChanged();
-    }
+//    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -479,15 +487,15 @@ public class SubjectFragment extends ButterFragment {
         return request;
     }
 
-    private Statement subjectRequest() {
-        Statement subject = new Statement();
-        subject.setStatement(Request.NEW_SUBJECT);
-        Parameters parameters = new Parameters();
-        parameters.getProps().put(Request.Var.NAME, mSubject.getText().toString().trim());
-        parameters.getProps().put(Request.Var.NAME_2, mMember.getSchool().getName());
-        subject.setParameters(parameters);
-        return subject;
-    }
+//    private Statement subjectRequest() {
+//        Statement subject = new Statement();
+//        subject.setStatement(Request.NEW_SUBJECT);
+//        Parameters parameters = new Parameters();
+//        parameters.getProps().put(Request.Var.NAME, mSubject.getText().toString().trim());
+//        parameters.getProps().put(Request.Var.NAME_2, mMember.getSchool().getName());
+//        subject.setParameters(parameters);
+//        return subject;
+//    }
 
     private Statement studiesRequest() {
         Statement studies = new Statement();
@@ -500,14 +508,14 @@ public class SubjectFragment extends ButterFragment {
         return studies;
     }
 
-    private Statement subjectsRequest() {
-        Statement statement = new Statement();
-        statement.setStatement(Request.FIND_SUBJECTS_BY_SCHOOL);
-        Parameters parameters = new Parameters();
-        parameters.getProps().put(Request.Var.NAME, mMember.getSchool().getName());
-        statement.setParameters(parameters);
-        return statement;
-    }
+//    private Statement subjectsRequest() {
+//        Statement statement = new Statement();
+//        statement.setStatement(Request.FIND_SUBJECTS_BY_SCHOOL);
+//        Parameters parameters = new Parameters();
+//        parameters.getProps().put(Request.Var.NAME, mMember.getSchool().getName());
+//        statement.setParameters(parameters);
+//        return statement;
+//    }
 
     private Statement noSubjectRequest() {
         Statement statement = new Statement();

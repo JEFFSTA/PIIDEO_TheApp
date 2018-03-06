@@ -4,15 +4,21 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import butterknife.BindView;
@@ -30,13 +36,15 @@ import ru.crew.motley.piideo.network.neo.Statements;
 import ru.crew.motley.piideo.network.neo.transaction.Data;
 import ru.crew.motley.piideo.network.neo.transaction.Result;
 import ru.crew.motley.piideo.network.neo.transaction.Row;
+import ru.crew.motley.piideo.registration.SubjectAdapterListener;
 import ru.crew.motley.piideo.registration.SubjectDialogListener;
+import ru.crew.motley.piideo.registration.adapter.SubjectAdapter;
 
 /**
  * Created by vas on 2/17/18.
  */
 
-public class SubjectDialog extends DialogFragment {
+public class SubjectDialog extends DialogFragment implements SubjectAdapterListener {
 
     private static final String TAG = SubjectDialog.class.getSimpleName();
 
@@ -44,10 +52,14 @@ public class SubjectDialog extends DialogFragment {
 
     @BindView(R.id.subject_name)
     EditText subjectName;
+    @BindView(R.id.subject_items)
+    RecyclerView mSubjectsRecycler;
 
     private Unbinder mUnbinder;
     private SubjectDialogListener mListener;
     private String mSchoolName;
+    private List<Subject> mSubjects;
+//    private List<String> mSubjectNames;
 
     public static SubjectDialog getInstance(String schoolName, SubjectDialogListener listener) {
         SubjectDialog dialog = new SubjectDialog();
@@ -61,8 +73,9 @@ public class SubjectDialog extends DialogFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        loadSubjects();
         mSchoolName = getArguments().getString(ARG_SCHOOL_NAME);
+        mSubjects = new ArrayList<>();
+        loadSubjects();
     }
 
     @Nullable
@@ -70,6 +83,36 @@ public class SubjectDialog extends DialogFragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.dialog_subject, container, false);
         mUnbinder = ButterKnife.bind(this, view);
+        mSubjectsRecycler.setLayoutManager(new LinearLayoutManager(getContext()));
+        mSubjectsRecycler.setAdapter(new SubjectAdapter(mSubjects, this));
+        subjectName.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                List<Subject> containsPattern = new ArrayList<>();
+                for (Subject subject : mSubjects) {
+                    if (subject.getName().toLowerCase().startsWith(s.toString().toLowerCase().trim())) {
+                        containsPattern.add(subject);
+                    }
+                }
+                Collections.sort(containsPattern, ((o1, o2) ->
+                        o1.getName().toLowerCase().compareTo(o2.getName().toLowerCase())
+                ));
+                show(containsPattern);
+            }
+        });
+        if (getDialog() != null && getDialog().getWindow() != null) {
+            getDialog().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+        }
         return view;
     }
 
@@ -77,6 +120,19 @@ public class SubjectDialog extends DialogFragment {
     public void onDestroyView() {
         super.onDestroyView();
         mUnbinder.unbind();
+    }
+
+    @Override
+    public void onSubjectSelected(Subject subject) {
+        getDialog().dismiss();
+        //
+        mListener.onSubjectSelected(subject);
+    }
+
+    private void show(List<Subject> subjects) {
+        if (mSubjectsRecycler != null) {
+            ((SubjectAdapter) mSubjectsRecycler.getAdapter()).updateWithUI(subjects);
+        }
     }
 
     private void loadSubjects() {
@@ -99,7 +155,8 @@ public class SubjectDialog extends DialogFragment {
                                     }
                                 }
                             }
-                            fillSubjectItems(subjects);
+                            mSubjects = subjects;
+                            show(mSubjects);
                         },
                         error -> {
                             Log.e(TAG, "Loading subjects while registration problem", error);
@@ -109,10 +166,6 @@ public class SubjectDialog extends DialogFragment {
                                 throw new RuntimeException(error);
                             }
                         });
-    }
-
-    private void fillSubjectItems(List<Subject> subjects) {
-
     }
 
     private Statement subjectsRequest() {

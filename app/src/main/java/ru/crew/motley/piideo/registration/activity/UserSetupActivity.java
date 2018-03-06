@@ -106,7 +106,6 @@ public class UserSetupActivity extends AppCompatActivity implements Registration
     public void onComplete(Member member) {
         ChatLab lab = ChatLab.get(this);
         if (member.getChatId() == null) {
-            // TODO: 1/19/18 uncomment 
             member.setChatId(FirebaseAuth.getInstance().getCurrentUser().getUid());
         }
         lab.addMember(member);
@@ -120,7 +119,6 @@ public class UserSetupActivity extends AppCompatActivity implements Registration
         switch (currentStep) {
             case Page.PHONE_PAGE:
                 FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-                // TODO: 1/19/18 uncomment next
                 if (user == null) {
                     currentStep = Page.VERIFY_PAGE;
                 } else {

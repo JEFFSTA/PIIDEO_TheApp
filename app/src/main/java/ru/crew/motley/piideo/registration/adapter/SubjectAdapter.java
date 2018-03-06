@@ -10,6 +10,7 @@ import java.util.List;
 
 import ru.crew.motley.piideo.R;
 import ru.crew.motley.piideo.network.Subject;
+import ru.crew.motley.piideo.registration.SubjectAdapterListener;
 
 /**
  * Created by vas on 2/17/18.
@@ -18,15 +19,17 @@ import ru.crew.motley.piideo.network.Subject;
 public class SubjectAdapter extends RecyclerView.Adapter<SubjectAdapter.SubjectHolder> {
 
     private List<Subject> mSubjects;
+    private SubjectAdapterListener mListener;
 
-    public SubjectAdapter(List<Subject> subjects) {
+    public SubjectAdapter(List<Subject> subjects, SubjectAdapterListener listener) {
         mSubjects = subjects;
+        mListener = listener;
     }
 
     @Override
     public SubjectHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext())
-                .inflate(android.R.layout.simple_dropdown_item_1line, parent, false);
+                .inflate(R.layout.item_dialog_subject, parent, false);
         return new SubjectHolder(v);
     }
 
@@ -36,9 +39,15 @@ public class SubjectAdapter extends RecyclerView.Adapter<SubjectAdapter.SubjectH
         holder.bind(subject);
     }
 
+    public void updateWithUI(List<Subject> subjects) {
+        mSubjects.clear();
+        mSubjects.addAll(subjects);
+        notifyDataSetChanged();
+    }
+
     @Override
     public int getItemCount() {
-        return 0;
+        return mSubjects.size();
     }
 
     class SubjectHolder extends RecyclerView.ViewHolder {
@@ -47,11 +56,14 @@ public class SubjectAdapter extends RecyclerView.Adapter<SubjectAdapter.SubjectH
 
         public SubjectHolder(View itemView) {
             super(itemView);
-            mSubjectName = itemView.findViewById(android.R.id.text1);
+            mSubjectName = itemView.findViewById(R.id.subject_name);
         }
 
         public void bind(Subject subject) {
-            mSubjectName.setText(subject.getName());
+            String subjectName = subject.getName()
+                    .replaceAll("^.", subject.getName().substring(0,1).toUpperCase());
+            mSubjectName.setText(subjectName);
+            itemView.setOnClickListener(v -> mListener.onSubjectSelected(subject));
         }
     }
 }

@@ -8,7 +8,7 @@
     <string name="reg_phone_length">Ton numéro doit être %1$d chiffres</string>
 
     <string name="req_dlg_title">Le Sujet</string>
-    <string name="req_dlg_hint">Ex: Loi de Charles, Inegral Double…</string>
+    <string name="req_dlg_hint">Ex: LSériede Fourier, Loi de Gauss</string>
 
     <string name="usl_hint">nom de la matière</string>
     <string name="usl_sub_hint">Vous avez une question dans quelle matière?</string>

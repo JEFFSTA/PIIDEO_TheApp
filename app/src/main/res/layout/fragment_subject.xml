@@ -38,9 +38,9 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="center_horizontal|bottom"
+            android:layout_marginBottom="68dp"
             android:layout_marginLeft="98dp"
             android:layout_marginRight="98dp"
-            android:layout_marginBottom="68dp"
             android:orientation="vertical">
 
             <!--<TextView-->
@@ -53,25 +53,41 @@
             <!--android:textSize="18sp" />-->
 
             <ImageView
-                android:layout_width="134dp"
-                android:layout_height="110dp"
+                android:layout_width="155dp"
+                android:layout_height="127dp"
                 android:layout_gravity="center_horizontal"
 
                 android:src="@drawable/earth" />
 
-
-            <AutoCompleteTextView
-                android:id="@+id/subject"
+            <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                android:layout_marginTop="10dp"
-                android:completionHint="@string/reg_subject_hint"
-                android:completionThreshold="1"
-                android:imeOptions="actionDone"
-                android:textAllCaps="true"
-                android:inputType="textCapSentences"
-                android:textSize="14sp" />
+                android:layout_marginTop="10dp">
+
+                <TextView
+                    android:gravity="center_horizontal"
+                    android:id="@+id/subject"
+                    android:textSize="16sp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="..." />
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="right"
+                    app:srcCompat="@drawable/ic_fake_spinner" />
+            </FrameLayout>
+
+            <!--<Spinner-->
+            <!--android:id="@+id/subject"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_marginBottom="16dp"-->
+            <!--android:layout_marginTop="10dp"-->
+            <!--android:spinnerMode="dropdown"-->
+            <!--android:textSize="14sp" />-->
 
         </LinearLayout>
 
