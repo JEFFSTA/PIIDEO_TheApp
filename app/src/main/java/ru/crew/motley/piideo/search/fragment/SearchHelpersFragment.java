@@ -110,8 +110,9 @@ public class SearchHelpersFragment extends ButterFragment implements SendRequest
                 .subscribe(transaction -> {
                             List<Data> responseData = transaction.getResults().get(0).getData();
                             if (responseData.isEmpty()) {
-                                Toast.makeText(getActivity(), R.string.sch_no_result, Toast.LENGTH_SHORT)
-                                        .show();
+//                                Toast.makeText(getActivity(), R.string.sch_no_result, Toast.LENGTH_SHORT)
+//                                        .show();
+                                mHelpersCallback.showNoOneCanHelp();
                                 return;
                             }
                             mMembers.clear();
@@ -123,11 +124,11 @@ public class SearchHelpersFragment extends ButterFragment implements SendRequest
                                 Log.d(TAG, member.toString());
                                 mMembers.add(member);
                             }
-                            if (mMembers.isEmpty()) {
-                                mHelpersCallback.showNoOneCanHelp();
-                            } else {
+//                            if (mMembers.isEmpty()) {
+
+//                            } else {
                                 mSearchAdapter.notifyDataSetChanged();
-                            }
+//                            }
                         },
                         error -> {
                             Log.e(TAG, "Request target search problem", error);

@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.1"
+        android:background="@color/screenColorBackground">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="@dimen/simple_padding_large"
+            android:background="@drawable/button_fake_blue"
+            android:paddingBottom="@dimen/simple_padding_small"
+            android:paddingLeft="@dimen/simple_padding_medium"
+            android:paddingRight="@dimen/simple_padding_medium"
+            android:paddingTop="@dimen/simple_padding_small"
+            android:text="@string/nhlp_info"
+            android:textColor="@color/colorWhite"
+            android:textSize="16sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal|bottom"
+            android:layout_marginBottom="@dimen/simple_padding_small"
+            android:text="@string/nhlp_classmate"
+            android:textColor="@color/colorWhite"
+            android:textSize="15sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical|right"
+            android:layout_marginRight="@dimen/simple_padding_large"
+            android:background="@drawable/button_fake_blue"
+            android:paddingBottom="@dimen/simple_padding_small"
+            android:paddingLeft="@dimen/simple_padding_medium"
+            android:paddingRight="@dimen/simple_padding_medium"
+            android:paddingTop="@dimen/simple_padding_small"
+            android:text="@string/nhlp_more"
+            android:textColor="@color/colorWhite"
+            android:textSize="16sp" />
+        <!--</FrameLayout>-->
+
+    </FrameLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.015"
+        android:background="#2aaae2">
+
+    </FrameLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.65"
+        android:background="#f2f2f2">
+
+        <ImageView
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="@dimen/simple_padding_medium"
+            android:layout_marginBottom="@dimen/simple_padding_small"
+            android:adjustViewBounds="true"
+            app:srcCompat="@drawable/ic_network"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+    </FrameLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.015"
+        android:background="#90acda">
+
+    </FrameLayout>
+
+    <FrameLayout
+
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.18"
+        android:background="@color/screenColorBackground">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="@dimen/simple_padding_small"
+            android:text="@string/nhlp_network"
+            android:textColor="@color/colorWhite"
+            android:textSize="14sp" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:layout_marginBottom="@dimen/simple_padding_large"
+            android:layout_marginLeft="@dimen/simple_padding_larger"
+
+            android:layout_marginRight="@dimen/simple_padding_larger"
+            android:background="@drawable/background_oval_fake"
+            android:paddingTop="@dimen/simple_padding_small">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/simple_padding_large"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="46dp"
+                    android:layout_height="46dp"
+                    android:layout_gravity="center_horizontal"
+                    android:background="@drawable/button_oval_fake_blue"
+                    android:gravity="center"
+                    android:paddingBottom="1dp"
+                    android:paddingRight="1dp"
+                    android:text="@string/nhlp_num_students"
+                    android:textColor="@color/colorWhite"
+                    android:textSize="18sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/nhlp_students"
+                    android:textColor="#2aaae2"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginBottom="@dimen/simple_padding_small"
+                android:text="@string/nhlp_mastered"
+                android:textColor="#2aaae2"
+                android:textSize="16sp" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right"
+                android:layout_marginRight="@dimen/simple_padding_large"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="46dp"
+                    android:layout_height="46dp"
+                    android:layout_gravity="center_horizontal"
+                    android:background="@drawable/button_oval_fake_blue"
+                    android:gravity="center"
+                    android:paddingBottom="1dp"
+                    android:paddingRight="1dp"
+                    android:text="@string/nhlp_num_subjects"
+                    android:textColor="@color/colorWhite"
+                    android:textSize="18sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/nhlp_subjects"
+                    android:textColor="#2aaae2"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+
+        </FrameLayout>
+
+    </FrameLayout>
+</LinearLayout>

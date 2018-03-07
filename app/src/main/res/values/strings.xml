@@ -59,4 +59,13 @@
     <string name="no_title">ELARGIT VOTRE RESEAU</string>
     <string name="no_info">Dèsloè,\nPersonne dans votre\nRèseau meitrise bien\ncette matière</string>
     <string name="no_btn">arrière</string>
+    <string name="nhlp_info">Inform</string>
+    <string name="nhlp_classmate">1 Classmate</string>
+    <string name="nhlp_more">more</string>
+    <string name="nhlp_network">Add to your network</string>
+    <string name="nhlp_num_students">50</string>
+    <string name="nhlp_mastered">who master</string>
+    <string name="nhlp_num_subjects">10+</string>
+    <string name="nhlp_subjects">Subjects</string>
+    <string name="nhlp_students">Students</string>
 </resources>

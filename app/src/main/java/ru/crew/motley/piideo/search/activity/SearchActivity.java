@@ -43,13 +43,13 @@ import ru.crew.motley.piideo.network.Member;
 import ru.crew.motley.piideo.registration.activity.UserSetupActivity;
 import ru.crew.motley.piideo.search.Events;
 import ru.crew.motley.piideo.search.SearchListener;
-import ru.crew.motley.piideo.search.fragment.NoCanHelp;
+import ru.crew.motley.piideo.search.fragment.NoCanHelpFragment;
+import ru.crew.motley.piideo.search.fragment.NoCanHelpFragment2;
 import ru.crew.motley.piideo.search.fragment.NoHelpFragment;
 import ru.crew.motley.piideo.search.fragment.SearchHelpersFragment;
 import ru.crew.motley.piideo.search.fragment.SearchSubjectFragment;
 import ru.crew.motley.piideo.search.fragment.SendingRequestFragment;
 import ru.crew.motley.piideo.search.fragment.UselessFragment;
-import ru.crew.motley.piideo.search.service.RequestService;
 import ru.crew.motley.piideo.splash.SplashActivity;
 
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
@@ -58,8 +58,7 @@ import static ru.crew.motley.piideo.piideo.service.Recorder.HOME_PATH;
 
 public class SearchActivity extends RequestListenerActivity
         implements SearchListener,
-        SearchHelpersFragment.NoHelpersCallback,
-        NoCanHelp.NoOneCanHelpCallback {
+        SearchHelpersFragment.NoHelpersCallback {
 
     private static final String TAG = SearchActivity.class.getSimpleName();
 
@@ -76,13 +75,14 @@ public class SearchActivity extends RequestListenerActivity
     /**
      * Page order
      */
-    @IntDef({Page.SUBJECT, Page.BUTTON, Page.HELPERS, Page.REQUEST, Page.REJECT, Page.COMPLETE})
+    @IntDef({Page.SUBJECT, Page.BUTTON, Page.HELPERS, Page.REQUEST, Page.REJECT, Page.NO_HELPERS, Page.COMPLETE})
     private @interface Page {
         int BUTTON = 0;
         int SUBJECT = 1;
         int HELPERS = 2;
         int REQUEST = 3;
         int REJECT = 4;
+        int NO_HELPERS = 5;
         int COMPLETE = 10;
     }
 
@@ -217,6 +217,8 @@ public class SearchActivity extends RequestListenerActivity
             case Page.REJECT:
                 currentStep = Page.COMPLETE;
                 break;
+            case Page.NO_HELPERS:
+                break;
             case Page.COMPLETE:
                 throw new IllegalStateException("Page you want to go out is final, just use onComplete.");
             default:
@@ -245,6 +247,9 @@ public class SearchActivity extends RequestListenerActivity
             case Page.REJECT:
                 fragment = NoHelpFragment.newInstance(this);
                 break;
+            case Page.NO_HELPERS:
+                fragment = NoCanHelpFragment2.newInstance();
+                break;
             case Page.COMPLETE:
                 // do nothing
                 return;
@@ -256,8 +261,7 @@ public class SearchActivity extends RequestListenerActivity
 
     @Override
     public void onBackPressed() {
-//        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.container);
-//        if (fragment instanceof SearchHelpersFragment) {
+
         switch (currentStep) {
             case Page.HELPERS:
                 currentStep = Page.SUBJECT;
@@ -268,8 +272,11 @@ public class SearchActivity extends RequestListenerActivity
                 super.onBackPressed();
                 break;
             case Page.REJECT:
-//                SearchRepeaterSingleton.instance(this).stop();
                 currentStep = Page.BUTTON;
+                showNextStep();
+                break;
+            case Page.NO_HELPERS:
+                currentStep = Page.SUBJECT;
                 showNextStep();
                 break;
             case Page.SUBJECT:
@@ -376,15 +383,16 @@ public class SearchActivity extends RequestListenerActivity
 
     @Override
     public void showNoOneCanHelp() {
-        Fragment fragment = NoCanHelp.newInstance(this);
+        currentStep = Page.NO_HELPERS;
+        Fragment fragment = NoCanHelpFragment.newInstance(this);
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.container, fragment)
                 .commit();
     }
 
-    @Override
-    public void showStartSearch() {
-        currentStep = Page.SUBJECT;
-        showNextStep();
-    }
+//    @Override
+//    public void showStartSearch() {
+//        currentStep = Page.SUBJECT;
+//        showNextStep();
+//    }
 }

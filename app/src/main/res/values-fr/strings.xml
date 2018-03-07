@@ -12,4 +12,12 @@
 
     <string name="usl_hint">nom de la matière</string>
     <string name="usl_sub_hint">Vous avez une question dans quelle matière?</string>
+
+    <string name="nhlp_info">Informez</string>
+    <string name="nhlp_classmate">1 Camarade</string>
+    <string name="nhlp_more">de plus</string>
+    <string name="nhlp_network">Elargit votre réseau par</string>
+    <string name="nhlp_mastered">maitrisant</string>
+    <string name="nhlp_students">Etudiants</string>
+    <string name="nhlp_subjects">Matiéres</string>
 </resources>

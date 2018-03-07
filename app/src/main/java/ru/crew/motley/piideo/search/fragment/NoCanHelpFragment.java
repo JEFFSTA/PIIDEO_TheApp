@@ -3,7 +3,6 @@ package ru.crew.motley.piideo.search.fragment;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,22 +10,23 @@ import android.view.ViewGroup;
 import butterknife.OnClick;
 import ru.crew.motley.piideo.ButterFragment;
 import ru.crew.motley.piideo.R;
+import ru.crew.motley.piideo.search.SearchListener;
 
 /**
  * Created by vas on 3/3/18.
  */
 
-public class NoCanHelp extends ButterFragment {
+public class NoCanHelpFragment extends ButterFragment {
 
-    private NoOneCanHelpCallback mCallback;
+    private SearchListener mCallback;
 
     public interface NoOneCanHelpCallback {
         void showStartSearch();
     }
 
-    public static NoCanHelp newInstance(NoOneCanHelpCallback callback) {
+    public static NoCanHelpFragment newInstance(SearchListener callback) {
         Bundle args = new Bundle();
-        NoCanHelp fragment = new NoCanHelp();
+        NoCanHelpFragment fragment = new NoCanHelpFragment();
         fragment.setArguments(args);
         fragment.mCallback = callback;
         return fragment;
@@ -41,6 +41,6 @@ public class NoCanHelp extends ButterFragment {
 
     @OnClick(R.id.redirect)
     public void showSearchStart() {
-        mCallback.showStartSearch();
+        mCallback.onNext();
     }
 }
