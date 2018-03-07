@@ -65,14 +65,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
-        android:paddingLeft="52dp"
-        android:src="@drawable/oops_heart"
+        android:src="@drawable/oops_heart_no_bg"
         app:layout_constraintBottom_toTopOf="@+id/another_time_text"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/time_up_text" />
 
     <TextView
+        android:layout_marginTop="@dimen/simple_padding_large"
         android:id="@+id/another_time_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
