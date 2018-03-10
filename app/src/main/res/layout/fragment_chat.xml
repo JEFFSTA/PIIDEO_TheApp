@@ -132,6 +132,7 @@
                 android:layout_marginLeft="48dp"
                 android:background="@color/colorWhite"
                 android:ems="11"
+                android:inputType="textCapSentences"
                 android:hint="@string/chat_bar_hint"
                 android:paddingBottom="@dimen/simple_padding_largish"
                 android:paddingTop="@dimen/simple_padding_largish"

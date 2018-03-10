@@ -36,7 +36,7 @@ class UselessFragment : Fragment() {
     }
 
     lateinit var callback: SearchListener
-    lateinit var mMember: Member
+    var mMember: Member? = null
     val mPhones = mutableListOf<String>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -75,7 +75,7 @@ class UselessFragment : Fragment() {
         request.statement = Request.KNOWS
         val parameters = Parameters()
 
-        parameters.props[Request.Var.PHONE + "From"] = mMember.phoneNumber
+        parameters.props[Request.Var.PHONE + "From"] = mMember!!.phoneNumber
         parameters.props[Request.Var.PHONE + "To"] = filteredPhone
         request.parameters = parameters
         return request

@@ -12,13 +12,7 @@ import android.util.Log;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
-import java.lang.ref.WeakReference;
-import java.util.Deque;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.BlockingDeque;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.schedulers.Schedulers;
@@ -26,7 +20,6 @@ import ru.crew.motley.piideo.SharedPrefs;
 import ru.crew.motley.piideo.chat.db.ChatLab;
 import ru.crew.motley.piideo.fcm.FcmMessage;
 import ru.crew.motley.piideo.fcm.MessagingService;
-import ru.crew.motley.piideo.handshake.activity.HandshakeActivity;
 import ru.crew.motley.piideo.network.Member;
 import ru.crew.motley.piideo.network.neo.NeoApi;
 import ru.crew.motley.piideo.network.neo.NeoApiSingleton;
@@ -36,7 +29,6 @@ import ru.crew.motley.piideo.network.neo.Statement;
 import ru.crew.motley.piideo.network.neo.Statements;
 import ru.crew.motley.piideo.network.neo.transaction.Data;
 import ru.crew.motley.piideo.search.Events;
-import ru.crew.motley.piideo.search.fragment.SearchSubjectFragment;
 import ru.crew.motley.piideo.search.fragment.SendingRequestFragment;
 import ru.crew.motley.piideo.search.receiver.RequestReceiver;
 import ru.crew.motley.piideo.util.TimeUtils;
@@ -76,6 +68,10 @@ public class RequestService extends IntentService {
 //    public static int count() {
 //        return mCount;
 //    }
+
+    public static Intent getIntent(Context context) {
+        return new Intent(context, RequestService.class);
+    }
 
     public RequestService() {
         super(TAG);
@@ -140,9 +136,16 @@ public class RequestService extends IntentService {
                 })
                 .map(rf -> {
                     receiver.setReceivedFrom(rf);
+//                    throw new ConnectException("OLOLO");
                     return receiver;
                 }).observeOn(Schedulers.io())
-                .subscribe(this::sendRequest);
+                .subscribe(
+                        o -> {
+                            Log.d(TAG, "OLOLO");
+                            sendRequest(o);
+                        },
+                        e -> Log.e(TAG, "OLOLO catched")
+                );
     }
 
     private void sendRequest(Member receiver) {
@@ -185,33 +188,33 @@ public class RequestService extends IntentService {
         return request;
     }
 
-    private void restartService() {
-        AlarmManager alarmManager = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
-
-
-        Intent serviceIntent = new Intent(this, RequestService.class);
-        serviceIntent.setAction("ru.crew.motley.piideo.BROADCAST_REQUEST");
-        PendingIntent servicePendingIntent =
-                PendingIntent.getService(this,
-                        RequestService.SERVICE_ID,
-                        serviceIntent,
-                        PendingIntent.FLAG_CANCEL_CURRENT);
-        long executeAt = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(50);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            alarmManager.setExactAndAllowWhileIdle(
-                    AlarmManager.RTC_WAKEUP,
-                    executeAt,
-                    servicePendingIntent);
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            alarmManager.setExact(AlarmManager.RTC_WAKEUP,
-                    executeAt,
-                    servicePendingIntent);
-        } else {
-            alarmManager.set(AlarmManager.RTC_WAKEUP,
-                    executeAt,
-                    servicePendingIntent);
-        }
-    }
+//    private void restartService() {
+//        AlarmManager alarmManager = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
+//
+//
+//        Intent serviceIntent = new Intent(this, RequestService.class);
+//        serviceIntent.setAction("ru.crew.motley.piideo.BROADCAST_REQUEST");
+//        PendingIntent servicePendingIntent =
+//                PendingIntent.getService(this,
+//                        RequestService.SERVICE_ID,
+//                        serviceIntent,
+//                        PendingIntent.FLAG_CANCEL_CURRENT);
+//        long executeAt = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(50);
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//            alarmManager.setExactAndAllowWhileIdle(
+//                    AlarmManager.RTC_WAKEUP,
+//                    executeAt,
+//                    servicePendingIntent);
+//        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+//            alarmManager.setExact(AlarmManager.RTC_WAKEUP,
+//                    executeAt,
+//                    servicePendingIntent);
+//        } else {
+//            alarmManager.set(AlarmManager.RTC_WAKEUP,
+//                    executeAt,
+//                    servicePendingIntent);
+//        }
+//    }
 
     private void restartService0() {
         AlarmManager alarmManager = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
@@ -219,7 +222,7 @@ public class RequestService extends IntentService {
         Intent intent = new Intent(this, RequestReceiver.class);
         intent.setAction(Events.BROADCAST_REPEAT);
 
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 33, intent, 0);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 33, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         long executeAt = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(50);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             alarmManager.setExactAndAllowWhileIdle(
@@ -237,25 +240,25 @@ public class RequestService extends IntentService {
         }
     }
 
-    public static void stopRestarting(Context context) {
-        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        Intent serviceIntent = new Intent(context, RequestService.class);
-        serviceIntent.setAction("ru.crew.motley.piideo.BROADCAST_REPEAT");
-        PendingIntent servicePendingIntent =
-                PendingIntent.getService(context,
-                        RequestService.SERVICE_ID,
-                        serviceIntent,
-                        PendingIntent.FLAG_CANCEL_CURRENT);
-
-        alarmManager.cancel(servicePendingIntent);
-
-    }
+//    public static void stopRestarting(Context context) {
+//        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+//        Intent serviceIntent = new Intent(context, RequestService.class);
+//        serviceIntent.setAction("ru.crew.motley.piideo.BROADCAST_REPEAT");
+//        PendingIntent servicePendingIntent =
+//                PendingIntent.getService(context,
+//                        RequestService.SERVICE_ID,
+//                        serviceIntent,
+//                        PendingIntent.FLAG_CANCEL_CURRENT);
+//
+//        alarmManager.cancel(servicePendingIntent);
+//
+//    }
 
     public static void stopRestarting0(Context context) {
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        Intent serviceIntent = new Intent(context, RequestService.class);
-        serviceIntent.setAction("ru.crew.motley.piideo.BROADCAST_REPEAT");
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 33, serviceIntent, 0);
+        Intent serviceIntent = new Intent(context, RequestReceiver.class);
+        serviceIntent.setAction(Events.BROADCAST_REPEAT);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 33, serviceIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 
         alarmManager.cancel(pendingIntent);
 

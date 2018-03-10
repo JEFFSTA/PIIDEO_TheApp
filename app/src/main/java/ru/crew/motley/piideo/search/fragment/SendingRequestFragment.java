@@ -1,10 +1,8 @@
 package ru.crew.motley.piideo.search.fragment;
 
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,15 +10,11 @@ import android.view.ViewGroup;
 import java.util.Date;
 
 import butterknife.BindView;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.disposables.Disposable;
 import me.zhanghai.android.materialprogressbar.MaterialProgressBar;
 import ru.crew.motley.piideo.ButterFragment;
 import ru.crew.motley.piideo.R;
 import ru.crew.motley.piideo.SharedPrefs;
 import ru.crew.motley.piideo.search.SearchListener;
-import ru.crew.motley.piideo.search.SearchRepeaterSingleton;
 import ru.crew.motley.piideo.search.service.RequestService;
 
 /**
@@ -51,15 +45,20 @@ public class SendingRequestFragment extends ButterFragment {
     public void onResume() {
         super.onResume();
         RequestService.fragmentCallback(this);
-        if (!SharedPrefs.isSearching(getContext())) {
-            complete();
-        }
+//        if (!SharedPrefs.isSearching(getContext())) {
+//            complete();
+//        }
 
-        int progressPosition = startProgress(SharedPrefs.loadProgressTime(getContext()));
+        int progressPosition = startProgress(SharedPrefs.loadStartSearchingTime(getContext()));
         mProgressBar.setMax(1000);
         mProgressBar.setProgress(progressPosition);
         progressUpdater = new Timer();
         progressCounter.postDelayed(progressUpdater, 200);
+        if (SharedPrefs.searchCompleted(getContext())) {
+            SharedPrefs.setSearching(false, getContext());
+            SharedPrefs.setSearchCount(-1, getContext());
+            complete();
+        }
     }
 
     @Override
@@ -104,7 +103,7 @@ public class SendingRequestFragment extends ButterFragment {
                 return;
             }
 
-                int value = startProgress(SharedPrefs.loadProgressTime(getContext()));
+                int value = startProgress(SharedPrefs.loadStartSearchingTime(getContext()));
                 if (value < 1000) {
                     progressCounter.postDelayed(this, 200);
                 }

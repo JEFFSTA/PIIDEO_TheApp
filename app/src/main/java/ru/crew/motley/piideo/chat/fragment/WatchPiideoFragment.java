@@ -5,6 +5,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
@@ -69,7 +70,7 @@ public class WatchPiideoFragment extends ButterFragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mPiideoFileName = getArguments().getString(ARG_PIIDEO_FILE_NAME);
-        mDuration = getDuration();
+//        mDuration = getDuration();
         try {
             String fullName = fileImagePath(mPiideoFileName);
             mBitmap = decodeFile(new File(fullName));
@@ -108,7 +109,7 @@ public class WatchPiideoFragment extends ButterFragment {
                 }
             }, 0, 50);
         } catch (Exception e) {
-            Log.e(TAG, "Error play", e);
+            Log.e(TAG, "Error play " + mPiideoFileName, e);
         }
     }
 
@@ -147,17 +148,21 @@ public class WatchPiideoFragment extends ButterFragment {
         releasePlayer();
     }
 
-    private long getDuration() {
-        try {
-            MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
-            mediaMetadataRetriever.setDataSource(fileAudioPath(mPiideoFileName));
-            String durationStr = mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
-            return Long.parseLong(durationStr) / 100;
-        } catch (IOException ex) {
-            Log.e(TAG, "Piideo duration exception", ex);
-            return -1;
-        }
-    }
+//    private long getDuration() {
+//        try {
+//            MediaPlayer mp = MediaPlayer.create(getContext(), Uri.fromFile(new File(mPiideoFileName)));
+//            int duration = mp.getDuration();
+//            mp.release();
+//
+//            MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
+//            mediaMetadataRetriever.setDataSource(fileAudioPath(mPiideoFileName));
+//            String durationStr = mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+//            return Long.parseLong(durationStr) / 100;
+//        } catch (IOException ex) {
+//            Log.e(TAG, "Piideo duration exception", ex);
+//            return -1;
+//        }
+//    }
 
     @Nullable
     @Override

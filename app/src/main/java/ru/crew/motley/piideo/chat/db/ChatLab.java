@@ -14,6 +14,8 @@ import ru.crew.motley.piideo.network.Member;
 import ru.crew.motley.piideo.network.School;
 import ru.crew.motley.piideo.network.Subject;
 
+import static ru.crew.motley.piideo.chat.db.PiideoSchema.*;
+
 /**
  * Created by vas on 12/26/17.
  */
@@ -29,47 +31,48 @@ public class ChatLab {
     public static ChatLab get(Context context) {
         if (sEventLab == null) {
             sEventLab = new ChatLab(context.getApplicationContext());
+//            return new ChatLab(context.getApplicationContext());
         }
         return sEventLab;
     }
 
     public static ContentValues getContentValues(PiideoRow row) {
         ContentValues values = new ContentValues();
-        values.put(PiideoSchema.ChatTable.Cols.PIIDEO_FILE, row.getPiideoFileName());
-        values.put(PiideoSchema.ChatTable.Cols.PIIDEO_STATE, row.getPiideoState());
+        values.put(ChatTable.Cols.PIIDEO_FILE, row.getPiideoFileName());
+        values.put(ChatTable.Cols.PIIDEO_STATE, row.getPiideoState());
         return values;
     }
 
     public static ContentValues getContentValues(Member member) {
         ContentValues values = new ContentValues();
-        values.put(PiideoSchema.MemberTable.Cols.NEO_ID, member.getId());
-        values.put(PiideoSchema.MemberTable.Cols.PHONE, member.getPhoneNumber());
-        values.put(PiideoSchema.MemberTable.Cols.CHAT_ID, member.getChatId());
-        values.put(PiideoSchema.MemberTable.Cols.C_CODE, member.getCountryCode());
-        values.put(PiideoSchema.MemberTable.Cols.PH_PREFIX, member.getPhonePrefix());
+        values.put(MemberTable.Cols.NEO_ID, member.getId());
+        values.put(MemberTable.Cols.PHONE, member.getPhoneNumber());
+        values.put(MemberTable.Cols.CHAT_ID, member.getChatId());
+        values.put(MemberTable.Cols.C_CODE, member.getCountryCode());
+        values.put(MemberTable.Cols.PH_PREFIX, member.getPhonePrefix());
         return values;
     }
 
     public static ContentValues getContentValues(Subject subject) {
         ContentValues values = new ContentValues();
-        values.put(PiideoSchema.SubjectTable.Cols.NEO_ID, subject.getId());
-        values.put(PiideoSchema.SubjectTable.Cols.NAME, subject.getName());
+        values.put(SubjectTable.Cols.NEO_ID, subject.getId());
+        values.put(SubjectTable.Cols.NAME, subject.getName());
         return values;
     }
 
     public static ContentValues getContentValues(School school) {
         ContentValues values = new ContentValues();
-        values.put(PiideoSchema.SchoolTable.Cols.NEO_ID, school.getId());
-        values.put(PiideoSchema.SchoolTable.Cols.NAME, school.getName());
+        values.put(SchoolTable.Cols.NEO_ID, school.getId());
+        values.put(SchoolTable.Cols.NAME, school.getName());
         return values;
     }
 
     public static ContentValues getContentValues(FcmMessage message) {
         ContentValues values = new ContentValues();
-        values.put(PiideoSchema.MessageTable.Cols.CONTENT, message.getContent());
-        values.put(PiideoSchema.MessageTable.Cols.SENDER_ID, message.getFrom());
-        values.put(PiideoSchema.MessageTable.Cols.RECEIVER_ID, message.getTo());
-        values.put(PiideoSchema.MessageTable.Cols.MSG_TYPE, message.getType());
+        values.put(MessageTable.Cols.CONTENT, message.getContent());
+        values.put(MessageTable.Cols.SENDER_ID, message.getFrom());
+        values.put(MessageTable.Cols.RECEIVER_ID, message.getTo());
+        values.put(MessageTable.Cols.MSG_TYPE, message.getType());
         return values;
     }
 
@@ -81,7 +84,7 @@ public class ChatLab {
 
     private ChatRowCursorWrapper queryChat(String whereClause, String[] whereArgs) {
         Cursor cursor = mDataBase.query(
-                PiideoSchema.ChatTable.NAME,
+                ChatTable.NAME,
                 null,
                 whereClause,
                 whereArgs,
@@ -94,7 +97,7 @@ public class ChatLab {
 
     private SubjectCursorWrapper querySubject(String whereClause, String[] whereArgs) {
         Cursor cursor = mDataBase.query(
-                PiideoSchema.SubjectTable.NAME,
+                SubjectTable.NAME,
                 null,
                 whereClause,
                 whereArgs,
@@ -107,7 +110,7 @@ public class ChatLab {
 
     private SchoolCursorWrapper querySchool(String whereClause, String[] whereArgs) {
         Cursor cursor = mDataBase.query(
-                PiideoSchema.SchoolTable.NAME,
+                SchoolTable.NAME,
                 null,
                 whereClause,
                 whereArgs,
@@ -120,7 +123,7 @@ public class ChatLab {
 
     private MemberCursorWrapper queryMember(String whereClause, String[] whereArgs, String orderBy) {
         Cursor cursor = mDataBase.query(
-                PiideoSchema.MemberTable.NAME,
+                MemberTable.NAME,
                 null,
                 whereClause,
                 whereArgs,
@@ -133,7 +136,7 @@ public class ChatLab {
 
     private MemberCursorWrapper queryQueueMember(String whereClause, String[] whereArgs, String orderBy) {
         Cursor cursor = mDataBase.query(
-                PiideoSchema.MemberQueue.NAME,
+                MemberQueue.NAME,
                 null,
                 whereClause,
                 whereArgs,
@@ -146,7 +149,7 @@ public class ChatLab {
 
     private FcmMessageCursorWrapper queryMessage(String whereClause, String[] whereArgs) {
         Cursor cursor = mDataBase.query(
-                PiideoSchema.MessageTable.NAME,
+                MessageTable.NAME,
                 null,
                 whereClause,
                 whereArgs,
@@ -158,7 +161,7 @@ public class ChatLab {
 
     private <W> W query0(String whereClause, String[] whereArgs, WrapperCreator<W> creator) {
         Cursor cursor = mDataBase.query(
-                PiideoSchema.MessageTable.NAME,
+                MessageTable.NAME,
                 null,
                 whereClause,
                 whereArgs,
@@ -194,7 +197,7 @@ public class ChatLab {
             Log.e("MULTIPLE", "Multiple piideo save");
         }
         ContentValues values = ChatLab.getContentValues(item);
-        mDataBase.insert(PiideoSchema.ChatTable.NAME, null, values);
+        mDataBase.insert(ChatTable.NAME, null, values);
     }
 
     public void enqueue(List<Member> items) {
@@ -204,8 +207,8 @@ public class ChatLab {
         }
 //        mDataBase.beginTransaction();
         for (ContentValues values : cv) {
-            long error = mDataBase.insertOrThrow(PiideoSchema.MemberQueue.NAME, null, values);
-            Log.d("ENQUE", "" + error );
+            long error = mDataBase.insertOrThrow(MemberQueue.NAME, null, values);
+            Log.d("ENQUE", "" + error);
         }
 //        mDataBase.endTransaction();
     }
@@ -221,8 +224,8 @@ public class ChatLab {
             member = cursor.getMember(null, null);
         }
         mDataBase.delete(
-                PiideoSchema.MemberQueue.NAME,
-                PiideoSchema.MemberQueue.Cols.CHAT_ID + " = ?",
+                MemberQueue.NAME,
+                MemberQueue.Cols.CHAT_ID + " = ?",
                 new String[]{"" + member.getChatId()}
         );
 //        mDataBase.endTransaction();
@@ -230,12 +233,12 @@ public class ChatLab {
     }
 
     public void clearQueue() {
-        mDataBase.delete(PiideoSchema.MemberQueue.NAME, null, null);
+        mDataBase.delete(MemberQueue.NAME, null, null);
     }
 
     public PiideoRow searchBy(String piideoName) {
         try (ChatRowCursorWrapper cursor = queryChat(
-                PiideoSchema.ChatTable.Cols.PIIDEO_FILE + " = ?",
+                ChatTable.Cols.PIIDEO_FILE + " = ?",
                 new String[]{piideoName}
         )) {
             if (cursor.getCount() > 1) {
@@ -251,17 +254,17 @@ public class ChatLab {
 
     public void setPiideoDone(String piideoName) {
         ContentValues values = new ContentValues();
-        values.put(PiideoSchema.ChatTable.Cols.PIIDEO_STATE, PiideoSchema.ChatTable.PIIDEO_STATE_DONE);
+        values.put(ChatTable.Cols.PIIDEO_STATE, ChatTable.PIIDEO_STATE_DONE);
         mDataBase.update(
-                PiideoSchema.ChatTable.NAME,
+                ChatTable.NAME,
                 values,
-                PiideoSchema.ChatTable.Cols.PIIDEO_FILE + " = ?",
+                ChatTable.Cols.PIIDEO_FILE + " = ?",
                 new String[]{piideoName});
     }
 
 //    public void setPiideoLoad(String piideoName) {
 //        ContentValues values = new ContentValues();
-//        values.put(PiideoSchema.ChatTable.Cols.PIIDEO_STATE, PiideoSchema.ChatTable.P)
+//        values.put(ChatTable.Cols.PIIDEO_STATE, ChatTable.P)
 //    }
 
     public Member getMember() {
@@ -309,42 +312,63 @@ public class ChatLab {
         addSchool(member.getSchool());
         addSubject(member.getSubject());
         ContentValues values = ChatLab.getContentValues(member);
-        mDataBase.insert(PiideoSchema.MemberTable.NAME, null, values);
+        mDataBase.insert(MemberTable.NAME, null, values);
     }
 
     private void addSubject(Subject subject) {
         ContentValues values = ChatLab.getContentValues(subject);
-        mDataBase.insert(PiideoSchema.SubjectTable.NAME, null, values);
+        mDataBase.insert(SubjectTable.NAME, null, values);
     }
 
     private void addSchool(School school) {
         ContentValues values = ChatLab.getContentValues(school);
-        mDataBase.insert(PiideoSchema.SchoolTable.NAME, null, values);
+        mDataBase.insert(SchoolTable.NAME, null, values);
+    }
+
+    public void updateMember(Member member) {
+        updateSchool(member.getSchool());
+        updateSubject(member.getSubject());
+        ContentValues values = ChatLab.getContentValues(member);
+        mDataBase.update(
+                MemberTable.NAME,
+                values,
+                MemberTable.Cols.CHAT_ID + " = ?",
+                new String[]{member.getChatId()});
+    }
+
+    private void updateSubject(Subject subject) {
+        deleteSubject();
+        addSubject(subject);
+    }
+
+    private void updateSchool(School school) {
+        deleteSchool();
+        addSchool(school);
     }
 
     public void deleteMember() {
         deleteSubject();
         deleteSchool();
-        mDataBase.delete(PiideoSchema.MemberTable.NAME, null, null);
+        mDataBase.delete(MemberTable.NAME, null, null);
     }
 
     private void deleteSubject() {
-        mDataBase.delete(PiideoSchema.SubjectTable.NAME, null, null);
+        mDataBase.delete(SubjectTable.NAME, null, null);
     }
 
     private void deleteSchool() {
-        mDataBase.delete(PiideoSchema.SchoolTable.NAME, null, null);
+        mDataBase.delete(SchoolTable.NAME, null, null);
     }
 
     public long addMessage(FcmMessage message) {
         ContentValues values = ChatLab.getContentValues(message);
-        return mDataBase.insert(PiideoSchema.MessageTable.NAME, null, values);
+        return mDataBase.insert(MessageTable.NAME, null, values);
     }
 
     public FcmMessage getReducedFcmMessage(String id) {
         try (
                 FcmMessageCursorWrapper cursor = queryMessage(
-                        PiideoSchema.MessageTable.Cols.UUID + " = ? ",
+                        MessageTable.Cols.UUID + " = ? ",
                         new String[]{id})) {
             if (cursor.getCount() == 0) {
                 return null;

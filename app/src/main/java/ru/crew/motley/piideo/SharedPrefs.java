@@ -11,6 +11,7 @@ public class SharedPrefs {
     private static final String REQUEST_MESSAGE = "requestMessage";
     private static final String SEARCHING = "searching";
     private static final String SEARCHING_COUNT = "searching_count";
+    private static final String SEARCH_START_TIME = "searching_start_time";
 
     private static final String CHAT = "page";
     private static final String CHAT_START_TIME = "chatStartTime";
@@ -20,7 +21,7 @@ public class SharedPrefs {
 
     private static final String VERIFICATION_ID = "verificationId";
 
-    private static final String PROGRESS_TIME = "progressTime";
+    private static final String PROGRESS_TIME = "startSearchingTime";
 
 
     public static void searchSubject(String value, Context context) {
@@ -161,16 +162,21 @@ public class SharedPrefs {
                 .apply();
     }
 
-    public static void progressTime(long millis, Context context) {
+    public static void startSearchingTime(long millis, Context context) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
         prefs.edit()
-                .putLong(HANDSHAKE_START_TIME, millis)
+                .putLong(SEARCH_START_TIME, millis)
                 .apply();
     }
 
-    public static long loadProgressTime(Context context) {
+    public static long loadStartSearchingTime(Context context) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-        long result = prefs.getLong(HANDSHAKE_START_TIME, -1);
+        long result = prefs.getLong(SEARCH_START_TIME, -1);
         return result;
+    }
+
+    public static boolean searchCompleted(Context context) {
+        long endTime = SharedPrefs.getSearchCount(context) * 50 * 1000 + SharedPrefs.loadStartSearchingTime(context);
+        return endTime < System.currentTimeMillis();
     }
 }

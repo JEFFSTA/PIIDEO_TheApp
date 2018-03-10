@@ -43,6 +43,7 @@
 
         <activity
             android:name=".chat.activity.ChatActivity"
+            android:noHistory="true"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.ChatTheme"
             android:windowSoftInputMode="adjustResize|stateHidden">
@@ -63,6 +64,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".settings.activity.SettingsActivity"
+            android:screenOrientation="portrait" />
 
         <activity
             android:name=".handshake.activity.HandshakeActivity"

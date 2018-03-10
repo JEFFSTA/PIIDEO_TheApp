@@ -50,6 +50,7 @@ import ru.crew.motley.piideo.search.fragment.SearchHelpersFragment;
 import ru.crew.motley.piideo.search.fragment.SearchSubjectFragment;
 import ru.crew.motley.piideo.search.fragment.SendingRequestFragment;
 import ru.crew.motley.piideo.search.fragment.UselessFragment;
+import ru.crew.motley.piideo.settings.activity.SettingsActivity;
 import ru.crew.motley.piideo.splash.SplashActivity;
 
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
@@ -98,6 +99,7 @@ public class SearchActivity extends RequestListenerActivity
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
+        Log.d(TAG, "createActivity " + currentStep);
         super.onCreate(savedInstanceState);
         mDatabase = FirebaseDatabase.getInstance().getReference();
         initializeFirebaseAuthListener();
@@ -135,6 +137,10 @@ public class SearchActivity extends RequestListenerActivity
 //                Intent chatIntent = ChatActivity.getIntent(null, this);
 //                startActivity(chatIntent);
 //                break;
+            case R.id.settings:
+                Intent ii = SettingsActivity.getIntent(this);
+                startActivity(ii);
+                break;
             case R.id.logout:
                 FirebaseAuth.getInstance().signOut();
                 ChatLab lab = ChatLab.get(this);
@@ -171,9 +177,9 @@ public class SearchActivity extends RequestListenerActivity
         String filename = "myapp_log_" + new Date().getTime() + ".log";
 
         File logFile = new File(logFolder, filename);
-        if (logFile.exists()) {
-            logFile.delete();
-        }
+//        if (logFile.exists()) {
+//            logFile.delete();
+//        }
         try {
             String[] cmd = new String[]{"logcat", "-f", logFile.getAbsolutePath(), "-v", "time", "*:D"};
             Runtime.getRuntime().exec(cmd);
@@ -322,12 +328,14 @@ public class SearchActivity extends RequestListenerActivity
 
     @Override
     public void onStart() {
+        Log.d(TAG, "start Activity " + currentStep);
         super.onStart();
         mAuth.addAuthStateListener(mAuthListener);
     }
 
     @Override
     public void onStop() {
+        Log.d(TAG, "stop Activity " + currentStep);
         super.onStop();
         if (mAuthListener != null) {
             mAuth.removeAuthStateListener(mAuthListener);
@@ -345,11 +353,11 @@ public class SearchActivity extends RequestListenerActivity
     @Override
     protected void onResume() {
         super.onResume();
-        Log.d(TAG, "onResume");
+        Log.d(TAG, "resume Activity " + currentStep);
         IntentFilter filter = new IntentFilter(Events.BROADCAST_NO_HELP);
         filter.setPriority(1);
         registerReceiver(mRejectReceiver, filter);
-        if (SharedPrefs.isSearching(this)) {
+        if (!SharedPrefs.searchCompleted(this)) {
             currentStep = Page.REQUEST;
             showNextStep();
         }
@@ -358,8 +366,14 @@ public class SearchActivity extends RequestListenerActivity
     @Override
     protected void onPause() {
         super.onPause();
-        Log.d(TAG, "onPause");
+        Log.d(TAG, "pause Activity " + currentStep);
         unregisterReceiver(mRejectReceiver);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG, "destroy Activity " + currentStep);
     }
 
     @Override

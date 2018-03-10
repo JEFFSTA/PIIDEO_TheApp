@@ -14,7 +14,7 @@ public class RequestReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        Intent onPush = new Intent(context, RequestService.class);
+        Intent onPush = RequestService.getIntent(context);
         context.startService(onPush);
     }
 }

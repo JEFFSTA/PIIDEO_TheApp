@@ -35,6 +35,7 @@ import com.squareup.picasso.Picasso;
 import org.parceler.Parcels;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
@@ -497,16 +498,16 @@ public class ChatFragment extends ButterFragment
     private void showRateView() {
         // TODO: 002 02.02.18 implement rate view
         Intent i = SplashActivity.getIntent(getActivity());
-        getActivity().startActivity(i);
-        getActivity().finish();
         SharedPrefs.clearChatStartTime(getActivity());
         SharedPrefs.clearChatMessageId(getActivity());
+        getActivity().startActivity(i);
+        getActivity().finish();
     }
 
     private void deleteUselessFiles() {
         File dir = new File(HOME_PATH);
         if (dir.isDirectory()) {
-            String[] children = dir.list();
+            String[] children = dir.list((dir1, name) -> name.toLowerCase().endsWith("jpg") || name.toLowerCase().endsWith("mp4"));
             for (String aChildren : children) {
                 new File(dir, aChildren).delete();
             }

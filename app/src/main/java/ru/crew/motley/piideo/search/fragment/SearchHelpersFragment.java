@@ -1,7 +1,6 @@
 package ru.crew.motley.piideo.search.fragment;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
@@ -18,7 +17,6 @@ import android.widget.Toast;
 import org.parceler.Parcels;
 
 import java.net.SocketTimeoutException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -38,7 +36,6 @@ import ru.crew.motley.piideo.network.neo.Statement;
 import ru.crew.motley.piideo.network.neo.Statements;
 import ru.crew.motley.piideo.network.neo.transaction.Data;
 import ru.crew.motley.piideo.search.SearchListener;
-import ru.crew.motley.piideo.search.SearchRepeaterSingleton;
 import ru.crew.motley.piideo.search.SendRequestCallback;
 import ru.crew.motley.piideo.search.adapter.SearchAdapter;
 import ru.crew.motley.piideo.search.service.RequestService;
@@ -127,7 +124,7 @@ public class SearchHelpersFragment extends ButterFragment implements SendRequest
 //                            if (mMembers.isEmpty()) {
 
 //                            } else {
-                                mSearchAdapter.notifyDataSetChanged();
+                            mSearchAdapter.notifyDataSetChanged();
 //                            }
                         },
                         error -> {
@@ -173,10 +170,10 @@ public class SearchHelpersFragment extends ButterFragment implements SendRequest
         ChatLab.get(getContext()).enqueue(mMembers);
 //        RequestService.setMembers(mMembers);
 //        RequestService.moveToFirstPosition(receiverId);
-        Intent i = new Intent(getContext(), RequestService.class);
+        Intent i = RequestService.getIntent(getContext());
         SharedPrefs.setSearching(true, getContext());
         SharedPrefs.setSearchCount(mMembers.size(), getContext());
-        SharedPrefs.progressTime(new Date().getTime(), getContext());
+        SharedPrefs.startSearchingTime(new Date().getTime(), getContext());
         getActivity().startService(i);
         mCallback.onNext();
     }

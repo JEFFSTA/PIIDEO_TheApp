@@ -11,6 +11,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
+import android.support.transition.ChangeBounds;
+import android.support.transition.TransitionManager;
 import android.support.v4.app.ActivityCompat;
 import android.text.TextUtils;
 import android.util.Log;
@@ -30,9 +32,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.TimeZone;
 
 import butterknife.BindView;
 import dagger.android.support.AndroidSupportInjection;
@@ -201,12 +200,54 @@ public class PhotoImageFragment extends ButterFragment {
 //        mShutterFiller.setVisibility(View.VISIBLE);
         getActivity().startService(intent);
         getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        enlargeRecButton();
+    }
+
+    private void enlargeRecButton() {
+        int newSquareSize = (int) (mShutter.getWidth() * 1.2);
+        ResizeAnimation resizeAnimation = new ResizeAnimation(
+                mShutter,
+                (int) (mShutter.getWidth() * 1.25),
+                mShutter.getWidth()
+        );
+        resizeAnimation.setDuration(200);
+        mShutter.startAnimation(resizeAnimation);
+//        ViewGroup sceneRoot = (ViewGroup) mShutter.getParent();
+//        int newSquareSize = (int) (mShutter.getWidth() * 1.2);
+//        ChangeBounds transition = new ChangeBounds();
+//        transition.setDuration(200);
+//        TransitionManager.beginDelayedTransition(sceneRoot, transition);
+//        ViewGroup.LayoutParams params = mShutter.getLayoutParams();
+//
+//        params.width = newSquareSize;
+//        params.height = newSquareSize;
+//        mShutter.setLayoutParams(params);
+    }
+
+    private void reduceRecButton() {
+        ResizeAnimation resizeAnimation = new ResizeAnimation(
+                mShutter,
+                (int) (mShutter.getWidth() * 0.8),
+                mShutter.getWidth()
+        );
+        resizeAnimation.setDuration(100);
+        mShutter.startAnimation(resizeAnimation);
+//        ViewGroup sceneRoot = (ViewGroup) mShutter.getParent();
+//        int newSquareSize = (int) (mShutter.getWidth() * 0.84);
+//        ChangeBounds transition = new ChangeBounds();
+//        transition.setDuration(20);
+//        TransitionManager.beginDelayedTransition(sceneRoot, transition);
+//        ViewGroup.LayoutParams params = mShutter.getLayoutParams();
+//        params.width = newSquareSize;
+//        params.height = newSquareSize;
+//        mShutter.setLayoutParams(params);
     }
 
     private void stopRecord(Intent intent) {
-        mShutterFiller.setVisibility(View.GONE);
+//        mShutterFiller.setVisibility(View.GONE);
         getActivity().stopService(intent);
         getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        reduceRecButton();
         // TODO: 1/20/18 remove null from getIntent
         Intent i = ChatActivity.getIntent(mMessageId, getActivity());
         getActivity().startActivity(i);
