@@ -17,6 +17,8 @@ public class Member {
     private School mSchool;
     private Member mReceivedFrom;
 
+    private int flagResId;
+
 
     public Long getId() {
         return id;
@@ -88,6 +90,14 @@ public class Member {
 
     public void setReceivedFrom(Member receivedFrom) {
         mReceivedFrom = receivedFrom;
+    }
+
+    public int getFlagResId() {
+        return flagResId;
+    }
+
+    public void setFlagResId(int flagResId) {
+        this.flagResId = flagResId;
     }
 
     public static Member fromJson(String jsonString) {

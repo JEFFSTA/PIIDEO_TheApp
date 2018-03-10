@@ -16,13 +16,20 @@ import android.widget.Toast;
 
 import org.parceler.Parcels;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.SocketTimeoutException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
 import butterknife.BindView;
+import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 import ru.crew.motley.piideo.ButterFragment;
 import ru.crew.motley.piideo.R;
 import ru.crew.motley.piideo.SharedPrefs;
@@ -35,6 +42,7 @@ import ru.crew.motley.piideo.network.neo.Request;
 import ru.crew.motley.piideo.network.neo.Statement;
 import ru.crew.motley.piideo.network.neo.Statements;
 import ru.crew.motley.piideo.network.neo.transaction.Data;
+import ru.crew.motley.piideo.search.Country;
 import ru.crew.motley.piideo.search.SearchListener;
 import ru.crew.motley.piideo.search.SendRequestCallback;
 import ru.crew.motley.piideo.search.adapter.SearchAdapter;
@@ -62,6 +70,7 @@ public class SearchHelpersFragment extends ButterFragment implements SendRequest
 
     private Member mMember;
     private List<Member> mMembers = new LinkedList<>();
+    private List<Country> mCountries = new ArrayList<>();
 
     public interface NoHelpersCallback {
         void showNoOneCanHelp();
@@ -82,7 +91,7 @@ public class SearchHelpersFragment extends ButterFragment implements SendRequest
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mMember = Parcels.unwrap(getArguments().getParcelable(ARG_MEMBER));
-        mSearchAdapter = new SearchAdapter(mMembers, this);
+        mSearchAdapter = new SearchAdapter(mMembers, mCountries, this);
     }
 
     @Nullable
@@ -92,7 +101,7 @@ public class SearchHelpersFragment extends ButterFragment implements SendRequest
         View v = super.onCreateView(inflater, container, savedInstanceState);
         mSearchRecycler.setLayoutManager(new LinearLayoutManager(getActivity()));
         mSearchRecycler.setAdapter(mSearchAdapter);
-        startSearch();
+        startSearch0();
         return v;
     }
 
@@ -107,8 +116,6 @@ public class SearchHelpersFragment extends ButterFragment implements SendRequest
                 .subscribe(transaction -> {
                             List<Data> responseData = transaction.getResults().get(0).getData();
                             if (responseData.isEmpty()) {
-//                                Toast.makeText(getActivity(), R.string.sch_no_result, Toast.LENGTH_SHORT)
-//                                        .show();
                                 mHelpersCallback.showNoOneCanHelp();
                                 return;
                             }
@@ -121,11 +128,7 @@ public class SearchHelpersFragment extends ButterFragment implements SendRequest
                                 Log.d(TAG, member.toString());
                                 mMembers.add(member);
                             }
-//                            if (mMembers.isEmpty()) {
-
-//                            } else {
                             mSearchAdapter.notifyDataSetChanged();
-//                            }
                         },
                         error -> {
                             Log.e(TAG, "Request target search problem", error);
@@ -176,6 +179,71 @@ public class SearchHelpersFragment extends ButterFragment implements SendRequest
         SharedPrefs.startSearchingTime(new Date().getTime(), getContext());
         getActivity().startService(i);
         mCallback.onNext();
+    }
+
+    private Single<List<Country>> loadCountries() {
+        return Single.fromCallable(() -> {
+            List<Country> data = new ArrayList<>(233);
+            BufferedReader reader = null;
+            try {
+                InputStream countriesStream = getContext()
+                        .getAssets()
+                        .open("countries.dat");
+                reader = new BufferedReader(new InputStreamReader(countriesStream, "UTF-8"));
+                String line;
+                int i = 0;
+                while ((line = reader.readLine()) != null) {
+                    Country c = new Country(line, i);
+                    data.add(c);
+                    i++;
+                }
+            } catch (IOException e) {
+                Log.e(TAG, "Error countries file reading", e);
+            } finally {
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (IOException e) {
+                        Log.e(TAG, "Error countries reader closing", e);
+                    }
+                }
+            }
+            return data;
+        }).subscribeOn(Schedulers.io());
+    }
+
+    private void startSearch0() {
+        String searchSubject = SharedPrefs.getSearchSubject(getActivity());
+        Statement search = searchRequest(searchSubject);
+        Statements statements = new Statements();
+        statements.getValues().add(search);
+        NeoApi api = NeoApiSingleton.getInstance();
+        Single<List<Member>> membersRequest = api.executeStatement(statements)
+                .map(transaction -> {
+                    List<Data> responseData = transaction.getResults().get(0).getData();
+                    List<Member> members = new ArrayList<>();
+                    for (Data item : responseData) {
+                        String targetFriendOfFriend = item.getRow()
+                                .get(0)
+                                .getValue();
+                        Member member = Member.fromJson(targetFriendOfFriend);
+                        Log.d(TAG, member.toString());
+                        members.add(member);
+                    }
+                    return members;
+                });
+        Single<List<Country>> countriesLoading = loadCountries();
+        Single.zip(membersRequest, countriesLoading, ((members, countries) -> {
+            mMembers.clear();
+            mMembers.addAll(members);
+            mCountries.clear();
+            mCountries.addAll(countries);
+            return 0;
+        })).subscribeOn(AndroidSchedulers.mainThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(useless -> {
+                    mSearchAdapter.notifyDataSetChanged();
+                });
     }
 
 
