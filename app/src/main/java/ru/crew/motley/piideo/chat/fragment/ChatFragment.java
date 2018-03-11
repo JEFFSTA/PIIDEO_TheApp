@@ -61,6 +61,7 @@ import ru.crew.motley.piideo.chat.model.PiideoLoader;
 import ru.crew.motley.piideo.fcm.FcmMessage;
 import ru.crew.motley.piideo.fcm.Receiver;
 import ru.crew.motley.piideo.network.Member;
+import ru.crew.motley.piideo.network.NetworkErrorCallback;
 import ru.crew.motley.piideo.network.neo.NeoApi;
 import ru.crew.motley.piideo.network.neo.NeoApiSingleton;
 import ru.crew.motley.piideo.network.neo.Parameters;
@@ -116,12 +117,14 @@ public class ChatFragment extends ButterFragment
     private DatabaseReference mDatabase;
 
     private PiideoShower mPiideoShower;
+    private NetworkErrorCallback mErrorCallback;
 
     private CompositeDisposable disposables = new CompositeDisposable();
 
-    public static ChatFragment newInstance(String dbMessageId, PiideoShower piideoShower) {
+    public static ChatFragment newInstance(String dbMessageId, PiideoShower piideoShower, NetworkErrorCallback errorCallback) {
         ChatFragment f = new ChatFragment();
         f.mPiideoShower = piideoShower;
+        f.mErrorCallback = errorCallback;
         Bundle args = new Bundle();
         args.putString(ARG_DB_MESSAGE_ID, dbMessageId);
         f.setArguments(args);
@@ -330,7 +333,10 @@ public class ChatFragment extends ButterFragment
                     .child("notifications")
                     .child("messages")
                     .push()
-                    .setValue(message);
+                    .setValue(message)
+                    .addOnFailureListener(failure -> {
+                        mErrorCallback.onError();
+                    });
         }
         mDatabase
                 .child("messages")
@@ -410,6 +416,7 @@ public class ChatFragment extends ButterFragment
                         },
                         error -> {
                             Log.e("Piideo", "Send error", error);
+                            mErrorCallback.onError();
                         });
     }
 
@@ -469,6 +476,9 @@ public class ChatFragment extends ButterFragment
                                     piideoImage.setOnClickListener(v -> mPiideoShower.showPiideo(message.getContent()));
                                 },
                                 error -> {
+
+                                    mErrorCallback.onError();
+
                                     Log.e("Piideo", "Receive error", error);
                                 })
         );
@@ -490,7 +500,10 @@ public class ChatFragment extends ButterFragment
             mDatabase.child("notifications")
                     .child("handshake")
                     .push()
-                    .setValue(message);
+                    .setValue(message)
+                    .addOnFailureListener(failure -> {
+                        mErrorCallback.onError();
+                    });
             mAckSent = true;
         }
     }

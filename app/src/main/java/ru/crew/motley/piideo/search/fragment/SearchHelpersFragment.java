@@ -12,7 +12,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
-import android.widget.Toast;
 
 import org.parceler.Parcels;
 
@@ -20,7 +19,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
@@ -35,6 +33,7 @@ import ru.crew.motley.piideo.R;
 import ru.crew.motley.piideo.SharedPrefs;
 import ru.crew.motley.piideo.chat.db.ChatLab;
 import ru.crew.motley.piideo.network.Member;
+import ru.crew.motley.piideo.network.NetworkErrorCallback;
 import ru.crew.motley.piideo.network.neo.NeoApi;
 import ru.crew.motley.piideo.network.neo.NeoApiSingleton;
 import ru.crew.motley.piideo.network.neo.Parameters;
@@ -60,6 +59,7 @@ public class SearchHelpersFragment extends ButterFragment implements SendRequest
 
     private SearchListener mCallback;
     private NoHelpersCallback mHelpersCallback;
+    private NetworkErrorCallback mErrorCallback;
 
     @BindView(R.id.searchRecycler)
     RecyclerView mSearchRecycler;
@@ -77,13 +77,14 @@ public class SearchHelpersFragment extends ButterFragment implements SendRequest
     }
 
 
-    public static SearchHelpersFragment newInstance(Parcelable member, SearchListener listener) {
+    public static SearchHelpersFragment newInstance(Parcelable member, SearchListener listener, NetworkErrorCallback errorCallback) {
         Bundle args = new Bundle();
         args.putParcelable(ARG_MEMBER, member);
         SearchHelpersFragment fragment = new SearchHelpersFragment();
         fragment.setArguments(args);
         fragment.mCallback = listener;
         fragment.mHelpersCallback = (NoHelpersCallback) listener;
+        fragment.mErrorCallback = errorCallback;
         return fragment;
     }
 
@@ -132,11 +133,12 @@ public class SearchHelpersFragment extends ButterFragment implements SendRequest
                         },
                         error -> {
                             Log.e(TAG, "Request target search problem", error);
-                            Toast.makeText(getActivity(), R.string.ex_network, Toast.LENGTH_SHORT)
-                                    .show();
-                            if (!(error instanceof SocketTimeoutException)) {
-                                throw new RuntimeException(error);
-                            }
+//                            Toast.makeText(getActivity(), R.string.ex_network, Toast.LENGTH_SHORT)
+//                                    .show();
+//                            if (!(error instanceof SocketTimeoutException)) {
+//                                throw new RuntimeException(error);
+//                            }
+                            mErrorCallback.onError();
                         });
     }
 
@@ -233,17 +235,26 @@ public class SearchHelpersFragment extends ButterFragment implements SendRequest
                     return members;
                 });
         Single<List<Country>> countriesLoading = loadCountries();
-        Single.zip(membersRequest, countriesLoading, ((members, countries) -> {
-            mMembers.clear();
-            mMembers.addAll(members);
-            mCountries.clear();
-            mCountries.addAll(countries);
-            return 0;
-        })).subscribeOn(AndroidSchedulers.mainThread())
+        Single.zip(
+                membersRequest.onErrorReturn(error -> {
+                    mErrorCallback.onError();
+                    return new ArrayList<>();
+                }),
+                countriesLoading,
+                ((members, countries) -> {
+                    mMembers.clear();
+                    mMembers.addAll(members);
+                    mCountries.clear();
+                    mCountries.addAll(countries);
+                    return 0;
+                })).subscribeOn(AndroidSchedulers.mainThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(useless -> {
-                    mSearchAdapter.notifyDataSetChanged();
-                });
+                            mSearchAdapter.notifyDataSetChanged();
+                        },
+                        error -> {
+                            mErrorCallback.onError();
+                        });
     }
 
 

@@ -1,35 +1,14 @@
 package ru.crew.motley.piideo.registration.activity;
 
-import android.annotation.SuppressLint;
-import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.IntentSender;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.annotation.IntDef;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.WindowManager;
 
-import com.google.android.gms.auth.api.Auth;
-import com.google.android.gms.auth.api.credentials.Credential;
-import com.google.android.gms.auth.api.credentials.Credentials;
-import com.google.android.gms.auth.api.credentials.CredentialsClient;
-import com.google.android.gms.auth.api.credentials.HintRequest;
-import com.google.android.gms.auth.api.phone.SmsRetriever;
-import com.google.android.gms.auth.api.phone.SmsRetrieverClient;
-import com.google.android.gms.common.api.CommonStatusCodes;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.Status;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -39,6 +18,8 @@ import butterknife.ButterKnife;
 import ru.crew.motley.piideo.R;
 import ru.crew.motley.piideo.chat.db.ChatLab;
 import ru.crew.motley.piideo.network.Member;
+import ru.crew.motley.piideo.network.NetworkErrorCallback;
+import ru.crew.motley.piideo.network.activity.ConnectionErrorActivity;
 import ru.crew.motley.piideo.registration.RegistrationListener;
 import ru.crew.motley.piideo.registration.fragments.PhoneFragment;
 import ru.crew.motley.piideo.registration.fragments.PhoneVerifyFragment;
@@ -50,7 +31,7 @@ import ru.crew.motley.piideo.search.activity.SearchActivity;
  * Created by vas on 12/17/17.
  */
 
-public class UserSetupActivity extends AppCompatActivity implements RegistrationListener {
+public class UserSetupActivity extends ConnectionErrorActivity implements RegistrationListener, NetworkErrorCallback {
 
     private static final String TAG = UserSetupActivity.class.getSimpleName();
 
@@ -144,22 +125,22 @@ public class UserSetupActivity extends AppCompatActivity implements Registration
     private void showNextStep() {
         switch (currentStep) {
             case Page.PHONE_PAGE:
-                Fragment phone = PhoneFragment.newInstance(this);
+                Fragment phone = PhoneFragment.newInstance(this, this);
                 showFragment(phone);
                 break;
             case Page.VERIFY_PAGE:
                 Parcelable memberForVerification = Parcels.wrap(mMember);
-                Fragment verify = PhoneVerifyFragment.newInstance(memberForVerification, this);
+                Fragment verify = PhoneVerifyFragment.newInstance(memberForVerification, this, this);
                 showFragment(verify);
                 break;
             case Page.SCHOOL_PAGE:
                 Parcelable memberForSchool = Parcels.wrap(mMember);
-                Fragment school = SchoolGroupFragment.newInstance(memberForSchool, this);
+                Fragment school = SchoolGroupFragment.newInstance(memberForSchool, this, this);
                 showFragment(school);
                 break;
             case Page.SUBJECT_PAGE:
                 Parcelable memberForSubject = Parcels.wrap(mMember);
-                Fragment subject = SubjectFragment.newInstance(memberForSubject, this);
+                Fragment subject = SubjectFragment.newInstance(memberForSubject, this, this);
                 showFragment(subject);
                 break;
             case Page.COMPLETE:
@@ -178,5 +159,14 @@ public class UserSetupActivity extends AppCompatActivity implements Registration
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.container, fragment)
                 .commit();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (errorShown()) {
+            backFromError();
+        } else {
+            onBackPressed();
+        }
     }
 }

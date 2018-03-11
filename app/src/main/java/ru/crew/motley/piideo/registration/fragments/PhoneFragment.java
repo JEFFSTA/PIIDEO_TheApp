@@ -44,6 +44,7 @@ import ru.crew.motley.piideo.ButterFragment;
 import ru.crew.motley.piideo.R;
 import ru.crew.motley.piideo.SharedPrefs;
 import ru.crew.motley.piideo.network.Member;
+import ru.crew.motley.piideo.network.NetworkErrorCallback;
 import ru.crew.motley.piideo.registration.RegistrationListener;
 
 /**
@@ -82,6 +83,7 @@ public class PhoneFragment extends ButterFragment {
     TextView timerValue;
 
     private RegistrationListener mRegistrationListener;
+    private NetworkErrorCallback mNetworkErrorCallback;
 
     private PhoneAuthProvider.OnVerificationStateChangedCallbacks mCallbacks;
     private PhoneAuthProvider.ForceResendingToken mResendToken;
@@ -94,7 +96,7 @@ public class PhoneFragment extends ButterFragment {
     private String GOO_S;
     private String MF;
 
-    public static PhoneFragment newInstance(/*Parcelable member,*/ RegistrationListener registrationListener) {
+    public static PhoneFragment newInstance(/*Parcelable member,*/ RegistrationListener registrationListener, NetworkErrorCallback errorCallback) {
 //        if (member == null) {
 //            throw new NullPointerException("Member variable can't be null");
 //        }
@@ -103,6 +105,7 @@ public class PhoneFragment extends ButterFragment {
         PhoneFragment fragment = new PhoneFragment();
         fragment.setArguments(args);
         fragment.mRegistrationListener = registrationListener;
+        fragment.mNetworkErrorCallback = errorCallback;
         return fragment;
     }
 
@@ -298,8 +301,11 @@ public class PhoneFragment extends ButterFragment {
                     } else {
                         // If sign in fails, display a message to the user.
                         Log.w(TAG, "signInAnonymously:failure", task.getException());
-                        throw new RuntimeException(task.getException());
+//                        throw new RuntimeException(task.getException());
                     }
+                })
+                .addOnFailureListener(getActivity(), task -> {
+                    mNetworkErrorCallback.onError();
                 });
     }
 

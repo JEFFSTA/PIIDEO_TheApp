@@ -237,15 +237,15 @@ public class SearchActivity extends RequestListenerActivity
         Fragment fragment;
         switch (currentStep) {
             case Page.BUTTON:
-                fragment = UselessFragment.Companion.newInstance(this);
+                fragment = UselessFragment.Companion.newInstance(this, this);
                 break;
             case Page.SUBJECT:
                 Parcelable memberForVerification = Parcels.wrap(mMember);
-                fragment = SearchSubjectFragment.newInstance(memberForVerification, this);
+                fragment = SearchSubjectFragment.newInstance(memberForVerification, this, this);
                 break;
             case Page.HELPERS:
                 Parcelable memberForSchool = Parcels.wrap(mMember);
-                fragment = SearchHelpersFragment.newInstance(memberForSchool, this);
+                fragment = SearchHelpersFragment.newInstance(memberForSchool, this, this);
                 break;
             case Page.REQUEST:
                 fragment = SendingRequestFragment.newInstance(this);
@@ -267,7 +267,10 @@ public class SearchActivity extends RequestListenerActivity
 
     @Override
     public void onBackPressed() {
-
+        if (errorShown()) {
+            backFromError();
+            return;
+        }
         switch (currentStep) {
             case Page.HELPERS:
                 currentStep = Page.SUBJECT;

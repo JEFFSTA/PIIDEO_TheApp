@@ -63,9 +63,9 @@ public class NeoApiSingleton {
                     return chain.proceed(newRequest);
                 })
                 .addInterceptor(interceptor)
-                .connectTimeout(120, TimeUnit.SECONDS)
-                .writeTimeout(110, TimeUnit.SECONDS)
-                .readTimeout(110, TimeUnit.SECONDS)
+                .connectTimeout(70, TimeUnit.SECONDS)
+                .writeTimeout(60, TimeUnit.SECONDS)
+                .readTimeout(60, TimeUnit.SECONDS)
                 .build();
 
         RxJava2CallAdapterFactory rxAdapter = RxJava2CallAdapterFactory.createWithScheduler(Schedulers.io());

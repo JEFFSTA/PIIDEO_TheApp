@@ -10,11 +10,12 @@ import ru.crew.motley.piideo.R
 import ru.crew.motley.piideo.chat.activity.ChatActivity
 import ru.crew.motley.piideo.contacts.PhoneContactObserver
 import ru.crew.motley.piideo.fcm.ShowDialogReceiver
+import ru.crew.motley.piideo.network.activity.ConnectionErrorActivity
 
 /**
  * Created by vas on 1/20/18.
  */
-abstract class RequestListenerActivity : AppCompatActivity() {
+abstract class RequestListenerActivity : ConnectionErrorActivity() {
 
     val fbNotificationReceiver = ShowDialogReceiver(this)
     val contactsListener by lazy { PhoneContactObserver(Handler()) }

@@ -17,8 +17,9 @@ import dagger.android.support.HasSupportFragmentInjector;
 import ru.crew.motley.piideo.R;
 import ru.crew.motley.piideo.chat.fragment.ChatFragment;
 import ru.crew.motley.piideo.chat.fragment.WatchPiideoFragment;
+import ru.crew.motley.piideo.network.activity.ConnectionErrorActivity;
 
-public class ChatActivity extends AppCompatActivity
+public class ChatActivity extends ConnectionErrorActivity
         implements
         ChatFragment.PiideoShower,
         WatchPiideoFragment.ChatShower,
@@ -47,7 +48,7 @@ public class ChatActivity extends AppCompatActivity
         Log.d(TAG, "create Activity ");
         setContentView(R.layout.activity_chat);
         mDBMessageId = getIntent().getStringExtra(EXTRA_DB_MESSAGE_ID);
-        Fragment fragment = ChatFragment.newInstance(mDBMessageId, this);
+        Fragment fragment = ChatFragment.newInstance(mDBMessageId, this, this);
         showFragment(fragment);
     }
 
@@ -101,7 +102,7 @@ public class ChatActivity extends AppCompatActivity
         if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
             getSupportFragmentManager().popBackStack();
         } else {
-            Fragment fragment = ChatFragment.newInstance(mDBMessageId, this);
+            Fragment fragment = ChatFragment.newInstance(mDBMessageId, this, this);
             showFragment(fragment);
         }
     }

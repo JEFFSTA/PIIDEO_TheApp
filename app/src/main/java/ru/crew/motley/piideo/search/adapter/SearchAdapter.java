@@ -40,6 +40,9 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.SearchView
     public void onBindViewHolder(SearchViewHolder holder, int position) {
         Member member = mMembers.get(position);
         String cc = member.getCountryCode();
+        if (cc.equals("8")) {
+            cc = "7";
+        }
         String resourceName = null;
         for (Country country : mCountries) {
             if (country.getCountryCodeStr().equals(cc)) {

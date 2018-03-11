@@ -35,6 +35,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import ru.crew.motley.piideo.ButterFragment;
 import ru.crew.motley.piideo.R;
 import ru.crew.motley.piideo.network.Member;
+import ru.crew.motley.piideo.network.NetworkErrorCallback;
 import ru.crew.motley.piideo.network.Subject;
 import ru.crew.motley.piideo.network.neo.NeoApi;
 import ru.crew.motley.piideo.network.neo.NeoApiSingleton;
@@ -70,13 +71,15 @@ public class SubjectFragment extends ButterFragment implements SubjectDialogList
 //    private List<Subject> mSubjects;
 
     private RegistrationListener mRegistrationListener;
+    private NetworkErrorCallback mErrorCallback;
 
-    public static SubjectFragment newInstance(Parcelable member, RegistrationListener registrationListener) {
+    public static SubjectFragment newInstance(Parcelable member, RegistrationListener registrationListener, NetworkErrorCallback errorCallback) {
         Bundle args = new Bundle();
         args.putParcelable(ARGS_MEMBER, member);
         SubjectFragment fragment = new SubjectFragment();
         fragment.setArguments(args);
         fragment.mRegistrationListener = registrationListener;
+        fragment.mErrorCallback = errorCallback;
         return fragment;
     }
 
@@ -95,12 +98,6 @@ public class SubjectFragment extends ButterFragment implements SubjectDialogList
         fragmentLayout = R.layout.fragment_subject;
         View v = super.onCreateView(inflater, container, savedInstanceState);
         next.setEnabled(true);
-//        ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, new String[]{"...", "''''"});
-//        mSubject.setAdapter(adapter);
-//        mSubject.setOnTouchListener((v1, event) -> {
-//            showSubjectDialog();
-//            return false;
-//        });
         return v;
     }
 
@@ -176,9 +173,7 @@ public class SubjectFragment extends ButterFragment implements SubjectDialogList
                             Log.e(TAG, "Error!: " + error.getLocalizedMessage());
                             Toast.makeText(getActivity(), R.string.ex_network, Toast.LENGTH_SHORT)
                                     .show();
-                            if (!(error instanceof SocketTimeoutException)) {
-                                throw new RuntimeException(error);
-                            }
+                            mErrorCallback.onError();
                         });
     }
 
@@ -198,9 +193,7 @@ public class SubjectFragment extends ButterFragment implements SubjectDialogList
                                 Log.e(TAG, "Error!: " + error1.getLocalizedMessage());
                                 Toast.makeText(getActivity(), R.string.ex_network, Toast.LENGTH_SHORT)
                                         .show();
-                                if (!(error1 instanceof SocketTimeoutException)) {
-                                    throw new RuntimeException(error1);
-                                }
+                                mErrorCallback.onError();
                             });
         }
     }
@@ -218,55 +211,9 @@ public class SubjectFragment extends ButterFragment implements SubjectDialogList
                             Log.e(TAG, "Deleteion old subjects problem occured", error);
                             Toast.makeText(getActivity(), R.string.ex_network, Toast.LENGTH_SHORT)
                                     .show();
-                            if (!(error instanceof SocketTimeoutException)) {
-                                throw new RuntimeException(error);
-                            }
+                            mErrorCallback.onError();
                         });
     }
-
-//    private void createNewSubjectAndMember() {
-//        Statements statements = new Statements();
-//        statements.getValues().add(subjectRequest());
-//        NeoApi api = NeoApiSingleton.getInstance();
-//        api.executeStatement(statements)
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .subscribe(transaction -> {
-//                            Subject subject = Subject.fromJson(
-//                                    transaction.getResults()
-//                                            .get(0)
-//                                            .getData()
-//                                            .get(0)
-//                                            .getRow()
-//                                            .get(0)
-//                                            .getValue());
-//                            subject.setId(
-//                                    (long) transaction.getResults()
-//                                            .get(0)
-//                                            .getData()
-//                                            .get(0)
-//                                            .getMeta()
-//                                            .get(0)
-//                                            .getId());
-//                            mMember.setSubject(subject);
-//                            createNewMember();
-//                        },
-//                        error -> {
-//                            Log.e(TAG, "Neo Request exception", error);
-//                            Toast.makeText(getActivity(), R.string.ex_network, Toast.LENGTH_SHORT)
-//                                    .show();
-//                            if (!(error instanceof SocketTimeoutException)) {
-//                                throw new RuntimeException(error);
-//                            }
-//                        });
-//    }
-
-//    private void setSubjectIfExist() {
-//        for (Subject subject : mSubjects) {
-//            if (subject.getName().toLowerCase().equals(mSubject.get.toString().toLowerCase().trim())) {
-//                mMember.setSubject(subject);
-//            }
-//        }
-//    }
 
     private void requestPermissionAndLoad() {
         int permissionCheck = ContextCompat.checkSelfPermission(
@@ -305,54 +252,6 @@ public class SubjectFragment extends ButterFragment implements SubjectDialogList
             mPhones.add(phone.replaceAll("\\D", ""));
         }
     }
-
-//    private void loadSubjects() {
-//        Statements statements = new Statements();
-//        statements.getValues().add(subjectsRequest());
-//        NeoApi api = NeoApiSingleton.getInstance();
-//        api.executeStatement(statements)
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .subscribe(transaction -> {
-//                            mSubjects = new ArrayList<>();
-//                            Log.d(TAG, "" + transaction.toString());
-//                            for (Result result : transaction.getResults()) {
-//                                List<Data> data = result.getData();
-//                                for (Data datum : data) {
-//                                    List<Row> rows = datum.getRow();
-//                                    for (int i = 0; i < rows.size(); i++) {
-//                                        Subject subject = Subject.fromJson(rows.get(i).getValue());
-//                                        subject.setId((long) datum.getMeta().get(i).getId());
-//                                        mSubjects.add(subject);
-//                                    }
-//                                }
-//                            }
-////                            fillAutocomplete();
-//                        },
-//                        error -> {
-//                            Log.e(TAG, "Loading subjects while registration problem", error);
-//                            Toast.makeText(getActivity(), R.string.ex_network, Toast.LENGTH_SHORT)
-//                                    .show();
-//                            if (!(error instanceof SocketTimeoutException)) {
-//                                throw new RuntimeException(error);
-//                            }
-//                        });
-//    }
-
-//    private void fillAutocomplete() {
-//        List<String> subjects = new ArrayList<>();
-//        for (Subject subject : mSubjects) {
-//            String subjectName = new StringBuilder()
-//                    .append(subject.getName().substring(0, 1).toUpperCase())
-//                    .append(subject.getName().substring(1))
-//                    .toString();
-//            subjects.add(subjectName);
-//        }
-//        ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(),
-//                android.R.layout.simple_dropdown_item_1line, subjects);
-//        mSubject.setAdapter(adapter);
-//        mSubject.setThreshold(1);
-//        adapter.notifyDataSetChanged();
-//    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -487,16 +386,6 @@ public class SubjectFragment extends ButterFragment implements SubjectDialogList
         return request;
     }
 
-//    private Statement subjectRequest() {
-//        Statement subject = new Statement();
-//        subject.setStatement(Request.NEW_SUBJECT);
-//        Parameters parameters = new Parameters();
-//        parameters.getProps().put(Request.Var.NAME, mSubject.getText().toString().trim());
-//        parameters.getProps().put(Request.Var.NAME_2, mMember.getSchool().getName());
-//        subject.setParameters(parameters);
-//        return subject;
-//    }
-
     private Statement studiesRequest() {
         Statement studies = new Statement();
         studies.setStatement(Request.STUDIES);
@@ -507,15 +396,6 @@ public class SubjectFragment extends ButterFragment implements SubjectDialogList
         studies.setParameters(parameters);
         return studies;
     }
-
-//    private Statement subjectsRequest() {
-//        Statement statement = new Statement();
-//        statement.setStatement(Request.FIND_SUBJECTS_BY_SCHOOL);
-//        Parameters parameters = new Parameters();
-//        parameters.getProps().put(Request.Var.NAME, mMember.getSchool().getName());
-//        statement.setParameters(parameters);
-//        return statement;
-//    }
 
     private Statement noSubjectRequest() {
         Statement statement = new Statement();

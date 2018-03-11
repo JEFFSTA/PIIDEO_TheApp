@@ -14,6 +14,7 @@ import kotlinx.android.synthetic.main.fragment_search_subject_input.view.*
 import ru.crew.motley.piideo.R
 import ru.crew.motley.piideo.chat.db.ChatLab
 import ru.crew.motley.piideo.network.Member
+import ru.crew.motley.piideo.network.NetworkErrorCallback
 import ru.crew.motley.piideo.network.neo.*
 import ru.crew.motley.piideo.registration.fragments.PhoneFragment.*
 import ru.crew.motley.piideo.search.SearchListener
@@ -32,10 +33,14 @@ class UselessFragment : Fragment() {
 //        val FRENCH_LENGTH = 10
 //        val FRENCH_PREFIX = "0"
 
-        fun newInstance(listener: SearchListener) = UselessFragment().apply { this.callback = listener }
+        fun newInstance(listener: SearchListener, errorCallback: NetworkErrorCallback) = UselessFragment().apply {
+            this.callback = listener
+            this.errorCallback = errorCallback
+        }
     }
 
     lateinit var callback: SearchListener
+    lateinit var errorCallback: NetworkErrorCallback
     var mMember: Member? = null
     val mPhones = mutableListOf<String>()
 
@@ -99,11 +104,12 @@ class UselessFragment : Fragment() {
                 }
                 ) { error1 ->
                     Log.e(TAG, "Error!: " + error1.localizedMessage)
-                    Toast.makeText(activity, R.string.ex_network, Toast.LENGTH_SHORT)
-                            .show()
-                    if (error1 !is SocketTimeoutException) {
-                        throw RuntimeException(error1)
-                    }
+//                    Toast.makeText(activity, R.string.ex_network, Toast.LENGTH_SHORT)
+//                            .show()
+                    errorCallback.onError()
+//                    if (error1 !is SocketTimeoutException) {
+//                        throw RuntimeException(error1)
+//                    }
                 }
 
     }

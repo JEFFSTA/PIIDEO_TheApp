@@ -4,7 +4,7 @@
     <string name="next_btn_caption">ENTER</string>
 
     <string name="reg_subject_title">Hey,\nQuick question:</string>
-    <string name="reg_subject_caption">If there’s only one subject\nyou like this semester,\nWhich would it be?</string>
+    <string name="reg_subject_caption">If there’s only one subject\nyou like this semester,\nwhich would it be?</string>
     <string name="reg_subject_hint">e.g: calculus2, anatomy…</string>
     <string name="reg_phone_hint">Phone number…</string>
     <string name="reg_phone_toast">Make sure you fill phone number.</string>
@@ -68,4 +68,5 @@
     <string name="nhlp_num_subjects">10+</string>
     <string name="nhlp_subjects">Subjects</string>
     <string name="nhlp_students">Students</string>
+    <string name="err_offline">you are offline check your\nconnection</string>
 </resources>

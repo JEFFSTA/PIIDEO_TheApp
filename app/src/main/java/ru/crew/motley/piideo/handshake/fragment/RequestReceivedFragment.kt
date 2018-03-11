@@ -23,6 +23,7 @@ import android.provider.BaseColumns
 import android.net.Uri
 import kotlinx.android.synthetic.main.fragment_request_received_0.view.*
 import ru.crew.motley.piideo.SharedPrefs
+import ru.crew.motley.piideo.network.NetworkErrorCallback
 import ru.crew.motley.piideo.registration.fragments.PhoneFragment.FRENCH_PREFIX
 
 
@@ -33,11 +34,13 @@ class RequestReceivedFragment : Fragment() {
 
     companion object {
         private const val ARG_DB_MESSAGE_ID = "local_db_id"
-        fun newInstance(dbMessageId: String) = RequestReceivedFragment().apply {
+        fun newInstance(dbMessageId: String, errorCallback: NetworkErrorCallback) = RequestReceivedFragment().apply {
             arguments = Bundle().apply { putString(ARG_DB_MESSAGE_ID, dbMessageId) }
+            this.errorCallback = errorCallback
         }
     }
 
+    lateinit var errorCallback: NetworkErrorCallback
     val messageId: String by lazy { arguments!!.getString(ARG_DB_MESSAGE_ID) }
     val message: FcmMessage by lazy { ChatLab.get(activity).getReducedFcmMessage(messageId) }
     val ownerId by lazy { FirebaseAuth.getInstance().currentUser!!.uid }
@@ -96,6 +99,7 @@ class RequestReceivedFragment : Fragment() {
                 .child("handshake")
                 .push()
                 .setValue(message)
+                .addOnFailureListener { errorCallback.onError() }
     }
 
     fun sendOwnStubMessage() {
@@ -106,6 +110,7 @@ class RequestReceivedFragment : Fragment() {
                 .child(message.from)
                 .push()
                 .setValue(message)
+                .addOnFailureListener { errorCallback.onError() }
     }
 
     fun cancelAlarm() {
@@ -134,7 +139,7 @@ class RequestReceivedFragment : Fragment() {
         if (contactName.isBlank()) {
             contactName = findContactName(FRENCH_PREFIX + friendNumber)
         }
-         v.meFriend.text = contactName
+        v.meFriend.text = contactName
     }
 
     private fun findContactName(friendNumber: String): String {

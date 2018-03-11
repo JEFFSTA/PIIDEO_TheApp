@@ -45,7 +45,6 @@ public class WatchPiideoFragment extends ButterFragment {
     private MediaPlayer mMediaPlayer;
     private ChatShower mChatShower;
 
-    private long mDuration;
     private boolean playing;
 
     public interface ChatShower {
@@ -70,11 +69,9 @@ public class WatchPiideoFragment extends ButterFragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mPiideoFileName = getArguments().getString(ARG_PIIDEO_FILE_NAME);
-//        mDuration = getDuration();
         try {
             String fullName = fileImagePath(mPiideoFileName);
             mBitmap = decodeFile(new File(fullName));
-//            Picasso.with(getActivity()).load(fullName).fetch();
         } catch (IOException ex) {
             Log.e(WatchPiideoFragment.class.getSimpleName(), "ERRR", ex);
         }
@@ -148,22 +145,6 @@ public class WatchPiideoFragment extends ButterFragment {
         releasePlayer();
     }
 
-//    private long getDuration() {
-//        try {
-//            MediaPlayer mp = MediaPlayer.create(getContext(), Uri.fromFile(new File(mPiideoFileName)));
-//            int duration = mp.getDuration();
-//            mp.release();
-//
-//            MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
-//            mediaMetadataRetriever.setDataSource(fileAudioPath(mPiideoFileName));
-//            String durationStr = mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
-//            return Long.parseLong(durationStr) / 100;
-//        } catch (IOException ex) {
-//            Log.e(TAG, "Piideo duration exception", ex);
-//            return -1;
-//        }
-//    }
-
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -172,24 +153,6 @@ public class WatchPiideoFragment extends ButterFragment {
         mPiideoImage.setImageBitmap(mBitmap);
         prepareOnImagePause();
         new Handler().postDelayed(() -> playStart(), 500);
-//        try {
-//            String fullName = fileImagePath(mPiideoFileName);
-//            Picasso.with(getActivity())
-//                    .load(new File(fullName))
-//                    .into(mPiideoImage, new Callback() {
-//                        @Override
-//                        public void onSuccess() {
-//                            new Handler().postDelayed(() -> playStart(), 500);
-//                        }
-//
-//                        @Override
-//                        public void onError() {
-//                            Log.e(TAG, "Error picasso watch piideo callback");
-//                        }
-//                    });
-//        } catch (IOException ex) {
-//            Log.e(TAG, "Error while loading piideo image " + mPiideoFileName);
-//        }
         return v;
     }
 
@@ -206,44 +169,20 @@ public class WatchPiideoFragment extends ButterFragment {
 
     private Bitmap decodeFile(File photoFile) {
         try {
-            //decode image size
+
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inJustDecodeBounds = true;
             BitmapFactory.decodeStream(new FileInputStream(photoFile), null, options);
-//            int imageHeight = options.outHeight;
-//            int imageWidth = options.outWidth;
-//            String imageType = options.outMimeType;
-            //Find the correct scale value. It should be the power of 2.
 
             Point displaySize = new Point();
             getActivity().getWindowManager().getDefaultDisplay().getSize(displaySize);
             int stageWidth = displaySize.x;
-            int stageHeight = displaySize.y;
-
             int inSampleSize = calculateInSampleSize(options, stageWidth, 0);
-//            final int REQUIRED_SIZE = stageHeight * stageWidth;
-//            int height_tmp = options.outHeight, width_tmp = options.outWidth;
-//            int scale = 1;
-//            while (true) {
-//                if (width_tmp / 2 < REQUIRED_SIZE || height_tmp / 2 < REQUIRED_SIZE)
-//                    break;
-//                width_tmp /= 2;
-//                height_tmp /= 2;
-//                scale++;
-//            }
-
-            //decode with inSampleSize
-//            BitmapFactory.Options o2 = new BitmapFactory.Options();
-//            o2.inSampleSize = scale;
 
             options.inSampleSize = inSampleSize;
 
-            // Decode bitmap with inSampleSize set
             options.inJustDecodeBounds = false;
             return BitmapFactory.decodeFile(photoFile.getAbsolutePath(), options);
-
-
-//            return BitmapFactory.decodeStream(new FileInputStream(photoFile), null, o2);
         } catch (FileNotFoundException e) {
             Log.e(TAG, photoFile.getAbsolutePath() + " doesn't exist");
             throw new RuntimeException(e);
@@ -252,18 +191,10 @@ public class WatchPiideoFragment extends ButterFragment {
 
     public static int calculateInSampleSize(
             BitmapFactory.Options options, int reqWidth, int reqHeight) {
-        // Raw height and width of image
-//        final int height = options.outHeight;
         final int width = options.outWidth;
         int inSampleSize = 1;
-
         if (width > reqWidth) {
-
-//            final int halfHeight = height / 2;
             final int halfWidth = width / 2;
-
-            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
-            // height and width larger than the requested height and width.
             while ((halfWidth / inSampleSize) >= reqWidth) {
                 inSampleSize *= 2;
             }

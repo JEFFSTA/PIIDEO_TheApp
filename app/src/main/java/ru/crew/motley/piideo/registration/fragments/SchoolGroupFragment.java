@@ -23,6 +23,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import ru.crew.motley.piideo.ButterFragment;
 import ru.crew.motley.piideo.R;
 import ru.crew.motley.piideo.network.Member;
+import ru.crew.motley.piideo.network.NetworkErrorCallback;
 import ru.crew.motley.piideo.network.School;
 import ru.crew.motley.piideo.network.neo.NeoApi;
 import ru.crew.motley.piideo.network.neo.NeoApiSingleton;
@@ -59,11 +60,12 @@ public class SchoolGroupFragment extends ButterFragment {
     ImageView enginSchoolActive;
 
     private RegistrationListener mRegistrationListener;
+    private NetworkErrorCallback mErrorCallback;
 
     private Member mMember;
     private List<School> mSchoolGroups;
 
-    public static SchoolGroupFragment newInstance(Parcelable member, RegistrationListener registrationListener) {
+    public static SchoolGroupFragment newInstance(Parcelable member, RegistrationListener registrationListener, NetworkErrorCallback errorCallback) {
         if (member == null) {
             throw new NullPointerException("Member varible can't be null.");
         }
@@ -72,6 +74,7 @@ public class SchoolGroupFragment extends ButterFragment {
         SchoolGroupFragment fragment = new SchoolGroupFragment();
         fragment.setArguments(args);
         fragment.mRegistrationListener = registrationListener;
+        fragment.mErrorCallback = errorCallback;
         return fragment;
     }
 
@@ -151,9 +154,10 @@ public class SchoolGroupFragment extends ButterFragment {
                             Log.e(TAG, "Load school groups failed");
                             Toast.makeText(getActivity(), R.string.ex_network, Toast.LENGTH_SHORT)
                                     .show();
-                            if (!(error instanceof SocketTimeoutException)) {
-                                throw new RuntimeException(error);
-                            }
+                            mErrorCallback.onError();
+//                            if (!(error instanceof SocketTimeoutException)) {
+//                                throw new RuntimeException(error);
+//                            }
                         });
     }
 

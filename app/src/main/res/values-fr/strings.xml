@@ -6,6 +6,7 @@
     <string name="req_from_stub">Connected\nBy</string>
     <string name="req_me_stub">Me</string>
     <string name="reg_phone_length">Ton numéro doit être %1$d chiffres</string>
+    <string name="reg_subject_caption">Ce semestre/trimestre quelle\nest te matiére préférée?</string>
 
     <string name="req_dlg_title">Le Sujet</string>
     <string name="req_dlg_hint">Ex: LSériede Fourier, Loi de Gauss</string>

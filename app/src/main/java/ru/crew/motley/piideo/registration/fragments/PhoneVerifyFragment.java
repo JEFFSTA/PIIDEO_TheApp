@@ -25,6 +25,7 @@ import ru.crew.motley.piideo.ButterFragment;
 import ru.crew.motley.piideo.R;
 import ru.crew.motley.piideo.SharedPrefs;
 import ru.crew.motley.piideo.network.Member;
+import ru.crew.motley.piideo.network.NetworkErrorCallback;
 import ru.crew.motley.piideo.network.neo.NeoApi;
 import ru.crew.motley.piideo.network.neo.NeoApiSingleton;
 import ru.crew.motley.piideo.network.neo.Parameters;
@@ -52,7 +53,7 @@ public class PhoneVerifyFragment extends ButterFragment {
 
     private Member mMember;
 
-    public static PhoneVerifyFragment newInstance(Parcelable member, RegistrationListener listener) {
+    public static PhoneVerifyFragment newInstance(Parcelable member, RegistrationListener listener, NetworkErrorCallback errorCallback) {
         Bundle args = new Bundle();
         args.putParcelable(ARG_MEMBER, member);
         PhoneVerifyFragment fragment = new PhoneVerifyFragment();

@@ -33,6 +33,7 @@ import ru.crew.motley.piideo.ButterFragment;
 import ru.crew.motley.piideo.R;
 import ru.crew.motley.piideo.SharedPrefs;
 import ru.crew.motley.piideo.network.Member;
+import ru.crew.motley.piideo.network.NetworkErrorCallback;
 import ru.crew.motley.piideo.network.neo.NeoApi;
 import ru.crew.motley.piideo.network.neo.NeoApiSingleton;
 import ru.crew.motley.piideo.network.neo.Parameters;
@@ -55,6 +56,7 @@ public class SearchSubjectFragment extends ButterFragment implements SubjectAdap
     private static final int REQUEST_DELAY = 5;
 
     private SearchListener mSearchListener;
+    private NetworkErrorCallback mErrorCallback;
 
     @BindView(R.id.subjectRecycler)
     RecyclerView mRecyclerView;
@@ -71,12 +73,13 @@ public class SearchSubjectFragment extends ButterFragment implements SubjectAdap
 
 //    private SearchRepeaterSingleton mSearchRepeaterSingleton;
 
-    public static SearchSubjectFragment newInstance(Parcelable member, SearchListener listener) {
+    public static SearchSubjectFragment newInstance(Parcelable member, SearchListener listener, NetworkErrorCallback errorCallback) {
         Bundle args = new Bundle();
         args.putParcelable(ARG_MEMBER, member);
         SearchSubjectFragment fragment = new SearchSubjectFragment();
         fragment.setArguments(args);
         fragment.mSearchListener = listener;
+        fragment.mErrorCallback = errorCallback;
         return fragment;
     }
 
@@ -162,11 +165,12 @@ public class SearchSubjectFragment extends ButterFragment implements SubjectAdap
                         },
                         error -> {
                             Log.e(TAG, "Contacts deletion request execution problem", error);
-                            Toast.makeText(getActivity(), R.string.ex_network, Toast.LENGTH_SHORT)
-                                    .show();
-                            if (!(error instanceof SocketTimeoutException)) {
-                                throw new RuntimeException(error);
-                            }
+//                            Toast.makeText(getActivity(), R.string.ex_network, Toast.LENGTH_SHORT)
+//                                    .show();
+//                            if (!(error instanceof SocketTimeoutException)) {
+//                                throw new RuntimeException(error);
+//                            }
+                            mErrorCallback.onError();
                         });
     }
 
@@ -217,11 +221,12 @@ public class SearchSubjectFragment extends ButterFragment implements SubjectAdap
                         },
                         error -> {
                             Log.e(TAG, "Used subjects loading problem", error);
-                            Toast.makeText(getActivity(), R.string.ex_network, Toast.LENGTH_SHORT)
-                                    .show();
-                            if (!(error instanceof SocketTimeoutException)) {
-                                throw new RuntimeException(error);
-                            }
+//                            Toast.makeText(getActivity(), R.string.ex_network, Toast.LENGTH_SHORT)
+//                                    .show();
+//                            if (!(error instanceof SocketTimeoutException)) {
+//                                throw new RuntimeException(error);
+//                            }
+                            mErrorCallback.onError();
                         });
     }
 

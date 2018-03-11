@@ -12,6 +12,7 @@ import ru.crew.motley.piideo.fcm.MessagingService.Companion.MessageType
 import ru.crew.motley.piideo.handshake.NavigationCallback
 import ru.crew.motley.piideo.handshake.fragment.HandshakeTimeoutFragment
 import ru.crew.motley.piideo.handshake.fragment.RequestReceivedFragment
+import ru.crew.motley.piideo.network.activity.ConnectionErrorActivity
 import ru.crew.motley.piideo.splash.SplashActivity
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -20,7 +21,7 @@ import java.util.concurrent.TimeUnit
  * Created by vas on 1/20/18.
  */
 
-class HandshakeActivity : AppCompatActivity(), NavigationCallback {
+class HandshakeActivity : ConnectionErrorActivity(), NavigationCallback {
 
     companion object {
 
@@ -51,7 +52,7 @@ class HandshakeActivity : AppCompatActivity(), NavigationCallback {
 
     fun showResponseFragment() {
         supportFragmentManager.beginTransaction()
-                .replace(R.id.container, RequestReceivedFragment.newInstance(messageId))
+                .replace(R.id.container, RequestReceivedFragment.newInstance(messageId, this))
                 .commit()
     }
 
@@ -92,5 +93,13 @@ class HandshakeActivity : AppCompatActivity(), NavigationCallback {
             SharedPrefs.clearHandshakeStartTime(applicationContext)
             showTimeoutMessage()
         }
+    }
+
+    override fun onBackPressed() {
+        if (errorShown()) {
+            backFromError()
+            return
+        }
+        super.onBackPressed()
     }
 }
