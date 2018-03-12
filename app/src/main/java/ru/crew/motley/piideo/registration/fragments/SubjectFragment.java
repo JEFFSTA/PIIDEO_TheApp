@@ -2,6 +2,7 @@ package ru.crew.motley.piideo.registration.fragments;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -54,7 +55,7 @@ import static ru.crew.motley.piideo.registration.fragments.PhoneFragment.NIGERIA
 import static ru.crew.motley.piideo.registration.fragments.PhoneFragment.NIGERIA_PREFIX;
 
 
-public class SubjectFragment extends ButterFragment implements SubjectDialogListener{
+public class SubjectFragment extends ButterFragment implements SubjectDialogListener {
 
     private static final String TAG = SubjectFragment.class.getSimpleName();
 
@@ -65,6 +66,8 @@ public class SubjectFragment extends ButterFragment implements SubjectDialogList
     Button next;
     @BindView(R.id.subject)
     TextView mSubject;
+    @BindView(R.id.textView2)
+    TextView infoQuestionText;
 
     private Member mMember;
     private Set<String> mPhones;
@@ -98,6 +101,16 @@ public class SubjectFragment extends ButterFragment implements SubjectDialogList
         fragmentLayout = R.layout.fragment_subject;
         View v = super.onCreateView(inflater, container, savedInstanceState);
         next.setEnabled(true);
+
+        Resources res = getResources();
+        String subText;
+        if (mMember.getSchool().getName().equals("High School")) {
+            subText = res.getString(R.string.reg_trimestre);
+        } else {
+            subText = res.getString(R.string.reg_semestre);
+        }
+        String text = res.getString(R.string.reg_subject_caption, subText);
+        infoQuestionText.setText(text);
         return v;
     }
 
@@ -138,7 +151,7 @@ public class SubjectFragment extends ButterFragment implements SubjectDialogList
 //        if (mMember.getSubject() == null) {
 //            createNewSubjectAndMember();
 //        } else {
-            createNewMember();
+        createNewMember();
 //        }
     }
 

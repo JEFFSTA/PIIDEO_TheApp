@@ -166,7 +166,7 @@ public class UserSetupActivity extends ConnectionErrorActivity implements Regist
         if (errorShown()) {
             backFromError();
         } else {
-            onBackPressed();
+           super.onBackPressed();
         }
     }
 }

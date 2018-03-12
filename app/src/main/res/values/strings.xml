@@ -4,7 +4,10 @@
     <string name="next_btn_caption">ENTER</string>
 
     <string name="reg_subject_title">Hey,\nQuick question:</string>
-    <string name="reg_subject_caption">If there’s only one subject\nyou like this semester,\nwhich would it be?</string>
+    <string name="reg_subject_caption">If there’s %1$s only one subject\nyou like this semester,\nwhich would it be?</string>
+    <string name="reg_semestre"></string>
+    <string name="reg_trimestre"></string>
+
     <string name="reg_subject_hint">e.g: calculus2, anatomy…</string>
     <string name="reg_phone_hint">Phone number…</string>
     <string name="reg_phone_toast">Make sure you fill phone number.</string>

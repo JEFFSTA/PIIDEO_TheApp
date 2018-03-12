@@ -25,9 +25,14 @@
         </activity>
 
         <!--<activity-->
-            <!--android:name=".network.activity.ConnectionErrorActivity"-->
-            <!--android:noHistory="true"-->
-            <!--android:screenOrientation="portrait" />-->
+        <!--android:name=".network.activity.ConnectionErrorActivity"-->
+        <!--android:noHistory="true"-->
+        <!--android:screenOrientation="portrait" />-->
+
+        <activity
+            android:name=".OwlActivity"
+            android:noHistory="true"
+            android:screenOrientation="portrait" />
 
         <activity
             android:name=".registration.activity.UserSetupActivity"

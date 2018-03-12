@@ -1,5 +1,6 @@
 package ru.crew.motley.piideo.registration.fragments;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
@@ -101,7 +102,7 @@ public class SchoolGroupFragment extends ButterFragment {
 
     @OnClick(R.id.high_school)
     public void chooseHighSchool() {
-        for (School school: mSchoolGroups) {
+        for (School school : mSchoolGroups) {
             if (school.getName().equals("High School")) {
                 mMember.setSchool(school);
                 deactivateAll();
@@ -113,7 +114,7 @@ public class SchoolGroupFragment extends ButterFragment {
 
     @OnClick(R.id.prep_classes)
     public void choosePreparatory() {
-        for (School school: mSchoolGroups) {
+        for (School school : mSchoolGroups) {
             if (school.getName().equals("Preparatory Classes")) {
                 mMember.setSchool(school);
                 deactivateAll();
@@ -125,7 +126,7 @@ public class SchoolGroupFragment extends ButterFragment {
 
     @OnClick(R.id.engin_school)
     public void chooseEngineeringSchool() {
-        for (School school: mSchoolGroups) {
+        for (School school : mSchoolGroups) {
             if (school.getName().equals("Engineering School")) {
                 mMember.setSchool(school);
                 deactivateAll();
@@ -137,7 +138,11 @@ public class SchoolGroupFragment extends ButterFragment {
 
     @OnClick(R.id.next_btn)
     public void showNextStep() {
-        mRegistrationListener.onNextStep(mMember);
+        if (mMember.getSchool() == null) {
+            Toast.makeText(getContext(), "Choose one of the schools", Toast.LENGTH_SHORT).show();
+        } else {
+            mRegistrationListener.onNextStep(mMember);
+        }
     }
 
     private void loadSchoolGroups() {

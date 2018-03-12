@@ -43,13 +43,13 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.SearchView
         if (cc.equals("8")) {
             cc = "7";
         }
-        String resourceName = null;
+        Country holderCountry = null;
         for (Country country : mCountries) {
             if (country.getCountryCodeStr().equals(cc)) {
-                resourceName = country.getFileName();
+                holderCountry = country;
             }
         }
-        holder.bind(member, resourceName);
+        holder.bind(member, holderCountry);
     }
 
     @Override
@@ -68,9 +68,9 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.SearchView
             mFlag = itemView.findViewById(R.id.flag_image);
         }
 
-        public void bind(Member member, String fileName) {
-            mPhoneNumber.setText(member.getPhoneNumber());
-            showFlag(fileName);
+        public void bind(Member member, Country country) {
+            mPhoneNumber.setText(country.getCountryName());
+            showFlag(country.getFileName());
             String receiverId = member.getChatId();
             itemView.setOnClickListener(v -> {
                 startChat(receiverId);

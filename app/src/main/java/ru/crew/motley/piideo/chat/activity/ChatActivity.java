@@ -37,6 +37,7 @@ public class ChatActivity extends ConnectionErrorActivity
 
     public static Intent getIntent(String dbMessageId, Context context) {
         Intent i = new Intent(context, ChatActivity.class);
+        i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         i.putExtra(EXTRA_DB_MESSAGE_ID, dbMessageId);
         return i;
     }

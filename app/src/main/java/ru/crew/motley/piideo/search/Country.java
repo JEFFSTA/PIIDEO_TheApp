@@ -10,10 +10,12 @@ public class Country {
 
     private String mCountryCodeStr;
     private String mFileName;
+    private String mCountryName;
 
     public Country(String str, int num) {
         String[] data = str.split(",");
         mCountryCodeStr = data[2];
+        mCountryName = data[0].toUpperCase();
         mFileName = String.format("f%03d", num);
     }
 
@@ -23,5 +25,9 @@ public class Country {
 
     public String getCountryCodeStr() {
         return mCountryCodeStr;
+    }
+
+    public String getCountryName() {
+        return mCountryName;
     }
 }

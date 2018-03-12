@@ -76,7 +76,7 @@ class RequestReceivedFragment : Fragment() {
         } else {
             setMeFriendText(v, message.content!!.split("||")[0])
             v.subject.text = message.content!!.split("||")[1].split("|")[0]
-            v.subject.text = message.content!!.split("||")[1].split("|")[1]
+            v.explanation.text = message.content!!.split("||")[1].split("|")[1]
         }
         return v
     }

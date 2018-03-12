@@ -149,6 +149,7 @@ public class ChatFragment extends ButterFragment
                 showRateView();
                 deleteUselessFiles();
                 makeMeFree();
+                return;
             }
             if (watchText != null && seconds >= 0) {
                 watchText.setText(timeMin(seconds) + ":" + timeSec(seconds));
@@ -242,6 +243,7 @@ public class ChatFragment extends ButterFragment
         mChatRecycler.setLayoutManager(layoutManager);
         attachRecyclerAdapter();
         attachTextWatcher();
+
         topicText.setText(SharedPrefs.getSearchSubject(getContext()));
         subject.setText(SharedPrefs.getRequestMessage(getContext()));
         return v;
