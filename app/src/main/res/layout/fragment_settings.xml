@@ -43,7 +43,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
 
-                    android:text="SUBJECT"
+                    android:text="@string/opt_hint"
 
                     android:textColor="@color/screenColorBackground"
                     android:textSize="14sp" />
@@ -65,10 +65,11 @@
                 android:background="@color/colorGrey" />
 
             <TextView
+                android:gravity="center_horizontal"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:text="Choose your favorite this semester"
+                android:text="@string/opt_info"
                 android:textColor="@color/screenColorBackground"
                 android:textSize="@dimen/text_size_small" />
 
@@ -163,7 +164,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:textAllCaps="false"
-            android:text="Demarrez" />
+            android:text="SAVE" />
 
     </FrameLayout>
 

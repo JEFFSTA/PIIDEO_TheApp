@@ -1,24 +1,33 @@
 <resources>
     <string name="app_name">PIIDEO</string>
 
-    <string name="next_btn_caption">ENTER</string>
+    <string name="next_btn_caption">Enter</string>
+
 
     <string name="reg_subject_title">Hey,\nQuick question:</string>
-    <string name="reg_subject_caption">If there’s %1$s only one subject\nyou like this semester,\nwhich would it be?</string>
-    <string name="reg_semestre"></string>
-    <string name="reg_trimestre"></string>
+    <string name="reg_welcome">WELCOME</string>
+    <string name="reg_button_next">Begin</string>
+    <string name="reg_phone_next">Enter</string>
+    <string name="reg_subject_caption">If there’s only one subject\nyou like this %1$s\nwhich would it be?</string>
+    <string name="reg_semestre">semester</string>
+    <string name="reg_trimestre">term</string>
 
+    <string name="reg_owl_info">The most efficient network for students</string>
     <string name="reg_subject_hint">e.g: calculus2, anatomy…</string>
-    <string name="reg_phone_hint">Phone number…</string>
+    <string name="reg_phone_hint">Phone number</string>
     <string name="reg_phone_toast">Make sure you fill phone number.</string>
     <string name="reg_phone_format">Make sure entered phone correctly formatted.</string>
     <string name="reg_phone_length">Your Number must be %1$d digits</string>
+    <string name="reg_acad_level">My academic level</string>
     <string name="reg_high_school">High School</string>
-    <string name="reg_preparatory_classes">Preparatory Classes</string>
-    <string name="reg_engineering_school">Engineering School</string>
+    <string name="reg_preparatory_classes">A Levels</string>
+    <string name="reg_engineering_school">University</string>
+    <string name="reg_school_next">Next</string>
+    <string name="reg_save">SAVE</string>
 
     <string name="sbj_violation">Subject is empty.</string>
 
+    <string name="sch_hello_title">Hello</string>
     <string name="sch_subject_violation">Question subject is empty.</string>
     <string name="sch_no_result">Nobody can answer you.</string>
 
@@ -29,21 +38,23 @@
 
     <string name="resToastText">New bug\'s been found</string>
     <string name="vrfy_caption">Please enter below the code You just received.</string>
-    <string name="vrfy_hint">...</string>
+    <string name="vrfy_hint">…</string>
 
 
     <string name="placeholder">Placeholder</string>
 
     <string name="chat_message_stub">Hello_stub</string>
-    <string name="chat_message_stub_text">Hello, do you have 10 minutes?</string>
+    <string name="chat_message_stub_text">Hello, do you have a minute?</string>
     <string name="chat_bar_hint">Type message here</string>
-    
+
     <string name="req_from_stub">Connected\nBy</string>
     <string name="req_me_stub">Me</string>
 
     <string name="req_dlg_title">The Topic</string>
     <string name="req_dlg_hint">Ex: Charles Law, Double Integrals…</string>
     <string name="req_dlg_empty_warn">Enter brief explanation</string>
+    <string name="req_i_have">I have a</string>
+    <string name="req_question_on">question on</string>
 
     <string name="hsh_time_up"><b>Time Up!</b></string>
     <string name="hsh_oops">oops</string>
@@ -56,12 +67,14 @@
     <string name="nty_piideo">You got PIIDEO</string>
     <string name="nty_message">You got MESSAGE</string>
 
-    <string name="usl_hint">name of the subject</string>
+    <string name="sch_menu_caption">Settings</string>
+    <string name="usl_hint">search…</string>
     <string name="usl_sub_hint">You have a question in what subject?</string>
 
-    <string name="no_title">ELARGIT VOTRE RESEAU</string>
-    <string name="no_info">Dèsloè,\nPersonne dans votre\nRèseau meitrise bien\ncette matière</string>
-    <string name="no_btn">arrière</string>
+    <string name="no_title">EXPAND YOUR NETWORK</string>
+    <string name="no_info">Sorry,\nNo one in your network\nunderstands this subject.</string>
+
+    <string name="no_btn">OK</string>
     <string name="nhlp_info">Inform</string>
     <string name="nhlp_classmate">1 Classmate</string>
     <string name="nhlp_more">more</string>
@@ -71,5 +84,12 @@
     <string name="nhlp_num_subjects">10+</string>
     <string name="nhlp_subjects">Subjects</string>
     <string name="nhlp_students">Students</string>
+
+    <string name="opt_hint">Subject</string>
+
     <string name="err_offline">you are offline check your\nconnection</string>
+    <string name="opt_info">Choose your favorite this\nsemester/term</string>
+    <string name="hlp_hint">CHOOSE AN AIDE</string>
+
+
 </resources>

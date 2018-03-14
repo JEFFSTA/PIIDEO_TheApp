@@ -10,6 +10,7 @@ class FcmMessageCursorWrapper(cursor: Cursor) : CursorWrapper(cursor) {
             content = getString(getColumnIndex(PiideoSchema.MessageTable.Cols.CONTENT)),
             from = getString(getColumnIndex(PiideoSchema.MessageTable.Cols.SENDER_ID)),
             to = getString(getColumnIndex(PiideoSchema.MessageTable.Cols.RECEIVER_ID)),
-            type = getString(getColumnIndex(PiideoSchema.MessageTable.Cols.MSG_TYPE))
+            type = getString(getColumnIndex(PiideoSchema.MessageTable.Cols.MSG_TYPE)),
+            timestamp = getString(getColumnIndex(PiideoSchema.MessageTable.Cols.TIMESTAMP))?.toLong() ?: -1L
     )
 }

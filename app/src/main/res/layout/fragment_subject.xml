@@ -125,7 +125,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:textAllCaps="false"
-            android:text="Demarrez" />
+            android:text="@string/reg_save" />
 
     </FrameLayout>
 

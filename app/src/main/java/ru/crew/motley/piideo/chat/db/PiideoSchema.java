@@ -72,6 +72,7 @@ public final class PiideoSchema {
             public static final String RECEIVER_ID = "receiver_id";
             public static final String CONTENT = "content";
             public static final String MSG_TYPE = "msg_type";
+            public static final String TIMESTAMP = "timestamp";
         }
     }
 }

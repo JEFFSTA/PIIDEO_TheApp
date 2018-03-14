@@ -157,7 +157,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center_horizontal"
-                    android:text="I have a"
+                    android:text="@string/req_i_have"
                     android:textSize="12sp" />
 
                 <TextView
@@ -167,7 +167,7 @@
                     android:layout_marginRight="10dp"
 
                     android:gravity="center_horizontal"
-                    android:text="Question on"
+                    android:text="@string/req_question_on"
                     android:textSize="10sp" />
 
             </LinearLayout>

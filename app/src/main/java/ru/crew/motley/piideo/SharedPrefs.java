@@ -16,6 +16,7 @@ public class SharedPrefs {
     private static final String CHAT = "page";
     private static final String CHAT_START_TIME = "chatStartTime";
     private static final String CHAT_MESSAGE_ID = "chatReceiverId";
+    private static final String CHAT_SIDE = "side";
 
     private static final String HANDSHAKE_START_TIME = "handshakeStartTime";
 
@@ -178,5 +179,18 @@ public class SharedPrefs {
     public static boolean searchCompleted(Context context) {
         long endTime = SharedPrefs.getSearchCount(context) * 50 * 1000 + SharedPrefs.loadStartSearchingTime(context);
         return endTime < System.currentTimeMillis();
+    }
+
+    public static void saveChatSide(String side, Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        prefs.edit()
+                .putString(CHAT_SIDE, side)
+                .apply();
+    }
+
+    public static String loadChatSide(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        return prefs.getString(CHAT_SIDE, "");
+
     }
 }

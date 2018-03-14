@@ -7,7 +7,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
-        android:layout_marginLeft="-40dp"
+        android:layout_marginLeft="-105dp"
         android:rotation="-90"
         android:text="@string/hlp_hint"
         android:textColor="@color/colorWhite"

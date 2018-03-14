@@ -36,6 +36,7 @@ public class ChatActivity extends ConnectionErrorActivity
 
 
     public static Intent getIntent(String dbMessageId, Context context) {
+        Log.d(TAG, " GET INTENT ");
         Intent i = new Intent(context, ChatActivity.class);
         i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         i.putExtra(EXTRA_DB_MESSAGE_ID, dbMessageId);
@@ -57,6 +58,7 @@ public class ChatActivity extends ConnectionErrorActivity
     protected void onResume() {
         super.onResume();
         Log.d(TAG, "resume Activity ");
+        Log.d(TAG, "Activity  string " + this.toString());
     }
 
     @Override

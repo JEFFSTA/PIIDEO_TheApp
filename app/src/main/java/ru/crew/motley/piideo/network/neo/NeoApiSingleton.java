@@ -62,7 +62,7 @@ public class NeoApiSingleton {
                     okhttp3.Request newRequest = builder.build();
                     return chain.proceed(newRequest);
                 })
-                .addInterceptor(interceptor)
+//                .addInterceptor(interceptor)
                 .connectTimeout(70, TimeUnit.SECONDS)
                 .writeTimeout(60, TimeUnit.SECONDS)
                 .readTimeout(60, TimeUnit.SECONDS)

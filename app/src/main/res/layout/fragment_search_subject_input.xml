@@ -12,14 +12,23 @@
         android:layout_marginTop="30dp"
         android:background="@android:color/white">
 
-        <ImageView
-            android:layout_width="74dp"
+        <!--<ImageView-->
+            <!--android:layout_width="74dp"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_gravity="center_horizontal"-->
+            <!--android:layout_marginTop="8dp"-->
+            <!--android:layout_marginBottom="4dp"-->
+            <!--android:adjustViewBounds="true"-->
+            <!--android:src="@drawable/search_screen_title_no_shadow" />-->
+        <TextView
+            android:textSize="18sp"
+            android:textColor="@color/screenColorBackground"
+            android:text="@string/sch_hello_title"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="4dp"
-            android:adjustViewBounds="true"
-            android:src="@drawable/search_screen_title_no_shadow" />
+            android:layout_marginTop="@dimen/simple_padding_small"
+            android:layout_marginBottom="@dimen/simple_padding_small"/>
 
     </FrameLayout>
 

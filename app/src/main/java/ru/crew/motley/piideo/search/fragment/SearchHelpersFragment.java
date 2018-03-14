@@ -106,42 +106,6 @@ public class SearchHelpersFragment extends ButterFragment implements SendRequest
         return v;
     }
 
-    private void startSearch() {
-        String searchSubject = SharedPrefs.getSearchSubject(getActivity());
-        Statement search = searchRequest(searchSubject);
-        Statements statements = new Statements();
-        statements.getValues().add(search);
-        NeoApi api = NeoApiSingleton.getInstance();
-        api.executeStatement(statements)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(transaction -> {
-                            List<Data> responseData = transaction.getResults().get(0).getData();
-                            if (responseData.isEmpty()) {
-                                mHelpersCallback.showNoOneCanHelp();
-                                return;
-                            }
-                            mMembers.clear();
-                            for (Data item : responseData) {
-                                String targetFriendOfFriend = item.getRow()
-                                        .get(0)
-                                        .getValue();
-                                Member member = Member.fromJson(targetFriendOfFriend);
-                                Log.d(TAG, member.toString());
-                                mMembers.add(member);
-                            }
-                            mSearchAdapter.notifyDataSetChanged();
-                        },
-                        error -> {
-                            Log.e(TAG, "Request target search problem", error);
-//                            Toast.makeText(getActivity(), R.string.ex_network, Toast.LENGTH_SHORT)
-//                                    .show();
-//                            if (!(error instanceof SocketTimeoutException)) {
-//                                throw new RuntimeException(error);
-//                            }
-                            mErrorCallback.onError();
-                        });
-    }
-
     private Statement searchRequest(String searchSubject) {
         if (TextUtils.isEmpty(searchSubject)) {
             throw new IllegalStateException("Search mSubject can't be null or empty");
@@ -236,10 +200,10 @@ public class SearchHelpersFragment extends ButterFragment implements SendRequest
                 });
         Single<List<Country>> countriesLoading = loadCountries();
         Single.zip(
-                membersRequest.onErrorReturn(error -> {
+                membersRequest/*.onErrorReturn(error -> {
                     mErrorCallback.onError();
                     return new ArrayList<>();
-                }),
+                })*/,
                 countriesLoading,
                 ((members, countries) -> {
                     mMembers.clear();
@@ -250,7 +214,11 @@ public class SearchHelpersFragment extends ButterFragment implements SendRequest
                 })).subscribeOn(AndroidSchedulers.mainThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(useless -> {
-                            mSearchAdapter.notifyDataSetChanged();
+                            if (mMembers.isEmpty()) {
+                                mHelpersCallback.showNoOneCanHelp();
+                            } else {
+                                mSearchAdapter.notifyDataSetChanged();
+                            }
                         },
                         error -> {
                             mErrorCallback.onError();

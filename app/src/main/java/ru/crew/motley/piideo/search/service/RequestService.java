@@ -43,6 +43,8 @@ public class RequestService extends IntentService {
 
     public static int SERVICE_ID = 100501;
 
+    private static final int REQUEST_DELAY = 90;
+
     //    private static volatile LinkedBlockingDeque<Member> mMembers = new LinkedBlockingDeque<>();
 //    private static volatile int check;
 //    private static volatile int mCount;
@@ -223,7 +225,7 @@ public class RequestService extends IntentService {
         intent.setAction(Events.BROADCAST_REPEAT);
 
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 33, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        long executeAt = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(50);
+        long executeAt = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(REQUEST_DELAY);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             alarmManager.setExactAndAllowWhileIdle(
                     AlarmManager.RTC_WAKEUP,

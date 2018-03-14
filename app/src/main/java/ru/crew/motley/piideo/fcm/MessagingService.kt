@@ -28,6 +28,7 @@ import ru.crew.motley.piideo.chat.fragment.ChatFragment
 import ru.crew.motley.piideo.chat.model.PiideoLoader
 import ru.crew.motley.piideo.fcm.MessagingService.Companion.SYN_ID
 import ru.crew.motley.piideo.handshake.activity.HandshakeActivity
+import ru.crew.motley.piideo.search.Events
 import ru.crew.motley.piideo.search.service.RequestService
 import java.text.SimpleDateFormat
 import java.util.*
@@ -90,7 +91,8 @@ class MessagingService : FirebaseMessagingService() {
                 message.data["senderUid"]!!,
                 message.data["receiverUid"]!!,
                 message.data["content"] ?: "",
-                message.data["type"]!!)
+                message.data["type"]!!,
+                message.data["timestamp"]!!.toLong())
         val dbMessageId = messageId.toString()
         val calendar = if (message.data["timestamp"] != null) {
             Calendar.getInstance(TimeZone.getDefault()).apply {
@@ -117,9 +119,9 @@ class MessagingService : FirebaseMessagingService() {
         }
     }
 
-    private fun saveMessageToDB(from: String, to: String, content: String, @MessageType type: String): Long {
+    private fun saveMessageToDB(from: String, to: String, content: String, @MessageType type: String, timestamp: Long): Long {
         val lab = ChatLab.get(applicationContext)
-        val fcmMessage = FcmMessage(from = from, to = to, content = content, type = type)
+        val fcmMessage = FcmMessage(from = from, to = to, content = content, type = type, timestamp = timestamp)
         return lab.addMessage(fcmMessage)
     }
 
@@ -127,6 +129,7 @@ class MessagingService : FirebaseMessagingService() {
         RequestService.stopRestarting0(applicationContext)
         SharedPrefs.setSearching(false, applicationContext)
         SharedPrefs.setSearchCount(-1, applicationContext)
+        SharedPrefs.saveChatSide(ACK, applicationContext)
         ChatLab.get(applicationContext).clearQueue()
 //        SharedPrefs.setSearching(false, applicationContext)
         val app = application as Appp
@@ -164,6 +167,7 @@ class MessagingService : FirebaseMessagingService() {
         if (chatIsActive()) return
         if (handShakeIsActive()) return
         val i = HandshakeActivity.getIntent(dbMessageId, type, applicationContext)
+        SharedPrefs.saveChatSide(SYN, applicationContext)
 //        i.action = System.currentTimeMillis().toString()
 //        i.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
 //        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_CLEAR_TASK)
@@ -222,6 +226,15 @@ class MessagingService : FirebaseMessagingService() {
 
     private fun showNothingOrNotification(messageId: String) {
         val app = application as Appp
+        var chatStartTime = SharedPrefs.loadChatStartTime(applicationContext)
+        if (chatStartTime == -1L && SharedPrefs.loadChatSide(applicationContext) == SYN) {
+            chatStartTime = ChatLab.get(applicationContext).getReducedFcmMessage(messageId).timestamp!!
+            SharedPrefs.saveChatStartTime(chatStartTime, applicationContext)
+            SharedPrefs.saveChatMessageId(messageId, applicationContext)
+            val broadcast = Intent()
+            broadcast.action = Events.BROADCAST_CHAT_START
+            applicationContext.sendBroadcast(broadcast, null)
+        }
         if (!app.isChatActivityVisible and chatIsActive()) {
             showChatNotification(messageId)
         }

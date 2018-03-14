@@ -129,7 +129,7 @@
         android:layout_marginBottom="24dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:text="Je suis en/au"
+        android:text="@string/reg_acad_level"
         android:textColor="@color/colorWhite"
         android:textSize="24sp"
         app:layout_constraintBottom_toTopOf="@+id/guideline8"
@@ -159,7 +159,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:textAllCaps="false"
-            android:text="Demarrez" />
+            android:text="@string/reg_school_next" />
 
     </FrameLayout>
 

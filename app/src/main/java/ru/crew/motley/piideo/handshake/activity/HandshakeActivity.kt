@@ -34,7 +34,7 @@ class HandshakeActivity : ConnectionErrorActivity(), NavigationCallback {
                     putExtra(EXTRA_TYPE, type)
                 }
 
-        const val HANDSHAKE_TIMEOUT = 45L
+        const val HANDSHAKE_TIMEOUT = 80L
     }
 
     val handler = Handler()

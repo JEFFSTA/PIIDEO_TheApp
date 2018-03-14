@@ -357,6 +357,7 @@ public class SearchActivity extends RequestListenerActivity
     protected void onResume() {
         super.onResume();
         Log.d(TAG, "resume Activity " + currentStep);
+        Log.d(TAG, "Activity  string " + this.toString());
         IntentFilter filter = new IntentFilter(Events.BROADCAST_NO_HELP);
         filter.setPriority(1);
         registerReceiver(mRejectReceiver, filter);

@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorPrimary">#416398</color>
+    <color name="colorPrimaryDark">#03396a</color>
     <color name="colorAccent">#FF4081</color>
 
     <color name="colorAccentPressed">#eaa60c</color>
     <color name="colorAccentIcons">#edb537</color>
 
     <color name="screenColorBackground">#7290c9</color>
+    <color name="toolbarColorBackground">#416398</color>
 
     <color name="colorButton">#f16264</color>
     <color name="colorOopsButton">#7792CC</color>

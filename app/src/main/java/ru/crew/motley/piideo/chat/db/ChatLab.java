@@ -73,6 +73,7 @@ public class ChatLab {
         values.put(MessageTable.Cols.SENDER_ID, message.getFrom());
         values.put(MessageTable.Cols.RECEIVER_ID, message.getTo());
         values.put(MessageTable.Cols.MSG_TYPE, message.getType());
+        values.put(MessageTable.Cols.TIMESTAMP, message.getTimestamp());
         return values;
     }
 

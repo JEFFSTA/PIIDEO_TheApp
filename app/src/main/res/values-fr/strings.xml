@@ -1,26 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="chat_message_stub">Hello, avez vous 10 minutes?</string>
+    <string name="chat_message_stub">Hello, avez vous une minute?</string>
 
-    <string name="req_from_stub">Connected\nBy</string>
-    <string name="req_me_stub">Me</string>
+    <string name="reg_owl_info">Le réseau le plus pratique pour l’étudiant</string>
+    <string name="reg_welcome">BIENVENUE</string>
+    <string name="reg_button_next">Démarrez</string>
+    <string name="reg_phone_hint">Numéro mobil</string>
+    <string name="reg_phone_next">Entrez</string>
+    <string name="reg_phone_toast">Insérez svp votre numéro.</string>
+    <string name="reg_acad_level">Je suis en/au</string>
+    <string name="reg_high_school">Lycée</string>
+    <string name="reg_preparatory_classes">Cycle Prépa.</string>
+    <string name="reg_engineering_school">Ecole/Université</string>
+    <string name="reg_school_next">SUITE</string>
+
+    <string name="req_from_stub">Connecté\nPar</string>
+    <string name="req_me_stub">Moi</string>
     <string name="reg_phone_length">Ton numéro doit être %1$d chiffres</string>
-    <string name="reg_subject_caption">Ce %1$s quelle\nest te matiére préférée?</string>
+    <string name="reg_subject_caption">Quelle est votre matière\npréférée ce %1$s?</string>
     <string name="reg_semestre">semestre</string>
     <string name="reg_trimestre">trimestre</string>
+    <string name="reg_save">FIN</string>
 
     <string name="req_dlg_title">Le Sujet</string>
-    <string name="req_dlg_hint">Ex: LSériede Fourier, Loi de Gauss</string>
+    <string name="req_dlg_hint">Ex: La Série de Fourier, Loi de Gauss</string>
+    <string name="req_i_have">J’ai une</string>
+    <string name="req_question_on">question en</string>
 
-    <string name="usl_hint">nom de la matière</string>
+    <string name="sch_hello_title">Bonjour</string>
+    <string name="usl_hint">recherchez…</string>
     <string name="usl_sub_hint">Vous avez une question dans quelle matière?</string>
+    <string name="sch_menu_caption">Paramètres</string>
 
-    <string name="nhlp_info">Informez</string>
+    <string name="no_title">ÉLARGIS TON RÉSEAU</string>
+    <string name="no_info">Désolé,\nPersonne dans ton\nRéseau ne maitrise bien\ncette matière.</string>
+
+    <string name="nhlp_info">Informes</string>
     <string name="nhlp_classmate">1 Camarade</string>
     <string name="nhlp_more">de plus</string>
-    <string name="nhlp_network">Elargit votre réseau par</string>
+    <string name="nhlp_network">Elargit ton réseau par</string>
     <string name="nhlp_mastered">maitrisant</string>
     <string name="nhlp_students">Etudiants</string>
-    <string name="nhlp_subjects">Matiéres</string>
+    <string name="nhlp_subjects">Matières</string>
+
+    <string name="opt_hint">Matière</string>
+    <string name="opt_info">Choisissez votre préférée ce\nsemestre/trimestre</string>
+    <string name="hlp_hint">CHOISISSEZ UN RECEPTEUR</string>
+
 </resources>

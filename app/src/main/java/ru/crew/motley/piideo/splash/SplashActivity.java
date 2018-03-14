@@ -45,7 +45,7 @@ public class SplashActivity extends AppCompatActivity {
 
         // TODO: 1/19/18 swap block comment/uncomment
         if (user == null || member == null) {
-            new Handler().postDelayed(this::startRegistration, 1500);
+            new Handler().postDelayed(this::startRegistration, 2500);
         } else {
             skipRegistration(member);
         }
