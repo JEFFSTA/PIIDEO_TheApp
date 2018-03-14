@@ -91,7 +91,7 @@ public class SendingRequestFragment extends ButterFragment {
 
     private int startProgress(long startTime) {
         long timeLeft = new Date().getTime() - startTime;
-        return 1000 * (int) timeLeft / (SharedPrefs.getSearchCount(getContext()) * 50 * 1000);
+        return 1000 * (int) timeLeft / (SharedPrefs.getSearchCount(getContext()) * 90 * 1000);
     }
 
 
