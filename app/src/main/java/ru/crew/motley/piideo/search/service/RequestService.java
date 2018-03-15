@@ -41,35 +41,13 @@ public class RequestService extends IntentService {
 
     private static String TAG = RequestService.class.getSimpleName();
 
-    public static int SERVICE_ID = 100501;
+    public static final int REQUEST_DELAY = 90;
 
-    private static final int REQUEST_DELAY = 90;
-
-    //    private static volatile LinkedBlockingDeque<Member> mMembers = new LinkedBlockingDeque<>();
-//    private static volatile int check;
-//    private static volatile int mCount;
     private DatabaseReference mDatabase;
     private Member mMember;
-    //    private static volatile boolean mIsOn;
+;
     private static volatile SendingRequestFragment mFragment;
 
-    private static volatile Object lock = new Object();
-
-//    public static void setMembers(List<Member> members) {
-//        synchronized (lock) {
-//            Log.d(TAG, "lock sM" + lock.toString());
-//            check = 123;
-//            mMembers.clear();
-//            for (Member member : members) {
-//                mMembers.add(member);
-//            }
-//            mCount = mMembers.size();
-//        }
-//    }
-
-//    public static int count() {
-//        return mCount;
-//    }
 
     public static Intent getIntent(Context context) {
         return new Intent(context, RequestService.class);
@@ -111,7 +89,7 @@ public class RequestService extends IntentService {
             }
             return;
         }
-        restartService0();
+        restartService();
         findReceiverFriendAndRequest(next);
     }
 
@@ -190,35 +168,7 @@ public class RequestService extends IntentService {
         return request;
     }
 
-//    private void restartService() {
-//        AlarmManager alarmManager = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
-//
-//
-//        Intent serviceIntent = new Intent(this, RequestService.class);
-//        serviceIntent.setAction("ru.crew.motley.piideo.BROADCAST_REQUEST");
-//        PendingIntent servicePendingIntent =
-//                PendingIntent.getService(this,
-//                        RequestService.SERVICE_ID,
-//                        serviceIntent,
-//                        PendingIntent.FLAG_CANCEL_CURRENT);
-//        long executeAt = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(50);
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//            alarmManager.setExactAndAllowWhileIdle(
-//                    AlarmManager.RTC_WAKEUP,
-//                    executeAt,
-//                    servicePendingIntent);
-//        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-//            alarmManager.setExact(AlarmManager.RTC_WAKEUP,
-//                    executeAt,
-//                    servicePendingIntent);
-//        } else {
-//            alarmManager.set(AlarmManager.RTC_WAKEUP,
-//                    executeAt,
-//                    servicePendingIntent);
-//        }
-//    }
-
-    private void restartService0() {
+    private void restartService() {
         AlarmManager alarmManager = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
 
         Intent intent = new Intent(this, RequestReceiver.class);
@@ -242,28 +192,12 @@ public class RequestService extends IntentService {
         }
     }
 
-//    public static void stopRestarting(Context context) {
-//        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-//        Intent serviceIntent = new Intent(context, RequestService.class);
-//        serviceIntent.setAction("ru.crew.motley.piideo.BROADCAST_REPEAT");
-//        PendingIntent servicePendingIntent =
-//                PendingIntent.getService(context,
-//                        RequestService.SERVICE_ID,
-//                        serviceIntent,
-//                        PendingIntent.FLAG_CANCEL_CURRENT);
-//
-//        alarmManager.cancel(servicePendingIntent);
-//
-//    }
-
-    public static void stopRestarting0(Context context) {
+    public static void stopRestarting(Context context) {
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         Intent serviceIntent = new Intent(context, RequestReceiver.class);
         serviceIntent.setAction(Events.BROADCAST_REPEAT);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 33, serviceIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-
         alarmManager.cancel(pendingIntent);
-
     }
 
     public synchronized static void fragmentCallback(SendingRequestFragment fragment) {

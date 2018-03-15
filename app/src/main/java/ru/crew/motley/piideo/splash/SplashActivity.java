@@ -64,7 +64,7 @@ public class SplashActivity extends AppCompatActivity {
         if (SharedPrefs.isSearching(this)) {
             Intent i = SearchActivity.getIntent(byPass, this);
             startActivity(i);
-        } else if (chatMessageId != null) {
+        } else if (SharedPrefs.loadChatIdleStartTime(this) != -1) {
             Intent i = ChatActivity.getIntent(chatMessageId, this);
             startActivity(i);
         } else {

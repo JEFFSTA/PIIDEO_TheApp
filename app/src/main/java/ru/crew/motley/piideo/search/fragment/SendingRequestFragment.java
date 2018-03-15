@@ -17,6 +17,8 @@ import ru.crew.motley.piideo.SharedPrefs;
 import ru.crew.motley.piideo.search.SearchListener;
 import ru.crew.motley.piideo.search.service.RequestService;
 
+import static ru.crew.motley.piideo.search.service.RequestService.REQUEST_DELAY;
+
 /**
  * Created by vas on 3/1/18.
  */
@@ -91,7 +93,7 @@ public class SendingRequestFragment extends ButterFragment {
 
     private int startProgress(long startTime) {
         long timeLeft = new Date().getTime() - startTime;
-        return 1000 * (int) timeLeft / (SharedPrefs.getSearchCount(getContext()) * 90 * 1000);
+        return 1000 * (int) timeLeft / (SharedPrefs.getSearchCount(getContext()) * REQUEST_DELAY * 1000);
     }
 
 

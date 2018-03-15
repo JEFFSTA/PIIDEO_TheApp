@@ -17,7 +17,6 @@ class MessageLogger {
     fun saveToLogFile(source: String, time: Long) {
         if (!isExternalStorageWritable()) {
             throw RuntimeException("Log couldn't be saved due to writing problems")
-            return
         }
         if (!File(HOME_PATH).exists()) {
             File(HOME_PATH).mkdir()

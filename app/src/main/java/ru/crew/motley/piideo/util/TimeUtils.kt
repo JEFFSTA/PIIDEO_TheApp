@@ -9,16 +9,6 @@ class TimeUtils {
     companion object {
 
         fun gmtTimeInMillis(): Long {
-            val current = Date()
-            val tz = TimeZone.getDefault()
-            val offset = tz.rawOffset
-            val getOffset = tz.getOffset(current.time)
-            getOffset
-            val st = System.currentTimeMillis()
-            st
-            val result = current.time - offset
-//            return result
-//            return System.currentTimeMillis()
             return Date().time
         }
 
@@ -31,15 +21,5 @@ class TimeUtils {
             calendar.set(Calendar.MINUTE, 0)
             return calendar.timeInMillis
         }
-
-//        fun gmtTimeInMillis(): Long {
-//            val current = Date()
-//            val tz = TimeZone.getDefault()
-//            val offset = tz.rawOffset
-//            val getOffset = tz.getOffset(current.time)
-//            getOffset
-//            val result = current.time - offset
-//            return result
-//        }
     }
 }

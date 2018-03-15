@@ -15,8 +15,8 @@ import static ru.crew.motley.piideo.chat.db.PiideoSchema.MemberQueue;
 
 public class ChatDBHelper extends SQLiteOpenHelper {
 
-    //    public static final int VERSION = 1;
-    public static final int VERSION = 2;
+    public static final int VERSION = 1;
+
 
     private static final String DATABASE_NAME = "chatBase.db";
 
@@ -56,7 +56,7 @@ public class ChatDBHelper extends SQLiteOpenHelper {
                 MessageTable.Cols.SENDER_ID + " TEXT, " +
                 MessageTable.Cols.RECEIVER_ID + " TEXT, " +
                 MessageTable.Cols.MSG_TYPE + " TEXT, " +
-                MessageTable.Cols.TIMESTAMP + "TEXT)");
+                MessageTable.Cols.TIMESTAMP + " TEXT)");
 
         db.execSQL("create table " + MemberQueue.NAME + "(" +
                 " _id integer primary key autoincrement, " +
@@ -69,9 +69,6 @@ public class ChatDBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        if (oldVersion == 1 && newVersion == 2) {
-            db.execSQL("alter table " + MessageTable.NAME +
-                    " add column " + MessageTable.Cols.TIMESTAMP + " TEXT");
-        }
+
     }
 }

@@ -113,6 +113,11 @@
             android:enabled="true"
             android:exported="false" />
 
+        <service
+            android:name=".fcm.AcknowledgeService"
+            android:enabled="true"
+            android:exported="false" />
+
         <receiver
             android:name=".fcm.Receiver"
             android:enabled="true">
@@ -136,6 +141,15 @@
             android:exported="false">
             <intent-filter>
                 <action android:name="ru.crew.motley.piideo.BROADCAST_REPEAT" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".fcm.ChatIdleStopper"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter android:priority="0">
+                <action android:name="ru.crew.motley.piideo.BROADCAST_IDLE_STOP" />
             </intent-filter>
         </receiver>
 

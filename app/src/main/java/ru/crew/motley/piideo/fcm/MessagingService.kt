@@ -7,9 +7,7 @@ import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.graphics.BitmapFactory
 import android.os.Build
-import android.os.Bundle
 import android.provider.Settings
 import android.support.annotation.StringDef
 import android.support.v4.app.NotificationCompat
@@ -94,21 +92,9 @@ class MessagingService : FirebaseMessagingService() {
                 message.data["type"]!!,
                 message.data["timestamp"]!!.toLong())
         val dbMessageId = messageId.toString()
-        val calendar = if (message.data["timestamp"] != null) {
-            Calendar.getInstance(TimeZone.getDefault()).apply {
-                timeInMillis = message.data["timestamp"]!!.toLong()
-            }
-        } else {
-            return
-//            null
-        }
-        val logger = MessageLogger()
-        val date = Date()
-        logger.saveToLogFile("onMessageReceived", date.time)
-        logger.saveToLogFile(message.data["type"]!!, date.time)
         when (message.data["type"]) {
-            SYN -> showRequestNotification(dbMessageId, message.data["type"]!!, calendar!!.time, message.data["content"]!!)
-            ACK -> showChatOrNotification(dbMessageId, message.data["type"]!!, calendar!!.time)
+            SYN -> showRequestNotification(dbMessageId)
+            ACK -> handleAcknowledge(dbMessageId)
             REJ -> sendNewRequest()
             MSG -> showNothingOrNotification(dbMessageId)
             PDO -> showPiideoNotyOrSkip(dbMessageId)
@@ -125,72 +111,57 @@ class MessagingService : FirebaseMessagingService() {
         return lab.addMessage(fcmMessage)
     }
 
-    private fun showChatOrNotification(dbMessageId: String, @MessageType type: String, timestamp: Date) {
-        RequestService.stopRestarting0(applicationContext)
-        SharedPrefs.setSearching(false, applicationContext)
-        SharedPrefs.setSearchCount(-1, applicationContext)
-        SharedPrefs.saveChatSide(ACK, applicationContext)
-        ChatLab.get(applicationContext).clearQueue()
+    private fun handleAcknowledge(dbMessageId: String) {
+        val i = AcknowledgeService.getIntent(applicationContext, dbMessageId)
+        startService(i)
+//        RequestService.stopRestarting(applicationContext)
 //        SharedPrefs.setSearching(false, applicationContext)
-        val app = application as Appp
-        val params = Bundle()
-        val date = Date()
-
-//        val visible  = if (app.searchActivityVisible()) 1L else 0L
-//        params.putLong("searchActivityVisible", visible )
-//        params.putLong("timeInMillis", date.time)
-//        FirebaseAnalytics.getInstance(this).logEvent("showChatOrNotification", params)
-//        mFirebaseAnalytics.logEvent("share_image", params);
-        val logger = MessageLogger()
-        logger.saveToLogFile("showChatOrNotification", date.time)
-        logger.saveToLogFile("searchActivityVisible " + app.searchActivityVisible(), date.time)
-        if (app.searchActivityVisible()) {
-            showChat(dbMessageId, params)
-        } else {
-            showAcknowledgeNotification(dbMessageId, timestamp)
-        }
+//        SharedPrefs.setSearchCount(-1, applicationContext)
+//        SharedPrefs.saveChatSide(ACK, applicationContext)
+//        ChatLab.get(applicationContext).clearQueue()
+//        val app = application as Appp
+//        if (app.searchActivityVisible()) {
+//            showChat(dbMessageId)
+//        } else {
+//            showAcknowledgeNotification(dbMessageId)
+//        }
     }
 
-    private fun showChat(dbMessageId: String, logBundle: Bundle) {
-        val i = ShowDialogReceiver.getIntent(dbMessageId, SYN)
-//        logBundle.putString("sendBroadCast", "executing")
-        val logger = MessageLogger()
-        val date = Date()
-        logger.saveToLogFile("showChat", date.time)
-        sendBroadcast(i)
-//        FirebaseAnalytics.getInstance(this).logEvent("broadCastToHandshake", logBundle)
-    }
+//    private fun showChat(dbMessageId: String) {
+//        val i = ShowDialogReceiver.getIntent(dbMessageId, SYN)
+//        val logger = MessageLogger()
+//        val date = Date()
+//        logger.saveToLogFile("showChat", date.time)
+//        sendBroadcast(i)
+//    }
 
-    private fun showRequestNotification(dbMessageId: String, @MessageType type: String, timestamp: Date, content: String) {
+    private fun showRequestNotification(dbMessageId: String) {
         clearChatTimeout()
-//        clearHandShakeTimeout()
+
         if (chatIsActive()) return
         if (handShakeIsActive()) return
-        val i = HandshakeActivity.getIntent(dbMessageId, type, applicationContext)
+        val i = HandshakeActivity.getIntent(dbMessageId, applicationContext)
         SharedPrefs.saveChatSide(SYN, applicationContext)
-//        i.action = System.currentTimeMillis().toString()
-//        i.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-//        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_CLEAR_TASK)
         i.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP
         val pI = notificationIntent(SYN_REQUEST_CODE, i)
         createChannelIfNeeded()
         val title = resources.getString(R.string.nty_request)
-//        val content = ownSubject()
         showCustomNotification(SYN_ID, pI, title, ownSubject())
         SharedPrefs.saveHandshakeStartTime(Date().time, applicationContext)
-        val topicArr = content.split("||")
+        val message = ChatLab.get(applicationContext).getReducedFcmMessage(dbMessageId)
+        val topicArr = message.content!!.split("||")
         val subject = if (topicArr.size == 1) {
             topicArr[0].split("|")[0]
         } else {
             topicArr[1].split("|")[0]
         }
-        val explaination = if (topicArr.size == 1) {
+        val explanation = if (topicArr.size == 1) {
             topicArr[0].split("|")[1]
         } else {
             topicArr[1].split("|")[1]
         }
         SharedPrefs.searchSubject(subject, applicationContext)
-        SharedPrefs.requestMessage(explaination, applicationContext)
+        SharedPrefs.requestMessage(explanation, applicationContext)
         setAlarm(dbMessageId)
     }
 
@@ -199,29 +170,18 @@ class MessagingService : FirebaseMessagingService() {
         return lab.member.subject.name
     }
 
-    private fun showAcknowledgeNotification(dbMessageId: String, timestamp: Date) {
-        val i = ChatActivity.getIntent(dbMessageId, applicationContext)
-//        i.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-        val pI = notificationIntent(ACK_REQUEST_CODE, i)
-        val title = resources.getString(R.string.nty_accepted)
-//        showNotification(ACK_ID, pI, title, "")
-        showCustomNotification(ACK_ID, pI, title, "")
-    }
-
-//    private fun showRejectNotification(dbMessageId: String, timestamp: Date) {
-//        val searchRepeater = SearchRepeaterSingleton.instance(applicationContext)
-//        searchRepeater.next()
-//        createChannelIfNeeded()
-//        showNotification(REJ_ID, null, "", dateFormatter.format(timestamp) + " Reject")
+//    private fun showAcknowledgeNotification(dbMessageId: String) {
+//        val i = ChatActivity.getIntent(dbMessageId, applicationContext)
+//        val pI = notificationIntent(ACK_REQUEST_CODE, i)
+//        val title = resources.getString(R.string.nty_accepted)
+//        showCustomNotification(ACK_ID, pI, title, "")
 //    }
 
+
     private fun sendNewRequest() {
-        RequestService.stopRestarting0(applicationContext)
+        RequestService.stopRestarting(applicationContext)
         val i = Intent(applicationContext, RequestService::class.java)
         startService(i)
-//        val searchRepeater = SearchRepeaterSingleton.instance(applicationContext)
-//        Handler(mainLooper).post { searchRepeater.skip() }
-
     }
 
     private fun showNothingOrNotification(messageId: String) {
@@ -264,8 +224,6 @@ class MessagingService : FirebaseMessagingService() {
             SharedPrefs.loadChatStartTime(applicationContext) + TimeUnit.SECONDS.toMillis(HandshakeActivity.HANDSHAKE_TIMEOUT) > Date().time
 
     private fun showPiideoNotification(dbMessageId: String) {
-        val lab = ChatLab.get(applicationContext)
-        val content = lab.getReducedFcmMessage(dbMessageId).content!!
         val i = ChatActivity.getIntent(dbMessageId, applicationContext)
         val pI = notificationIntent(PDO_REQUEST_CODE, i)
         createChannelIfNeeded()
@@ -305,13 +263,6 @@ class MessagingService : FirebaseMessagingService() {
         }
     }
 
-    private fun clearHandShakeTimeout() {
-        val handshakeStartTime = SharedPrefs.loadHandshakeStartTime(applicationContext)
-        if (handshakeStartTime + TimeUnit.SECONDS.toMillis(HandshakeActivity.HANDSHAKE_TIMEOUT) < Date().time) {
-            SharedPrefs.clearHandshakeStartTime(applicationContext)
-        }
-    }
-
     private fun notificationIntent(requestCode: Int, intent: Intent): PendingIntent {
         intent.action = System.currentTimeMillis().toString()
         return PendingIntent.getActivity(
@@ -321,26 +272,7 @@ class MessagingService : FirebaseMessagingService() {
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_ONE_SHOT)
     }
 
-
-    private fun showNotification(id: Int, intent: PendingIntent?, title: String = "", content: String) {
-        val manager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        val largeIcon = BitmapFactory.decodeResource(resources, R.mipmap.ic_launcher_new)
-        val notification = NotificationCompat.Builder(
-                applicationContext,
-                NOTIFICATION_CHANNEL_DEFAULT)
-                .setContentTitle(title)
-                .setContentText(content)
-//                .setStyle(NotificationCompat.BigTextStyle().bigText(content))
-                .setSmallIcon(android.R.mipmap.sym_def_app_icon)
-                .setLargeIcon(largeIcon)
-                .setSound(Settings.System.DEFAULT_NOTIFICATION_URI)
-                .setContentIntent(intent)
-                .setAutoCancel(true)
-                .build()
-        manager.notify(id, notification)
-    }
-
-    fun setAlarm(dbMessageId: String) {
+    private fun setAlarm(dbMessageId: String) {
         val alarmManager = this.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
         val intent = Intent(this, Receiver::class.java)
@@ -405,26 +337,5 @@ class Receiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.cancel(SYN_ID)
-        val firstMessageId = intent.getStringExtra("DB_MESSAGE_ID")
-//        if (SharedPrefs.loadChatMessageId(context) == null) {
-//            val dbMessage = ChatLab.get(context).getReducedFcmMessage(firstMessageId)!!
-//            val timestamp = System.currentTimeMillis()
-//            val dayTimestamp = TimeUtils.gmtDayTimestamp(timestamp)
-//            val message = FcmMessage(
-//                    timestamp,
-//                    -timestamp,
-//                    dayTimestamp,
-//                    dbMessage.to,
-//                    dbMessage.from,
-//                    "",
-//                    MessagingService.REJ,
-//                    dbMessage.to + "_" + dbMessage.from)
-//            FirebaseDatabase.getInstance()
-//                    .reference
-//                    .child("notifications")
-//                    .child("handshake")
-//                    .push()
-//                    .setValue(message)
-//        }
     }
 }

@@ -28,20 +28,20 @@ class HandshakeActivity : ConnectionErrorActivity(), NavigationCallback {
         private const val EXTRA_DB_MESSAGE_ID = "local_db_id"
         private const val EXTRA_TYPE = "message_type"
 
-        fun getIntent(dbMessageId: String, @MessageType type: String, context: Context) =
+        fun getIntent(dbMessageId: String, context: Context) =
                 Intent(context, HandshakeActivity::class.java).apply {
                     putExtra(EXTRA_DB_MESSAGE_ID, dbMessageId)
-                    putExtra(EXTRA_TYPE, type)
+//                    putExtra(EXTRA_TYPE, type)
                 }
 
-        const val HANDSHAKE_TIMEOUT = 80L
+        const val HANDSHAKE_TIMEOUT = 85L
     }
 
     val handler = Handler()
     val timer = Timer()
 
     val messageId by lazy { intent.getStringExtra(EXTRA_DB_MESSAGE_ID)!! }
-    val type by lazy { intent.getStringExtra(EXTRA_TYPE)!! }
+//    val type by lazy { intent.getStringExtra(EXTRA_TYPE)!! }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

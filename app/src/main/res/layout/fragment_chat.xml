@@ -21,8 +21,6 @@
             app:contentInsetLeft="0dp"
             app:contentInsetRight="0dp"
             app:contentInsetStart="0dp">
-            <!--android:layout_height="?attr/actionBarSize"-->
-            <!--app:popupTheme="@style/AppTheme.PopupOverlay">-->
             <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -72,10 +70,6 @@
                         android:textColor="@color/screenColorBackground"
                         android:textSize="22sp"
                         tools:text="00:00" />
-
-                    <!--android:layout_marginBottom="@dimen/simple_padding_tiny"-->
-                    <!--android:layout_marginRight="@dimen/simple_padding_tiny"-->
-
                 </FrameLayout>
 
             </FrameLayout>
@@ -164,39 +158,41 @@
             android:layout_width="match_parent"
             android:layout_height="54dp"
             android:background="@color/colorBlack"
-            android:visibility="gone"
-            >
+            android:visibility="gone">
 
-            <LinearLayout
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
+                android:layout_marginBottom="@dimen/simple_padding_tiny"
                 android:layout_marginLeft="@dimen/simple_padding_medium"
                 android:layout_marginRight="@dimen/simple_padding_medium"
                 android:layout_marginTop="@dimen/simple_padding_tiny"
-                android:layout_marginBottom="@dimen/simple_padding_tiny"
-                android:background="@drawable/chat_text_bar_bg"
-                android:elevation="4dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                >
+                android:background="@drawable/chat_text_bar_bg">
 
-                <TextView
-                    android:layout_marginLeft="24dp"
-                    android:paddingBottom="@dimen/simple_padding_largish"
-                    android:paddingTop="@dimen/simple_padding_largish"
-                    android:textSize="@dimen/text_size_primary"
+                <LinearLayout
+                    android:layout_gravity="center_horizontal"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Thank you "
-                    android:textColor="@color/colorRed" />
+                    android:layout_height="wrap_content">
 
-                <TextView
-                    android:paddingBottom="@dimen/simple_padding_largish"
-                    android:paddingTop="@dimen/simple_padding_largish"
-                    android:textSize="@dimen/text_size_primary"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="for choosing piideo" />
-            </LinearLayout>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingBottom="@dimen/simple_padding_largish"
+                        android:paddingTop="@dimen/simple_padding_largish"
+                        android:text="Thank you "
+                        android:textColor="@color/colorRed"
+                        android:textSize="@dimen/text_size_primary" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingBottom="@dimen/simple_padding_largish"
+                        android:paddingTop="@dimen/simple_padding_largish"
+                        android:text="for choosing piideo"
+                        android:textSize="@dimen/text_size_primary" />
+                </LinearLayout>
+            </FrameLayout>
 
 
         </FrameLayout>

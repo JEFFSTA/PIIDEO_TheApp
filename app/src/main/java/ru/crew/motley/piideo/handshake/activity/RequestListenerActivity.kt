@@ -4,7 +4,6 @@ import android.content.IntentFilter
 import android.os.Bundle
 import android.os.Handler
 import android.provider.ContactsContract
-import android.support.v7.app.AppCompatActivity
 import ru.crew.motley.piideo.Appp
 import ru.crew.motley.piideo.R
 import ru.crew.motley.piideo.chat.activity.ChatActivity
@@ -23,7 +22,6 @@ abstract class RequestListenerActivity : ConnectionErrorActivity() {
     override fun onResume() {
         super.onResume()
         (application as Appp).searchActivityResumed()
-//        fbNotificationReceiver = ShowDialogReceiver(this)
         val filter = IntentFilter(ShowDialogReceiver.BROADCAST_ACTION)
         registerReceiver(fbNotificationReceiver, filter)
         contentResolver.registerContentObserver(
@@ -44,7 +42,7 @@ abstract class RequestListenerActivity : ConnectionErrorActivity() {
         setContentView(R.layout.activity_search)
     }
 
-    fun showChat(dbMessageId: String, type: String) {
+    fun showChat(dbMessageId: String) {
         val i = ChatActivity.getIntent(dbMessageId, this)
         startActivity(i)
         finish()

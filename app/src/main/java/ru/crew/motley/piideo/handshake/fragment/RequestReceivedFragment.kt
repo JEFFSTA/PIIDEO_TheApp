@@ -21,10 +21,15 @@ import ru.crew.motley.piideo.util.TimeUtils
 import android.provider.ContactsContract
 import android.provider.BaseColumns
 import android.net.Uri
+import android.os.Build
 import kotlinx.android.synthetic.main.fragment_request_received_0.view.*
 import ru.crew.motley.piideo.SharedPrefs
+import ru.crew.motley.piideo.fcm.AcknowledgeService.CHAT_IDLE_TIMEOUT
+import ru.crew.motley.piideo.fcm.AcknowledgeService.REQUEST_CODE_IDLE_STOPPER
 import ru.crew.motley.piideo.network.NetworkErrorCallback
 import ru.crew.motley.piideo.registration.fragments.PhoneFragment.FRENCH_PREFIX
+import ru.crew.motley.piideo.search.Events
+import java.util.concurrent.TimeUnit
 
 
 /**
@@ -56,7 +61,8 @@ class RequestReceivedFragment : Fragment() {
             cancelAlarm()
             clearPreviousChat()
             sendOwnStubMessage()
-//            sendAcknowledge()
+            SharedPrefs.saveChatIdleStartTime(System.currentTimeMillis(), context)
+            initChatIdle()
             val i = ChatActivity.getIntent(messageId, activity)
             startActivity(i)
             SharedPrefs.clearHandshakeStartTime(context)
@@ -160,5 +166,33 @@ class RequestReceivedFragment : Fragment() {
                     }
                     return ""
                 }
+    }
+
+    private fun initChatIdle() {
+        val alarmManager = context?.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val intent = Intent()
+        intent.action = Events.BROADCAST_CHAT_IDLE_STOP
+
+        val pendingIntent = PendingIntent.getBroadcast(
+                context,
+                REQUEST_CODE_IDLE_STOPPER,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT)
+        val executeAt = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(CHAT_IDLE_TIMEOUT.toLong())
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            alarmManager.setExactAndAllowWhileIdle(
+                    AlarmManager.RTC_WAKEUP,
+                    executeAt,
+                    pendingIntent)
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            alarmManager.setExact(AlarmManager.RTC_WAKEUP,
+                    executeAt,
+                    pendingIntent)
+        } else {
+            alarmManager.set(AlarmManager.RTC_WAKEUP,
+                    executeAt,
+                    pendingIntent)
+        }
+        SharedPrefs.saveChatIdleStartTime(System.currentTimeMillis(), context)
     }
 }

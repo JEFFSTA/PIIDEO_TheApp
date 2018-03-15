@@ -1,12 +1,16 @@
 package ru.crew.motley.piideo.chat.activity;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -15,9 +19,12 @@ import dagger.android.AndroidInjector;
 import dagger.android.DispatchingAndroidInjector;
 import dagger.android.support.HasSupportFragmentInjector;
 import ru.crew.motley.piideo.R;
+import ru.crew.motley.piideo.SharedPrefs;
 import ru.crew.motley.piideo.chat.fragment.ChatFragment;
 import ru.crew.motley.piideo.chat.fragment.WatchPiideoFragment;
+import ru.crew.motley.piideo.fcm.AcknowledgeService;
 import ru.crew.motley.piideo.network.activity.ConnectionErrorActivity;
+import ru.crew.motley.piideo.search.Events;
 
 public class ChatActivity extends ConnectionErrorActivity
         implements
@@ -31,6 +38,16 @@ public class ChatActivity extends ConnectionErrorActivity
 
     private String mDBMessageId;
 
+    private BroadcastReceiver mIdleReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            SharedPrefs.saveChatIdleStartTime(-1, context);
+            SharedPrefs.clearChatData(context);
+            ChatActivity.this.finish();
+            abortBroadcast();
+        }
+    };
+
     @Inject
     DispatchingAndroidInjector<Fragment> injector;
 
@@ -38,7 +55,6 @@ public class ChatActivity extends ConnectionErrorActivity
     public static Intent getIntent(String dbMessageId, Context context) {
         Log.d(TAG, " GET INTENT ");
         Intent i = new Intent(context, ChatActivity.class);
-        i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         i.putExtra(EXTRA_DB_MESSAGE_ID, dbMessageId);
         return i;
     }
@@ -59,6 +75,13 @@ public class ChatActivity extends ConnectionErrorActivity
         super.onResume();
         Log.d(TAG, "resume Activity ");
         Log.d(TAG, "Activity  string " + this.toString());
+        long time = SharedPrefs.loadChatIdleStartTime(this);
+        long timeoutInMillis = TimeUnit.SECONDS.toMillis(AcknowledgeService.CHAT_IDLE_TIMEOUT);
+        if (time == -1 || time + timeoutInMillis < System.currentTimeMillis()) {
+            SharedPrefs.saveChatIdleStartTime(-1, this);
+            SharedPrefs.clearChatData(this);
+            finish();
+        }
     }
 
     @Override
@@ -77,11 +100,15 @@ public class ChatActivity extends ConnectionErrorActivity
     protected void onStop() {
         super.onStop();
         Log.d(TAG, "stop Activity ");
+        unregisterReceiver(mIdleReceiver);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
+        IntentFilter filter = new IntentFilter(Events.BROADCAST_CHAT_IDLE_STOP);
+        filter.setPriority(1);
+        registerReceiver(mIdleReceiver, filter);
         Log.d(TAG, "start Activity ");
     }
 

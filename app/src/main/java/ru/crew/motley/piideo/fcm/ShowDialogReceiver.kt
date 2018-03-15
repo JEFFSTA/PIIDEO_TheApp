@@ -6,11 +6,13 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import android.util.Log
 import com.google.firebase.analytics.FirebaseAnalytics
 import ru.crew.motley.piideo.Appp
 import ru.crew.motley.piideo.search.activity.SearchActivity
 import java.lang.ref.WeakReference
 import ru.crew.motley.piideo.fcm.MessagingService.Companion.MessageType
+import ru.crew.motley.piideo.fcm.MessagingService.Companion.TAG
 import java.util.*
 
 /**
@@ -22,34 +24,23 @@ class ShowDialogReceiver(activity: AppCompatActivity) : BroadcastReceiver() {
 
     companion object {
         val BROADCAST_ACTION = "broadcast_for_dialog"
-
-        val EXTRA_TYPE = "message_type"
         val EXTRA_ID = "db_message_id"
 
-        fun getIntent(dbMessageId: String, @MessageType type: String) = Intent(BROADCAST_ACTION).apply {
-            putExtra(EXTRA_TYPE, type)
+        fun getIntent(dbMessageId: String) = Intent(BROADCAST_ACTION).apply {
             putExtra(EXTRA_ID, dbMessageId)
         }
     }
 
 
     override fun onReceive(context: Context, intent: Intent) {
-        val type = intent.getStringExtra(EXTRA_TYPE)!!
         val dbMessageId = intent.getStringExtra(EXTRA_ID)!!
-
-//        val params = Bundle()
-//        val date = Date()
-//        params.putLong("timeInMillis", date.time)
-//        params.putBoolean("weakActivityIsNotNull", weakActivity.get() != null)
-//        FirebaseAnalytics.getInstance(context).logEvent("receiveByActivity", params)
-        val logger = MessageLogger()
         val date = Date()
-        logger.saveToLogFile("onReceive", date.time)
-        logger.saveToLogFile("weakActivity.get " + (weakActivity.get() == null), date.time)
+        Log.d(TAG, "on Receive show chat " + date.time)
+        Log.d(TAG, "weakActivity.get " + (weakActivity.get() == null) + " " + date.time)
         weakActivity.get()?.let {
             val app = it.application as Appp
             if (app.searchActivityVisible()) {
-                (it as SearchActivity).showChat(dbMessageId, type)
+                (it as SearchActivity).showChat(dbMessageId)
                 it.finish()
             }
         }

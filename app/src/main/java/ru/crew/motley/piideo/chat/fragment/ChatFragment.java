@@ -55,6 +55,7 @@ import ru.crew.motley.piideo.chat.ChatAdapter;
 import ru.crew.motley.piideo.chat.MessagesAdapter;
 import ru.crew.motley.piideo.chat.db.ChatLab;
 import ru.crew.motley.piideo.chat.model.PiideoLoader;
+import ru.crew.motley.piideo.fcm.ChatIdleStopper;
 import ru.crew.motley.piideo.fcm.FcmMessage;
 import ru.crew.motley.piideo.fcm.Receiver;
 import ru.crew.motley.piideo.network.Member;
@@ -67,9 +68,11 @@ import ru.crew.motley.piideo.network.neo.Statement;
 import ru.crew.motley.piideo.network.neo.Statements;
 import ru.crew.motley.piideo.piideo.activity.PhotoActivity;
 import ru.crew.motley.piideo.search.Events;
+import ru.crew.motley.piideo.search.receiver.RequestReceiver;
 import ru.crew.motley.piideo.splash.SplashActivity;
 import ru.crew.motley.piideo.util.TimeUtils;
 
+import static ru.crew.motley.piideo.fcm.AcknowledgeService.REQUEST_CODE_IDLE_STOPPER;
 import static ru.crew.motley.piideo.fcm.MessagingService.ACK;
 import static ru.crew.motley.piideo.fcm.MessagingService.SYN;
 import static ru.crew.motley.piideo.piideo.service.Recorder.HOME_PATH;
@@ -86,7 +89,7 @@ public class ChatFragment extends ButterFragment
     }
 
     private static final String TAG = ChatFragment.class.getSimpleName();
-    public static final long CHAT_TIMEOUT = 600L;
+    public static final long CHAT_TIMEOUT = 60L;
     private static final String ARG_DB_MESSAGE_ID = "local_db_id";
 
     @BindView(R.id.chat_recycler)
@@ -163,7 +166,7 @@ public class ChatFragment extends ButterFragment
             if (seconds < 0) {
                 handler.removeCallbacks(mTimer);
                 showRateView();
-                deleteUselessFiles();
+//                deleteUselessFiles();
                 makeMeFree();
                 return;
             }
@@ -522,14 +525,18 @@ public class ChatFragment extends ButterFragment
     private void showRateView() {
         // TODO: 002 02.02.18 implement rate view
         imageStub.setVisibility(View.VISIBLE);
-        mMessageInput.setFocusable(false);
-        mMessageInput.setFocusableInTouchMode(false);
+        mMessageInput.setVisibility(View.GONE);
+        messageButton.setVisibility(View.GONE);
+        piideoButton.setVisibility(View.GONE);
         getView().setFocusableInTouchMode(true);
         getView().requestFocus();
         getView().setOnKeyListener((v, keyCode, event) -> {
             if (keyCode == KeyEvent.KEYCODE_BACK) {
                 SharedPrefs.clearChatStartTime(getActivity());
                 SharedPrefs.clearChatMessageId(getActivity());
+                SharedPrefs.saveChatIdleStartTime(-1, getActivity());
+                deleteUselessFiles();
+                cancelChatIdleBroadcast();
                 Intent i = SplashActivity.getIntent(getActivity());
                 i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 SharedPrefs.saveChatSide("", getContext());
@@ -539,6 +546,19 @@ public class ChatFragment extends ButterFragment
             }
             return false;
         });
+    }
+
+    private void cancelChatIdleBroadcast() {
+        AlarmManager alarmManager = (AlarmManager) getContext()
+                .getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent();
+        intent.setAction(Events.BROADCAST_CHAT_IDLE_STOP);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                getContext(),
+                REQUEST_CODE_IDLE_STOPPER,
+                intent,
+                PendingIntent.FLAG_CANCEL_CURRENT);
+        alarmManager.cancel(pendingIntent);
     }
 
     private void deleteUselessFiles() {

@@ -3,6 +3,8 @@ package ru.crew.motley.piideo;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import static ru.crew.motley.piideo.search.service.RequestService.*;
+
 public class SharedPrefs {
 
     private static final String PREFS = "prefs";
@@ -13,17 +15,14 @@ public class SharedPrefs {
     private static final String SEARCHING_COUNT = "searching_count";
     private static final String SEARCH_START_TIME = "searching_start_time";
 
-    private static final String CHAT = "page";
     private static final String CHAT_START_TIME = "chatStartTime";
     private static final String CHAT_MESSAGE_ID = "chatReceiverId";
     private static final String CHAT_SIDE = "side";
+    private static final String CHAT_IDLE_START_TIME = "chatIdleStartTime";
 
     private static final String HANDSHAKE_START_TIME = "handshakeStartTime";
 
     private static final String VERIFICATION_ID = "verificationId";
-
-    private static final String PROGRESS_TIME = "startSearchingTime";
-
 
     public static void searchSubject(String value, Context context) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
@@ -137,7 +136,6 @@ public class SharedPrefs {
         prefs.edit()
                 .remove(CHAT_MESSAGE_ID)
                 .remove(CHAT_START_TIME)
-                .remove(CHAT)
                 .apply();
     }
 
@@ -172,12 +170,11 @@ public class SharedPrefs {
 
     public static long loadStartSearchingTime(Context context) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-        long result = prefs.getLong(SEARCH_START_TIME, -1);
-        return result;
+        return prefs.getLong(SEARCH_START_TIME, -1);
     }
 
     public static boolean searchCompleted(Context context) {
-        long endTime = SharedPrefs.getSearchCount(context) * 50 * 1000 + SharedPrefs.loadStartSearchingTime(context);
+        long endTime = SharedPrefs.getSearchCount(context) * REQUEST_DELAY * 1000 + SharedPrefs.loadStartSearchingTime(context);
         return endTime < System.currentTimeMillis();
     }
 
@@ -191,6 +188,17 @@ public class SharedPrefs {
     public static String loadChatSide(Context context) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
         return prefs.getString(CHAT_SIDE, "");
+    }
 
+    public static void saveChatIdleStartTime(long inMillis, Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        prefs.edit()
+                .putLong(CHAT_IDLE_START_TIME, inMillis)
+                .apply();
+    }
+
+    public static long loadChatIdleStartTime(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        return prefs.getLong(CHAT_IDLE_START_TIME, -1);
     }
 }
