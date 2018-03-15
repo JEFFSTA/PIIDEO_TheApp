@@ -21,6 +21,7 @@ import ru.crew.motley.piideo.R;
 import ru.crew.motley.piideo.chat.activity.ChatActivity;
 import ru.crew.motley.piideo.chat.db.ChatLab;
 import ru.crew.motley.piideo.network.Member;
+import ru.crew.motley.piideo.search.activity.RejectActivity;
 import ru.crew.motley.piideo.search.activity.SearchActivity;
 
 import static ru.crew.motley.piideo.fcm.MessagingService.MSG_REQUEST_CODE;
@@ -42,10 +43,7 @@ public class PushBroadcastHandler extends IntentService {
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
         Log.d(TAG, "Handle intent");
-        ChatLab lab = ChatLab.get(getApplicationContext());
-        Member member = lab.getMember();
-        Parcelable memberParceled = Parcels.wrap(member);
-        Intent i = SearchActivity.getIntent(memberParceled, getApplicationContext());
+        Intent i = RejectActivity.getIntent(getApplicationContext());
         i.setAction(Long.toString(System.currentTimeMillis()));
         PendingIntent pI = notificationIntent(MSG_REQUEST_CODE, i);
         createChannelIfNeeded();

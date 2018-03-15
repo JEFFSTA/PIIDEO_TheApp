@@ -25,6 +25,8 @@ import ru.crew.motley.piideo.chat.fragment.WatchPiideoFragment;
 import ru.crew.motley.piideo.fcm.AcknowledgeService;
 import ru.crew.motley.piideo.network.activity.ConnectionErrorActivity;
 import ru.crew.motley.piideo.search.Events;
+import ru.crew.motley.piideo.search.activity.SearchActivity;
+import ru.crew.motley.piideo.splash.SplashActivity;
 
 public class ChatActivity extends ConnectionErrorActivity
         implements
@@ -41,10 +43,12 @@ public class ChatActivity extends ConnectionErrorActivity
     private BroadcastReceiver mIdleReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            abortBroadcast();
             SharedPrefs.saveChatIdleStartTime(-1, context);
             SharedPrefs.clearChatData(context);
+            Intent i = SplashActivity.getIntent(ChatActivity.this);
+            startActivity(i);
             ChatActivity.this.finish();
-            abortBroadcast();
         }
     };
 
@@ -80,6 +84,8 @@ public class ChatActivity extends ConnectionErrorActivity
         if (time == -1 || time + timeoutInMillis < System.currentTimeMillis()) {
             SharedPrefs.saveChatIdleStartTime(-1, this);
             SharedPrefs.clearChatData(this);
+            Intent i = SplashActivity.getIntent(this);
+            startActivity(i);
             finish();
         }
     }
@@ -142,7 +148,8 @@ public class ChatActivity extends ConnectionErrorActivity
         if (getSupportFragmentManager().getBackStackEntryCount() > 0)
             getSupportFragmentManager().popBackStack();
         else
-            super.onBackPressed();
+            moveTaskToBack(true);
+//            super.onBackPressed();
     }
 
     @Override

@@ -1,6 +1,7 @@
 package ru.crew.motley.piideo.chat.fragment;
 
 import android.app.AlarmManager;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -72,8 +73,11 @@ import ru.crew.motley.piideo.search.receiver.RequestReceiver;
 import ru.crew.motley.piideo.splash.SplashActivity;
 import ru.crew.motley.piideo.util.TimeUtils;
 
+import static android.content.Context.NOTIFICATION_SERVICE;
 import static ru.crew.motley.piideo.fcm.AcknowledgeService.REQUEST_CODE_IDLE_STOPPER;
 import static ru.crew.motley.piideo.fcm.MessagingService.ACK;
+import static ru.crew.motley.piideo.fcm.MessagingService.MSG_ID;
+import static ru.crew.motley.piideo.fcm.MessagingService.PDO_ID;
 import static ru.crew.motley.piideo.fcm.MessagingService.SYN;
 import static ru.crew.motley.piideo.piideo.service.Recorder.HOME_PATH;
 
@@ -198,6 +202,10 @@ public class ChatFragment extends ButterFragment
     public void onResume() {
         super.onResume();
         ((Appp) getActivity().getApplication()).chatAcitivityResumed();
+        NotificationManager manager = (NotificationManager)getContext()
+                .getSystemService(NOTIFICATION_SERVICE);
+        manager.cancel(MSG_ID);
+        manager.cancel(PDO_ID);
         IntentFilter filter = new IntentFilter(Events.BROADCAST_CHAT_START);
         getContext().registerReceiver(mChatStartReceiver, filter);
         long chatStartTime = SharedPrefs.loadChatStartTime(getActivity());
@@ -532,8 +540,7 @@ public class ChatFragment extends ButterFragment
         getView().requestFocus();
         getView().setOnKeyListener((v, keyCode, event) -> {
             if (keyCode == KeyEvent.KEYCODE_BACK) {
-                SharedPrefs.clearChatStartTime(getActivity());
-                SharedPrefs.clearChatMessageId(getActivity());
+                SharedPrefs.clearChatData(getActivity());
                 SharedPrefs.saveChatIdleStartTime(-1, getActivity());
                 deleteUselessFiles();
                 cancelChatIdleBroadcast();

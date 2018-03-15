@@ -40,7 +40,6 @@
 
         <activity
             android:name=".search.activity.SearchActivity"
-            android:noHistory="true"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme">
 
@@ -53,7 +52,7 @@
 
         <activity
             android:name=".chat.activity.ChatActivity"
-            android:noHistory="true"
+            android:launchMode="singleInstance"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.ChatTheme"
             android:windowSoftInputMode="adjustResize|stateHidden">
@@ -84,6 +83,9 @@
             android:name=".handshake.activity.HandshakeActivity"
             android:noHistory="true"
             android:screenOrientation="portrait" />
+
+        <activity android:name=".search.activity.RejectActivity"
+            android:screenOrientation="portrait"/>
 
         <service android:name=".piideo.service.Recorder" />
 
