@@ -7,10 +7,8 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.BehaviorSubject
-import io.reactivex.subjects.ReplaySubject
 import ru.crew.motley.piideo.chat.db.ChatLab
 import ru.crew.motley.piideo.chat.db.PiideoRow
 import ru.crew.motley.piideo.chat.db.PiideoSchema
@@ -18,10 +16,9 @@ import ru.crew.motley.piideo.fcm.FcmMessage
 import ru.crew.motley.piideo.fcm.MessagingService
 import ru.crew.motley.piideo.piideo.service.Recorder
 import ru.crew.motley.piideo.piideo.service.Recorder.HOME_PATH
-import ru.crew.motley.piideo.util.TimeUtils
+import ru.crew.motley.piideo.util.Utils
 import java.io.File
 import java.io.FileInputStream
-import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
 
@@ -178,11 +175,11 @@ class PiideoLoader(val context: Context) {
         if (from != FirebaseAuth.getInstance().currentUser?.uid) {
             throw RuntimeException("From is not equal to auth user uid")
         }
-        val timestamp = TimeUtils.gmtTimeInMillis()
+        val timestamp = Utils.gmtTimeInMillis()
         val message = FcmMessage(
                 timestamp,
                 -timestamp,
-                TimeUtils.Companion.gmtDayTimestamp(timestamp),
+                Utils.Companion.gmtDayTimestamp(timestamp),
                 from,
                 to,
                 piideoName,

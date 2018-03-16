@@ -31,7 +31,7 @@ import ru.crew.motley.piideo.network.neo.Request;
 import ru.crew.motley.piideo.network.neo.Statement;
 import ru.crew.motley.piideo.network.neo.Statements;
 import ru.crew.motley.piideo.network.neo.transaction.Data;
-import ru.crew.motley.piideo.util.TimeUtils;
+import ru.crew.motley.piideo.util.Utils;
 
 /**
  * Created by vas on 1/21/18.
@@ -208,8 +208,8 @@ public class SearchRepeaterSingleton {
     }
 
     private void sendRequest(Member receiver) {
-        long timestamp = TimeUtils.Companion.gmtTimeInMillis();
-        long dayTimestamp = TimeUtils.Companion.gmtDayTimestamp(timestamp);
+        long timestamp = Utils.Companion.gmtTimeInMillis();
+        long dayTimestamp = Utils.Companion.gmtDayTimestamp(timestamp);
         String ownerId = mMember.getChatId();
         String directRequestMarker = "";
         if (receiver.getReceivedFrom().getChatId().equals(ownerId)) {

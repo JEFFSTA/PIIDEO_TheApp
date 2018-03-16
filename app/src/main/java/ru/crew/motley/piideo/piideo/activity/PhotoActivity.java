@@ -2,7 +2,6 @@ package ru.crew.motley.piideo.piideo.activity;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.ImageFormat;
@@ -12,8 +11,6 @@ import android.hardware.Camera;
 import android.hardware.Camera.Size;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -23,7 +20,6 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -39,12 +35,6 @@ import ru.crew.motley.piideo.R;
 import ru.crew.motley.piideo.piideo.BitmapSingleton;
 import ru.crew.motley.piideo.piideo.service.Recorder;
 
-import static android.Manifest.permission.CAMERA;
-import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
-
-/**
- * Created by vas on 12/22/17.
- */
 
 public class PhotoActivity extends AppCompatActivity {
 
@@ -52,8 +42,6 @@ public class PhotoActivity extends AppCompatActivity {
     private static final String EXTRA_MESSAGE = "fcm_message";
     private static final String EXTRA_MESSAGE_ID = "local_db_id";
 
-    private static final int REQUEST_CAMERA = 2;
-    private static final int REQUEST_WRITE_SD = 3;
 
     SurfaceView sv;
     SurfaceHolder holder;
@@ -97,7 +85,6 @@ public class PhotoActivity extends AppCompatActivity {
         debugPhoto = findViewById(R.id.photo_debug);
         photoSizes = findViewById(R.id.photo_size);
 
-        holderCallback = new HolderCallback();
 
     }
 
@@ -122,6 +109,8 @@ public class PhotoActivity extends AppCompatActivity {
         camera.setParameters(params);
         setPreviewSize();
 
+
+        holderCallback = new HolderCallback();
         holder.addCallback(holderCallback);
     }
 
@@ -247,33 +236,13 @@ public class PhotoActivity extends AppCompatActivity {
     }
 
     private void requestPermissionAndLoad() {
-        int cameraCheck = ContextCompat.checkSelfPermission(this,
-                CAMERA);
-        int sdCardCheck = ContextCompat.checkSelfPermission(this,
-                WRITE_EXTERNAL_STORAGE);
-        if (cameraCheck == PackageManager.PERMISSION_GRANTED && sdCardCheck == PackageManager.PERMISSION_GRANTED) {
-            prepareCamera();
-        } else {
-            ActivityCompat.requestPermissions(
-                    this,
-                    new String[]{CAMERA, WRITE_EXTERNAL_STORAGE},
-                    REQUEST_CAMERA);
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        switch (requestCode) {
-            case REQUEST_CAMERA:
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    prepareCamera();
-                }
-                break;
-        }
+        prepareCamera();
     }
 
     public void onClickPicture(View view) {
         pictureButton.setEnabled(false);
+        int colorId = ContextCompat.getColor(this, android.R.color.holo_green_light);
+        ((TextView) findViewById(R.id.button_text)).setTextColor(colorId);
         File piideoFolder = new File(Recorder.HOME_PATH);
         if (!piideoFolder.exists()) {
             piideoFolder.mkdir();

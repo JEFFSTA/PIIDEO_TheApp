@@ -10,7 +10,9 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
@@ -24,6 +26,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.firebase.database.DatabaseReference;
@@ -35,8 +38,11 @@ import org.parceler.Parcels;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
@@ -56,7 +62,6 @@ import ru.crew.motley.piideo.chat.ChatAdapter;
 import ru.crew.motley.piideo.chat.MessagesAdapter;
 import ru.crew.motley.piideo.chat.db.ChatLab;
 import ru.crew.motley.piideo.chat.model.PiideoLoader;
-import ru.crew.motley.piideo.fcm.ChatIdleStopper;
 import ru.crew.motley.piideo.fcm.FcmMessage;
 import ru.crew.motley.piideo.fcm.Receiver;
 import ru.crew.motley.piideo.network.Member;
@@ -69,11 +74,14 @@ import ru.crew.motley.piideo.network.neo.Statement;
 import ru.crew.motley.piideo.network.neo.Statements;
 import ru.crew.motley.piideo.piideo.activity.PhotoActivity;
 import ru.crew.motley.piideo.search.Events;
-import ru.crew.motley.piideo.search.receiver.RequestReceiver;
 import ru.crew.motley.piideo.splash.SplashActivity;
-import ru.crew.motley.piideo.util.TimeUtils;
+import ru.crew.motley.piideo.util.Utils;
 
+import static android.Manifest.permission.CAMERA;
+import static android.Manifest.permission.RECORD_AUDIO;
 import static android.content.Context.NOTIFICATION_SERVICE;
+import static android.content.pm.PackageManager.PERMISSION_DENIED;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static ru.crew.motley.piideo.fcm.AcknowledgeService.REQUEST_CODE_IDLE_STOPPER;
 import static ru.crew.motley.piideo.fcm.MessagingService.ACK;
 import static ru.crew.motley.piideo.fcm.MessagingService.MSG_ID;
@@ -95,6 +103,7 @@ public class ChatFragment extends ButterFragment
     private static final String TAG = ChatFragment.class.getSimpleName();
     public static final long CHAT_TIMEOUT = 60L;
     private static final String ARG_DB_MESSAGE_ID = "local_db_id";
+    private static final int REQUEST_MEDIA = 23;
 
     @BindView(R.id.chat_recycler)
     RecyclerView mChatRecycler;
@@ -202,7 +211,7 @@ public class ChatFragment extends ButterFragment
     public void onResume() {
         super.onResume();
         ((Appp) getActivity().getApplication()).chatAcitivityResumed();
-        NotificationManager manager = (NotificationManager)getContext()
+        NotificationManager manager = (NotificationManager) getContext()
                 .getSystemService(NOTIFICATION_SERVICE);
         manager.cancel(MSG_ID);
         manager.cancel(PDO_ID);
@@ -279,9 +288,27 @@ public class ChatFragment extends ButterFragment
 
     @OnClick(R.id.piideo)
     public void makePiideo() {
-        Parcelable message = Parcels.wrap(mFcmMessage);
-        Intent i = PhotoActivity.getIntent(mMessageId, message, getActivity());
-        startActivity(i);
+        List<String> permissions = requiredPermissions();
+        if (!requiredPermissions().isEmpty()) {
+            requestPermissions(permissions.toArray(new String[0]), REQUEST_MEDIA);
+        } else {
+            Parcelable message = Parcels.wrap(mFcmMessage);
+            Intent i = PhotoActivity.getIntent(mMessageId, message, getActivity());
+            startActivity(i);
+        }
+    }
+
+    private List<String> requiredPermissions() {
+        int cameraCheck = ContextCompat.checkSelfPermission(getContext(), CAMERA);
+        int recordCheck = ContextCompat.checkSelfPermission(getContext(), RECORD_AUDIO);
+        List<String> result = new ArrayList<>();
+        if (cameraCheck != PERMISSION_GRANTED) {
+            result.add(CAMERA);
+        }
+        if (recordCheck != PERMISSION_GRANTED) {
+            result.add(RECORD_AUDIO);
+        }
+        return result;
     }
 
     private void attachTextWatcher() {
@@ -341,9 +368,9 @@ public class ChatFragment extends ButterFragment
         // 1 because there's stub hello message
         sendAcknowledge();
         cancelRejectTimeout();
-        long timestamp = TimeUtils.Companion.gmtTimeInMillis();
+        long timestamp = Utils.Companion.gmtTimeInMillis();
         startTimer(timestamp);
-        long dayTimestamp = TimeUtils.Companion.gmtDayTimestamp(timestamp);
+        long dayTimestamp = Utils.Companion.gmtDayTimestamp(timestamp);
         Calendar cal = Calendar.getInstance(Locale.getDefault());
         cal.setTimeInMillis(timestamp);
         String body = mMessageInput.getText().toString().trim();
@@ -508,11 +535,11 @@ public class ChatFragment extends ButterFragment
 
     private void sendAcknowledge() {
         if (mFcmMessage.getType().equals(SYN) && !mAckSent) {
-            long now = TimeUtils.Companion.gmtTimeInMillis();
+            long now = Utils.Companion.gmtTimeInMillis();
             FcmMessage message = new FcmMessage(
                     now,
                     -now,
-                    TimeUtils.Companion.gmtDayTimestamp(now),
+                    Utils.Companion.gmtDayTimestamp(now),
                     mFcmMessage.getTo(),
                     mFcmMessage.getFrom(),
                     "",
@@ -613,5 +640,31 @@ public class ChatFragment extends ButterFragment
         statements.getValues().add(createFreeRequest());
         NeoApi api = NeoApiSingleton.getInstance();
         api.executeStatement(statements).subscribe();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_MEDIA) {
+            if (permissions.length > 0 && validate(grantResults)) {
+                Parcelable message = Parcels.wrap(mFcmMessage);
+                Intent i = PhotoActivity.getIntent(mMessageId, message, getActivity());
+                startActivity(i);
+            } else {
+                Toast.makeText(getActivity(),
+                        "This is a key permission. " +
+                                "You can't use this app without it.",
+                        Toast.LENGTH_SHORT)
+                        .show();
+            }
+        } else {
+            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
+    }
+
+    private boolean validate(int[] grantResults) {
+        for (int i : grantResults)
+            if (i == PERMISSION_DENIED) return false;
+        return true;
     }
 }

@@ -17,7 +17,7 @@ import ru.crew.motley.piideo.chat.db.ChatLab
 import ru.crew.motley.piideo.fcm.FcmMessage
 import ru.crew.motley.piideo.fcm.MessagingService
 import ru.crew.motley.piideo.fcm.Receiver
-import ru.crew.motley.piideo.util.TimeUtils
+import ru.crew.motley.piideo.util.Utils
 import android.provider.ContactsContract
 import android.provider.BaseColumns
 import android.net.Uri
@@ -132,7 +132,7 @@ class RequestReceivedFragment : Fragment() {
         return FcmMessage(
                 now,
                 -now,
-                TimeUtils.gmtDayTimestamp(now),
+                Utils.gmtDayTimestamp(now),
                 from,
                 to,
                 content,

@@ -7,6 +7,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Parcelable;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
@@ -18,6 +19,7 @@ import android.widget.RemoteViews;
 import org.parceler.Parcels;
 
 import ru.crew.motley.piideo.R;
+import ru.crew.motley.piideo.SharedPrefs;
 import ru.crew.motley.piideo.chat.activity.ChatActivity;
 import ru.crew.motley.piideo.chat.db.ChatLab;
 import ru.crew.motley.piideo.network.Member;
@@ -49,6 +51,7 @@ public class PushBroadcastHandler extends IntentService {
         createChannelIfNeeded();
         String title = getResources().getString(R.string.nty_rejected);
         showCustomNotification(REJ_ID, pI, title);
+        SharedPrefs.setRejectVisited(SharedPrefs.REJECT_UNVISITED, getApplicationContext());
     }
 
     private void showCustomNotification(int id, PendingIntent intent, String title) {
@@ -60,6 +63,7 @@ public class PushBroadcastHandler extends IntentService {
                 .setSmallIcon(R.drawable.ic_notification)
                 .setSound(Settings.System.DEFAULT_NOTIFICATION_URI)
                 .setContent(contentView)
+                .setPriority(Notification.PRIORITY_HIGH)
                 .setContentIntent(intent)
                 .setAutoCancel(true)
                 .build();

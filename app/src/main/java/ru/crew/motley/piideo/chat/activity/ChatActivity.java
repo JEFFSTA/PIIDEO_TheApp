@@ -47,6 +47,7 @@ public class ChatActivity extends ConnectionErrorActivity
             SharedPrefs.saveChatIdleStartTime(-1, context);
             SharedPrefs.clearChatData(context);
             Intent i = SplashActivity.getIntent(ChatActivity.this);
+            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(i);
             ChatActivity.this.finish();
         }

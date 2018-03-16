@@ -3,6 +3,7 @@ package ru.crew.motley.piideo.search.fragment;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -84,6 +85,7 @@ public class SendingRequestFragment extends ButterFragment {
 
 
     public void complete() {
+        Log.d(TAG, " on next ");
         mCallback.onNext();
     }
 
@@ -105,13 +107,13 @@ public class SendingRequestFragment extends ButterFragment {
                 return;
             }
 
-                int value = startProgress(SharedPrefs.loadStartSearchingTime(getContext()));
-                if (value < 1000) {
-                    progressCounter.postDelayed(this, 200);
-                }
-                if (mProgressBar != null) {
-                    mProgressBar.setProgress(value);
-                }
+            int value = startProgress(SharedPrefs.loadStartSearchingTime(getContext()));
+            if (value < 1000) {
+                progressCounter.postDelayed(this, 200);
+            }
+            if (mProgressBar != null) {
+                mProgressBar.setProgress(value);
+            }
 
         }
 

@@ -30,9 +30,24 @@ public class RejectActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        if (SharedPrefs.getRejectVisited(this) == SharedPrefs.REJECT_VISITED) {
+            Intent i = SplashActivity.getIntent(this);
+            startActivity(i);
+            finish();
+        }
+    }
+
+    @Override
     public void onBackPressed() {
         Intent i = SplashActivity.getIntent(this);
         startActivity(i);
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+//            finishAndRemoveTask();
+//        } else {
         finish();
+        SharedPrefs.setRejectVisited(SharedPrefs.REJECT_VISITED, this);
+//        }
     }
 }

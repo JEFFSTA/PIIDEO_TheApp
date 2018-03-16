@@ -5,7 +5,7 @@ import java.util.*
 /**
  * Created by Aleksandr on 002 02.02.18.
  */
-class TimeUtils {
+class Utils {
     companion object {
 
         fun gmtTimeInMillis(): Long {
@@ -21,5 +21,7 @@ class TimeUtils {
             calendar.set(Calendar.MINUTE, 0)
             return calendar.timeInMillis
         }
+
+        fun contains(arr: Array<Int>, value: Int) = arr.contains(value)
     }
 }

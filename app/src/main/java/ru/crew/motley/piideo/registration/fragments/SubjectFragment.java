@@ -129,13 +129,13 @@ public class SubjectFragment extends ButterFragment implements SubjectDialogList
     @OnClick(R.id.next_btn)
     public void finishRegistration() {
 
-        int permissionCheck = ContextCompat.checkSelfPermission(
-                getActivity(),
-                Manifest.permission.READ_CONTACTS);
-        if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[]{Manifest.permission.READ_CONTACTS}, REQUEST_CONTACTS);
-            return;
-        }
+//        int permissionCheck = ContextCompat.checkSelfPermission(
+//                getActivity(),
+//                Manifest.permission.READ_CONTACTS);
+//        if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
+//            requestPermissions(new String[]{Manifest.permission.READ_CONTACTS}, REQUEST_CONTACTS);
+//            return;
+//        }
 
         if (mMember.getSubject() == null) {
             Toast.makeText(getActivity(), R.string.sch_subject_violation, Toast.LENGTH_SHORT)
@@ -191,24 +191,24 @@ public class SubjectFragment extends ButterFragment implements SubjectDialogList
     }
 
     private void createContacts() {
-        NeoApi api = NeoApiSingleton.getInstance();
-        Statements statements1 = contactsRequests();
-        if (statements1.getValues().isEmpty()) {
+//        NeoApi api = NeoApiSingleton.getInstance();
+//        Statements statements1 = contactsRequests();
+//        if (statements1.getValues().isEmpty()) {
             mRegistrationListener.onComplete(mMember);
-        } else {
-            api.executeStatement(statements1)
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(transaction1 -> {
-                                Log.d(TAG, "" + Arrays.toString(transaction1.getErrors().toArray(new Object[0])));
-                                mRegistrationListener.onComplete(mMember);
-                            },
-                            error1 -> {
-                                Log.e(TAG, "Error!: " + error1.getLocalizedMessage());
-                                Toast.makeText(getActivity(), R.string.ex_network, Toast.LENGTH_SHORT)
-                                        .show();
-                                mErrorCallback.onError();
-                            });
-        }
+//        } else {
+//            api.executeStatement(statements1)
+//                    .observeOn(AndroidSchedulers.mainThread())
+//                    .subscribe(transaction1 -> {
+//                                Log.d(TAG, "" + Arrays.toString(transaction1.getErrors().toArray(new Object[0])));
+//                                mRegistrationListener.onComplete(mMember);
+//                            },
+//                            error1 -> {
+//                                Log.e(TAG, "Error!: " + error1.getLocalizedMessage());
+//                                Toast.makeText(getActivity(), R.string.ex_network, Toast.LENGTH_SHORT)
+//                                        .show();
+//                                mErrorCallback.onError();
+//                            });
+//        }
     }
 
     private void deleteOldSubjectRelationAndCreateNewMember() {
@@ -229,13 +229,13 @@ public class SubjectFragment extends ButterFragment implements SubjectDialogList
     }
 
     private void requestPermissionAndLoad() {
-        int permissionCheck = ContextCompat.checkSelfPermission(
-                getActivity(),
-                Manifest.permission.READ_CONTACTS);
-        if (permissionCheck == PackageManager.PERMISSION_GRANTED)
-            loadContactsPhones();
-        else
-            requestPermissions(new String[]{Manifest.permission.READ_CONTACTS}, REQUEST_CONTACTS);
+//        int permissionCheck = ContextCompat.checkSelfPermission(
+//                getActivity(),
+//                Manifest.permission.READ_CONTACTS);
+//        if (permissionCheck == PackageManager.PERMISSION_GRANTED)
+//            loadContactsPhones();
+//        else
+//            requestPermissions(new String[]{Manifest.permission.READ_CONTACTS}, REQUEST_CONTACTS);
     }
 
     private void loadContactsPhones() {
@@ -266,108 +266,100 @@ public class SubjectFragment extends ButterFragment implements SubjectDialogList
         }
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        switch (requestCode) {
-            case REQUEST_CONTACTS:
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
-                    loadContactsPhones();
-//                    createContacts();
-                else {
+//    @Override
+//    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+//        switch (requestCode) {
+//            case REQUEST_CONTACTS:
+//                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+//                    loadContactsPhones();
+//                else {
+//                    Toast.makeText(getActivity(),
+//                            "This is a key permission. " +
+//                                    "You can't use this app without it.",
+//                            Toast.LENGTH_SHORT)
+//                            .show();
+//                }
+//                break;
+//            default:
+//                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+//                break;
+//        }
+//    }
 
-                    Toast.makeText(getActivity(),
-                            "This is a key permission. " +
-                                    "You can't use this app without it.",
-                            Toast.LENGTH_SHORT)
-                            .show();
-                    // uncommenting this makes Fatal Exception: java.lang.IllegalStateException not attached to Activity
-//                    new Handler().postDelayed(() ->
-//                                    requestPermissions(
-//                                            new String[]{Manifest.permission.READ_CONTACTS},
-//                                            REQUEST_CONTACTS),
-//                            1000);
-                }
-                break;
-            default:
-                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-                break;
-        }
-    }
+//    private Statements contactsRequests() {
+//        Statements statements = new Statements();
+//        for (String phone : mPhones) {
+//            statements.getValues().add(contactRequest(phone));
+//            statements.getValues().add(knowsRequest(phone));
+//        }
+//        return statements;
+//    }
 
-    private Statements contactsRequests() {
-        Statements statements = new Statements();
-        for (String phone : mPhones) {
-            statements.getValues().add(contactRequest(phone));
-            statements.getValues().add(knowsRequest(phone));
-        }
-        return statements;
-    }
-
-    private Statement contactRequest(String phone) {
-        Statement request = new Statement();
-        if (phone.length() == FRENCH_LENGTH && phone.startsWith(FRENCH_PREFIX)) {
-            request.setStatement(Request.NEW_CONTACT_WITH_PHONE_PREFIX);
-        } else if (phone.length() == MOROCCO_LENGTH && phone.startsWith(MOROCCO_PREFIX)) {
-            request.setStatement(Request.NEW_CONTACT_WITH_PHONE_PREFIX);
-        } else if (phone.length() == NIGERIA_LENGTH && phone.startsWith(NIGERIA_PREFIX)) {
-            request.setStatement(Request.NEW_CONTACT_WITH_PHONE_PREFIX);
-        } else if (phone.length() > 10) {
-            request.setStatement(Request.NEW_CONTACT_WITH_COUNTRY_CODE);
-        } else {
-            request.setStatement(Request.NEW_CONTACT);
-        }
-        Parameters parameters = new Parameters();
-        if (phone.length() == FRENCH_LENGTH && phone.startsWith(FRENCH_PREFIX)) {
-            parameters.getProps().put(Request.Var.PH_PREFIX, phone.substring(0, 1));
-            parameters.getProps().put(Request.Var.PHONE, phone.substring(1, phone.length()));
-        } else if (phone.length() == MOROCCO_LENGTH && phone.startsWith(MOROCCO_PREFIX)) {
-            parameters.getProps().put(Request.Var.PH_PREFIX, phone.substring(0, 1));
-            parameters.getProps().put(Request.Var.PHONE, phone.substring(1, phone.length()));
-        } else if (phone.length() == NIGERIA_LENGTH && phone.startsWith(NIGERIA_PREFIX)) {
-            parameters.getProps().put(Request.Var.PH_PREFIX, phone.substring(0, 1));
-            parameters.getProps().put(Request.Var.PHONE, phone.substring(1, phone.length()));
-        } else if (phone.startsWith("33")) {
-            parameters.getProps().put(Request.Var.C_CODE, phone.substring(0, 2));
-            parameters.getProps().put(Request.Var.PHONE, phone.substring(2, phone.length()));
-        } else if (phone.startsWith("212") || phone.startsWith("213") || phone.startsWith("234")) {
-            parameters.getProps().put(Request.Var.C_CODE, phone.substring(0, 3));
-            parameters.getProps().put(Request.Var.PHONE, phone.substring(3, phone.length()));
-        } else if (phone.length() > 10) {
-            parameters.getProps().put(Request.Var.C_CODE, phone.substring(0, phone.length() - 10));
-            parameters.getProps().put(Request.Var.PHONE, phone.substring(phone.length() - 10, phone.length()));
-        } else {
-            parameters.getProps().put(Request.Var.PHONE, phone);
-        }
-        request.setParameters(parameters);
-        return request;
-    }
-
-    private Statement knowsRequest(String phone) {
-        Statement request = new Statement();
-        String filteredPhone;
-        if (phone.length() == FRENCH_LENGTH && phone.startsWith(FRENCH_PREFIX)) {
-            filteredPhone = phone.substring(1, phone.length());
-        } else if (phone.length() == MOROCCO_LENGTH && phone.startsWith(MOROCCO_PREFIX)) {
-            filteredPhone = phone.substring(1, phone.length());
-        } else if (phone.length() == NIGERIA_LENGTH && phone.startsWith(NIGERIA_PREFIX)) {
-            filteredPhone = phone.substring(1, phone.length());
-        } else if (phone.startsWith("33")) {
-            filteredPhone = phone.substring(2, phone.length());
-        } else if (phone.startsWith("212") || phone.startsWith("213") || phone.startsWith("234")) {
-            filteredPhone = phone.substring(3, phone.length());
-        } else if (phone.length() > 10) {
-            filteredPhone = phone.substring(phone.length() - 10, phone.length());
-        } else {
-            filteredPhone = phone;
-        }
-        request.setStatement(Request.KNOWS);
-        Parameters parameters = new Parameters();
-
-        parameters.getProps().put(Request.Var.PHONE + "From", mMember.getPhoneNumber());
-        parameters.getProps().put(Request.Var.PHONE + "To", filteredPhone);
-        request.setParameters(parameters);
-        return request;
-    }
+//    private Statement contactRequest(String phone) {
+//        Statement request = new Statement();
+//        if (phone.length() == FRENCH_LENGTH && phone.startsWith(FRENCH_PREFIX)) {
+//            request.setStatement(Request.NEW_CONTACT_WITH_PHONE_PREFIX);
+//        } else if (phone.length() == MOROCCO_LENGTH && phone.startsWith(MOROCCO_PREFIX)) {
+//            request.setStatement(Request.NEW_CONTACT_WITH_PHONE_PREFIX);
+//        } else if (phone.length() == NIGERIA_LENGTH && phone.startsWith(NIGERIA_PREFIX)) {
+//            request.setStatement(Request.NEW_CONTACT_WITH_PHONE_PREFIX);
+//        } else if (phone.length() > 10) {
+//            request.setStatement(Request.NEW_CONTACT_WITH_COUNTRY_CODE);
+//        } else {
+//            request.setStatement(Request.NEW_CONTACT);
+//        }
+//        Parameters parameters = new Parameters();
+//        if (phone.length() == FRENCH_LENGTH && phone.startsWith(FRENCH_PREFIX)) {
+//            parameters.getProps().put(Request.Var.PH_PREFIX, phone.substring(0, 1));
+//            parameters.getProps().put(Request.Var.PHONE, phone.substring(1, phone.length()));
+//        } else if (phone.length() == MOROCCO_LENGTH && phone.startsWith(MOROCCO_PREFIX)) {
+//            parameters.getProps().put(Request.Var.PH_PREFIX, phone.substring(0, 1));
+//            parameters.getProps().put(Request.Var.PHONE, phone.substring(1, phone.length()));
+//        } else if (phone.length() == NIGERIA_LENGTH && phone.startsWith(NIGERIA_PREFIX)) {
+//            parameters.getProps().put(Request.Var.PH_PREFIX, phone.substring(0, 1));
+//            parameters.getProps().put(Request.Var.PHONE, phone.substring(1, phone.length()));
+//        } else if (phone.startsWith("33")) {
+//            parameters.getProps().put(Request.Var.C_CODE, phone.substring(0, 2));
+//            parameters.getProps().put(Request.Var.PHONE, phone.substring(2, phone.length()));
+//        } else if (phone.startsWith("212") || phone.startsWith("213") || phone.startsWith("234")) {
+//            parameters.getProps().put(Request.Var.C_CODE, phone.substring(0, 3));
+//            parameters.getProps().put(Request.Var.PHONE, phone.substring(3, phone.length()));
+//        } else if (phone.length() > 10) {
+//            parameters.getProps().put(Request.Var.C_CODE, phone.substring(0, phone.length() - 10));
+//            parameters.getProps().put(Request.Var.PHONE, phone.substring(phone.length() - 10, phone.length()));
+//        } else {
+//            parameters.getProps().put(Request.Var.PHONE, phone);
+//        }
+//        request.setParameters(parameters);
+//        return request;
+//    }
+//
+//    private Statement knowsRequest(String phone) {
+//        Statement request = new Statement();
+//        String filteredPhone;
+//        if (phone.length() == FRENCH_LENGTH && phone.startsWith(FRENCH_PREFIX)) {
+//            filteredPhone = phone.substring(1, phone.length());
+//        } else if (phone.length() == MOROCCO_LENGTH && phone.startsWith(MOROCCO_PREFIX)) {
+//            filteredPhone = phone.substring(1, phone.length());
+//        } else if (phone.length() == NIGERIA_LENGTH && phone.startsWith(NIGERIA_PREFIX)) {
+//            filteredPhone = phone.substring(1, phone.length());
+//        } else if (phone.startsWith("33")) {
+//            filteredPhone = phone.substring(2, phone.length());
+//        } else if (phone.startsWith("212") || phone.startsWith("213") || phone.startsWith("234")) {
+//            filteredPhone = phone.substring(3, phone.length());
+//        } else if (phone.length() > 10) {
+//            filteredPhone = phone.substring(phone.length() - 10, phone.length());
+//        } else {
+//            filteredPhone = phone;
+//        }
+//        request.setStatement(Request.KNOWS);
+//        Parameters parameters = new Parameters();
+//
+//        parameters.getProps().put(Request.Var.PHONE + "From", mMember.getPhoneNumber());
+//        parameters.getProps().put(Request.Var.PHONE + "To", filteredPhone);
+//        request.setParameters(parameters);
+//        return request;
+//    }
 
     private Statement meRequest() {
         // TODO: 1/19/18 uncomment next

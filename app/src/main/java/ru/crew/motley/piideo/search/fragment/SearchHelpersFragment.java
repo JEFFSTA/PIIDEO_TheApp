@@ -144,6 +144,7 @@ public class SearchHelpersFragment extends ButterFragment implements SendRequest
         SharedPrefs.setSearchCount(mMembers.size(), getContext());
         SharedPrefs.startSearchingTime(new Date().getTime(), getContext());
         getActivity().startService(i);
+        Log.d(TAG, " on next ");
         mCallback.onNext();
     }
 

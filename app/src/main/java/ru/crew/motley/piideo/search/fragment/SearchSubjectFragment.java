@@ -244,7 +244,7 @@ public class SearchSubjectFragment extends ButterFragment implements SubjectAdap
     public void onClick(String subject) {
         SharedPrefs.searchSubject(subject, getActivity());
 //        mSearchRepeaterSingleton.startSearch();
-
+        Log.d(TAG, " on next ");
         mSearchListener.onNext();
     }
 

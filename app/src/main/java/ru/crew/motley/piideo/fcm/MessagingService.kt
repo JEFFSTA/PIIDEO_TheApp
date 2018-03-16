@@ -1,9 +1,6 @@
 package ru.crew.motley.piideo.fcm
 
-import android.app.AlarmManager
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
+import android.app.*
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -307,6 +304,7 @@ class MessagingService : FirebaseMessagingService() {
                 .setSmallIcon(R.drawable.ic_notification)
                 .setSound(Settings.System.DEFAULT_NOTIFICATION_URI)
                 .setContent(contentView)
+                .setPriority(Notification.PRIORITY_HIGH)
                 .setContentIntent(intent)
                 .setAutoCancel(true)
                 .build()

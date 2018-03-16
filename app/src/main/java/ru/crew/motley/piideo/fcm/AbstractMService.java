@@ -43,6 +43,7 @@ public abstract class AbstractMService extends IntentService {
                 NOTIFICATION_CHANNEL_DEFAULT)
                 .setSmallIcon(R.drawable.ic_notification)
                 .setSound(Settings.System.DEFAULT_NOTIFICATION_URI)
+                .setPriority(Notification.PRIORITY_HIGH)
                 .setContent(contentView)
                 .setContentIntent(intent)
                 .setAutoCancel(true)

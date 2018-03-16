@@ -24,6 +24,12 @@ public class SharedPrefs {
 
     private static final String VERIFICATION_ID = "verificationId";
 
+    private static final String REJECT_STATE = "rejectState";
+
+    public static final int REJECT_UKNOWN = -1;
+    public static final int REJECT_UNVISITED = 0;
+    public static final int REJECT_VISITED = 2;
+
     public static void searchSubject(String value, Context context) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
         prefs.edit()
@@ -200,5 +206,17 @@ public class SharedPrefs {
     public static long loadChatIdleStartTime(Context context) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
         return prefs.getLong(CHAT_IDLE_START_TIME, -1);
+    }
+
+    public static void setRejectVisited(int state, Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        prefs.edit()
+                .putInt(REJECT_STATE, state)
+                .apply();
+    }
+
+    public static int getRejectVisited(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        return prefs.getInt(REJECT_STATE, -1);
     }
 }

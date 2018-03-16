@@ -2,18 +2,13 @@ package ru.crew.motley.piideo.piideo.fragment;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.media.ExifInterface;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.support.annotation.NonNull;
-import android.support.transition.ChangeBounds;
-import android.support.transition.TransitionManager;
-import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Display;
@@ -23,6 +18,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -44,7 +40,10 @@ import ru.crew.motley.piideo.fcm.FcmMessage;
 import ru.crew.motley.piideo.fcm.MessagingService;
 import ru.crew.motley.piideo.piideo.BitmapSingleton;
 import ru.crew.motley.piideo.piideo.service.Recorder;
-import ru.crew.motley.piideo.util.TimeUtils;
+import ru.crew.motley.piideo.util.Utils;
+
+
+
 
 /**
  * Created by vas on 12/22/17.
@@ -98,7 +97,6 @@ public class PhotoImageFragment extends ButterFragment {
         mPiideoName = getArguments().getString(ARG_PIIDEO_NAME);
         mFcmMessage = Parcels.unwrap(getArguments().getParcelable(ARG_MESSAGE));
         mMessageId = getArguments().getString(ARG_MESSAGE_ID);
-        requestPermissionAndLoad();
     }
 
     @Override
@@ -161,6 +159,8 @@ public class PhotoImageFragment extends ButterFragment {
                 // start recording.
                 Log.d("Shutter", " DOWN");
                 startRecord(Recorder.getIntent(getActivity(), mPiideoName));
+                int colorId = ContextCompat.getColor(getContext(), android.R.color.holo_green_light);
+                ((TextView) getView().findViewById(R.id.button_text)).setTextColor(colorId);
                 return true;
             }
             if (event.getAction() == MotionEvent.ACTION_UP) {
@@ -175,11 +175,11 @@ public class PhotoImageFragment extends ButterFragment {
     }
 
     private void sendPiideoMessage() {
-        long timestamp = TimeUtils.Companion.gmtTimeInMillis();
+        long timestamp = Utils.Companion.gmtTimeInMillis();
         FcmMessage message = new FcmMessage(
                 timestamp,
                 -timestamp,
-                TimeUtils.Companion.gmtDayTimestamp(timestamp),
+                Utils.Companion.gmtDayTimestamp(timestamp),
                 mFcmMessage.getTo(),
                 mFcmMessage.getFrom(),
                 mPiideoName,
@@ -294,30 +294,6 @@ public class PhotoImageFragment extends ButterFragment {
             Log.e(TAG, photoFile.getAbsolutePath() + " doesn't exist");
             throw new RuntimeException(e);
         }
-    }
-
-    private void requestPermissionAndLoad() {
-        if (ActivityCompat.checkSelfPermission(
-                getActivity(), android.Manifest.permission.RECORD_AUDIO)
-                != PackageManager.PERMISSION_GRANTED /*||
-                ActivityCompat.checkSelfPermission(
-                        this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                        != PackageManager.PERMISSION_GRANTED ||
-                ActivityCompat.checkSelfPermission(
-                        this, android.Manifest.permission.READ_EXTERNAL_STORAGE)
-                        != PackageManager.PERMISSION_GRANTED*/)
-
-        {
-            if (Build.VERSION.SDK_INT >= 23) {
-                requestPermissions(
-                        new String[]{android.Manifest.permission.RECORD_AUDIO}, 1);
-            }
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     private int rotation(File photoFile) {
