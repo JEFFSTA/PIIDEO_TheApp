@@ -159,7 +159,7 @@ public class Request {
     public static final String FIND_TARGET_FRIEND =
             "MATCH (me" + PersonNode.LABEL + " {" + PersonNode.PHONE + ":{props}." + Var.PHONE + "})," +
                     " (t" + PersonNode.LABEL + " {" + PersonNode.PHONE + ":{props}." + Var.F_PHONE + "})," +
-                    " p = shortestPath((me)<-[" + KnowsRelation.LABEL + "*1..5]-(t)) " +
+                    " p = shortestPath((me)<-[" + KnowsRelation.LABEL + "*1..10]-(t)) " +
                     " RETURN nodes(p)[size(nodes(p))-2]";
 
 
@@ -177,6 +177,21 @@ public class Request {
                     " WITH head(collect([pathLength, nearest])) AS frst, friendOfFriend " +
                     " RETURN frst[1] AS nearest, friendOfFriend " +
                     " ORDER BY frst[0] limit 6";
+
+    public static final String FIND_QUESTION_TARGET_1 =
+            "match (p" + PersonNode.LABEL + ")" +
+                    "-[" + StudiesRelation.LABEL + "]" +
+                    "->(s" + SubjectNode.LABEL + ")" +
+                    "-[" + ContainsRelation.LABEL + "]" +
+                    "->(g" + SchoolGroupNode.LABEL + ")" +
+                    " where s.name =  {props}." + Var.NAME +
+                    " and g.name = {props}." + Var.NAME_2 +
+                    " and p.phoneNumber <> {props}." + Var.PHONE +
+                    " and (p.dialogTime > timestamp() " +
+                    " or not exists(p.dialogTime)) " +
+                    " match path = shortestPath((p)-[" + KnowsRelation.LABEL + "*1..10]->(me" + PersonNode.LABEL + ")) " +
+                    " where me.phoneNumber = {props}." + Var.PHONE +
+                    " return head(nodes(path)) order by length(path) asc limit 6";
 
     public static final String FIND_SUBJECTS_BY_SCHOOL =
             "MATCH (s" + SubjectNode.LABEL + ")" +

@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 
 import com.squareup.picasso.Callback;
@@ -21,6 +22,7 @@ import java.io.IOException;
 import butterknife.BindView;
 import ru.crew.motley.piideo.ButterFragment;
 import ru.crew.motley.piideo.R;
+import ru.crew.motley.piideo.util.ImageUtils;
 
 import static ru.crew.motley.piideo.piideo.service.Recorder.HOME_PATH;
 
@@ -99,8 +101,11 @@ public class WatchPiideoFragment extends ButterFragment {
         View v = super.onCreateView(inflater, container, savedInstanceState);
         try {
             String fullName = fileImagePath(mPiideoFileName);
+            File imageFile = new File(fullName);
+            int orientation = ImageUtils.orientation(imageFile);
+            ((TextView) v.findViewById(R.id.orientation_text)).setText("" + orientation);
             Picasso.with(getActivity())
-                    .load(new File(fullName))
+                    .load(imageFile)
                     .into(mPiideoImage, new Callback() {
                         @Override
                         public void onSuccess() {

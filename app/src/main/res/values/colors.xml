@@ -42,4 +42,8 @@
     <color name="colorGrey">#BDBDBD</color>
     <color name="colorRed">#F44336</color>
     <color name="colorPink">#de7172</color>
+
+
+
+    <color name="control_background">#cc4285f4</color>
 </resources>

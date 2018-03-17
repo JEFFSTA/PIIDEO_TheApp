@@ -20,9 +20,12 @@ import ru.crew.motley.piideo.SharedPrefs
 import ru.crew.motley.piideo.chat.activity.ChatActivity
 import ru.crew.motley.piideo.chat.db.ChatLab
 import ru.crew.motley.piideo.chat.fragment.ChatFragment
+import ru.crew.motley.piideo.chat.fragment.ChatFragment.BUSY_TIMEOUT
 import ru.crew.motley.piideo.chat.model.PiideoLoader
 import ru.crew.motley.piideo.fcm.MessagingService.Companion.SYN_ID
 import ru.crew.motley.piideo.handshake.activity.HandshakeActivity
+import ru.crew.motley.piideo.handshake.activity.HandshakeActivity.Companion.HANDSHAKE_TIMEOUT
+import ru.crew.motley.piideo.network.neo.*
 import ru.crew.motley.piideo.search.Events
 import ru.crew.motley.piideo.search.service.RequestService
 import java.text.SimpleDateFormat
@@ -82,6 +85,12 @@ class MessagingService : FirebaseMessagingService() {
         Log.d(TAG, "" + message.data["type"])
         Log.d(TAG, "" + message.data["content"])
         Log.d(TAG, "" + message.data["timestamp"])
+        val type = message.data["type"]
+        val timestamp = message.data["timestamp"]!!.toLong()
+        if ((type == SYN || type == ACK) &&
+                timestamp + TimeUnit.SECONDS.toMillis(HANDSHAKE_TIMEOUT) < Date().time) {
+            return
+        }
         val messageId = saveMessageToDB(
                 message.data["senderUid"]!!,
                 message.data["receiverUid"]!!,
@@ -191,10 +200,31 @@ class MessagingService : FirebaseMessagingService() {
             val broadcast = Intent()
             broadcast.action = Events.BROADCAST_CHAT_START
             applicationContext.sendBroadcast(broadcast, null)
+            makeMeBusy(Date().time)
         }
         if (!app.isChatActivityVisible and chatIsActive()) {
             showChatNotification(messageId)
         }
+    }
+
+    private fun makeMeBusy(busyStartTime: Long) {
+        val statements = Statements()
+        statements.values.add(createBusyRequest(busyStartTime))
+        val api = NeoApiSingleton.getInstance()
+        api.executeStatement(statements).subscribe()
+    }
+
+    private fun createBusyRequest(busyStartTime: Long): Statement {
+        val lab = ChatLab.get(applicationContext)
+        val member = lab.member!!
+        val statement = Statement()
+        statement.statement = Request.MAKE_ME_BUSY
+        val parameters = Parameters()
+        val endBusyTime = BUSY_TIMEOUT + busyStartTime
+        parameters.props[Request.Var.PHONE] = member.phoneNumber
+        parameters.props[Request.Var.DLG_TIME] = endBusyTime
+        statement.parameters = parameters
+        return statement
     }
 
     private fun showChatNotification(dbMessageId: String) {

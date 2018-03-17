@@ -31,7 +31,7 @@ public class AcknowledgeService extends AbstractMService {
 
     private static final String EXTRA_MESSAGE_ID = "message_id";
 
-    public static final int CHAT_IDLE_TIMEOUT = 2 * 60;
+    public static final int CHAT_IDLE_TIMEOUT = 30 * 60;
 
     public static final int REQUEST_CODE_IDLE_STOPPER = 51;
 

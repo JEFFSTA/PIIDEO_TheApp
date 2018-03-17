@@ -45,6 +45,7 @@
     <string name="nhlp_subjects">Matières</string>
 
     <string name="opt_hint">Matière</string>
+    <string name="perm_warning">PIIDEO ne peut pas fonctionner sans ces autorisations.</string>
     <string name="opt_info">Choisissez votre préférée ce\nsemestre/trimestre</string>
     <string name="hlp_hint">CHOISISSEZ UN RECEPTEUR</string>
 

@@ -163,7 +163,7 @@ class UselessFragment : Fragment() {
                     Log.d(TAG, " on next ")
                 } else {
                     Toast.makeText(activity,
-                            "This is a key permission. " + "You can't use this app without it.",
+                            R.string.perm_warning,
                             Toast.LENGTH_SHORT)
                             .show()
                 }

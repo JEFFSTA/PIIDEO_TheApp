@@ -51,6 +51,10 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
 
+        <activity android:name=".piideo.activity.PhotoActivity2"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+
         <activity
             android:name=".chat.activity.ChatActivity"
             android:launchMode="singleInstance"

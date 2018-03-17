@@ -69,6 +69,7 @@
 
                         android:textColor="@color/screenColorBackground"
                         android:textSize="22sp"
+                        android:text="10:00"
                         tools:text="00:00" />
                 </FrameLayout>
 

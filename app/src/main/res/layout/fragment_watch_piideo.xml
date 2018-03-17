@@ -4,6 +4,7 @@
     android:background="@color/colorBlack"
     android:layout_height="match_parent">
 
+
     <ImageView
         android:layout_gravity="center_vertical"
         android:id="@+id/piideoImage"
@@ -16,5 +17,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="10dp"/>
+
+    <TextView
+        android:textColor="@color/colorWhite"
+        android:id="@+id/orientation_text"
+        android:textSize="20sp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
 
 </FrameLayout>

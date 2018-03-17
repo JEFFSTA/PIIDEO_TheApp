@@ -2,6 +2,7 @@ package ru.crew.motley.piideo.chat.fragment;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.graphics.Point;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
@@ -17,6 +18,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.SeekBar;
+import android.widget.TextView;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -28,6 +30,7 @@ import java.util.TimerTask;
 import butterknife.BindView;
 import ru.crew.motley.piideo.ButterFragment;
 import ru.crew.motley.piideo.R;
+import ru.crew.motley.piideo.util.ImageUtils;
 
 import static ru.crew.motley.piideo.piideo.service.Recorder.HOME_PATH;
 
@@ -169,6 +172,8 @@ public class WatchPiideoFragment extends ButterFragment {
 
     private Bitmap decodeFile(File photoFile) {
         try {
+            int orientation = ImageUtils.orientation(photoFile);
+
 
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inJustDecodeBounds = true;
@@ -182,11 +187,22 @@ public class WatchPiideoFragment extends ButterFragment {
             options.inSampleSize = inSampleSize;
 
             options.inJustDecodeBounds = false;
-            return BitmapFactory.decodeFile(photoFile.getAbsolutePath(), options);
+            Bitmap bitmap = BitmapFactory.decodeFile(photoFile.getAbsolutePath(), options);
+            if (orientation > 0) {
+                Matrix matrix = new Matrix();
+                matrix.postRotate(orientation);
+
+                bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(),
+                        bitmap.getHeight(), matrix, true);
+            }
+            return bitmap;
         } catch (FileNotFoundException e) {
             Log.e(TAG, photoFile.getAbsolutePath() + " doesn't exist");
             throw new RuntimeException(e);
+        } catch (IOException ex) {
+            Log.e(TAG, "Check orientation exception");
         }
+        return null;
     }
 
     public static int calculateInSampleSize(

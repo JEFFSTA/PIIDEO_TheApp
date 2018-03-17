@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.ImageFormat;
-import android.graphics.Matrix;
 import android.graphics.Point;
 import android.hardware.Camera;
 import android.hardware.Camera.Size;
@@ -35,6 +34,8 @@ import ru.crew.motley.piideo.R;
 import ru.crew.motley.piideo.piideo.BitmapSingleton;
 import ru.crew.motley.piideo.piideo.service.Recorder;
 
+import static ru.crew.motley.piideo.chat.fragment.WatchPiideoFragment.calculateInSampleSize;
+
 
 public class PhotoActivity extends AppCompatActivity {
 
@@ -54,6 +55,8 @@ public class PhotoActivity extends AppCompatActivity {
     private TextView photoSizes;
 
     private String mPiideoName;
+
+    private int mInSampleSize;
 
     private Parcelable mMessage;
     private String mMessageId;
@@ -81,7 +84,7 @@ public class PhotoActivity extends AppCompatActivity {
         sv = findViewById(R.id.surfaceView);
         holder = sv.getHolder();
         holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
-
+        mPiideoName = UUID.randomUUID().toString();
         debugPhoto = findViewById(R.id.photo_debug);
         photoSizes = findViewById(R.id.photo_size);
 
@@ -99,9 +102,12 @@ public class PhotoActivity extends AppCompatActivity {
         setCameraDisplayOrientation(CAMERA_ID);
 
         Camera.Parameters params = camera.getParameters();
+        for (String focusMode : params.getSupportedFocusModes()) {
+            debugPhoto.append(focusMode + "\n");
+        }
         if (params.getSupportedFocusModes().contains(
-                Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO)) {
-            params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
+                Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
+            params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
         }
         params.setPictureFormat(ImageFormat.JPEG);
         params.setJpegQuality(100);
@@ -241,51 +247,55 @@ public class PhotoActivity extends AppCompatActivity {
 
     public void onClickPicture(View view) {
         pictureButton.setEnabled(false);
+
         int colorId = ContextCompat.getColor(this, android.R.color.holo_green_light);
         ((TextView) findViewById(R.id.button_text)).setTextColor(colorId);
         File piideoFolder = new File(Recorder.HOME_PATH);
         if (!piideoFolder.exists()) {
             piideoFolder.mkdir();
         }
-        mPiideoName = UUID.randomUUID().toString();
+
+        BitmapSingleton.save(getViewBitmap());
 //        File photoFile = new File(piideoFolder, mPiideoName + ".jpg");
         camera.takePicture(null, null, (data, camera) -> {
             try {
-                Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
-                Log.d(TAG, " w " + bitmap.getWidth() + "  h " + bitmap.getHeight());
-                if (bitmap.getWidth() > bitmap.getHeight()) {
-                    Matrix mat = new Matrix();
-                    mat.postRotate(90);
-                    bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), mat, true);
-                }
-                saveFile(bitmap);
+                saveFile2(data);
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inJustDecodeBounds = true;
+                Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length, options);
+                Point displaySize = new Point();
+                this.getWindowManager().getDefaultDisplay().getSize(displaySize);
+                int inSampleSize = calculateInSampleSize(options, displaySize.x, displaySize.y);
+                Log.d("!!!!!!", options.outWidth + " + " + options.outHeight + " " + inSampleSize);
+                options.inJustDecodeBounds = false;
+                options.inSampleSize = inSampleSize;
+                bitmap = BitmapFactory.decodeByteArray(data, 0, data.length, options);
                 BitmapSingleton.save(bitmap);
-//
-//                FileOutputStream out = null;
-//                try {
-//                    out = new FileOutputStream(photoFile);
-//                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out); // bmp is your Bitmap instance
-//                    // PNG is a lossless format, the compression factor (100) is ignored
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                } finally {
-//                    try {
-//                        if (out != null) {
-//                            out.close();
-//                        }
-//                    } catch (IOException e) {
-//                        e.printStackTrace();
-//                    }
+                Log.d(TAG, " w " + bitmap.getWidth() + "  h " + bitmap.getHeight());
+                                Intent i = PiideoActivity.getIntent(this, mPiideoName, mMessage, mMessageId);
+                startActivity(i);
+                finish();
+//                if (bitmap.getWidth() > bitmap.getHeight()) {
+//                    Matrix mat = new Matrix();
+//                    mat.postRotate(90);
+//                    bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), mat, true);
 //                }
 
 
-                Intent i = PiideoActivity.getIntent(this, mPiideoName, mMessage, mMessageId);
-                startActivity(i);
-                finish();
             } catch (Exception e) {
                 e.printStackTrace();
             }
         });
+    }
+
+
+    private Bitmap getViewBitmap() {
+        sv.setDrawingCacheEnabled(true);
+        sv.buildDrawingCache(true);
+        final Bitmap bitmap = Bitmap.createBitmap(sv.getDrawingCache());
+        sv.setDrawingCacheEnabled(false);
+        sv.destroyDrawingCache();
+        return bitmap;
     }
 
     private Size getOptimalPreviewSize(List<Size> sizes, int w, int h) {
@@ -300,23 +310,23 @@ public class PhotoActivity extends AppCompatActivity {
         int targetHeight = h;
         int targetWidth = w;
 
-        debugPhoto.append("tR " + targetRatio);
+//        debugPhoto.append("tR " + targetRatio);
 
 //        if (  you want ratio as closed to what i asked for) {
         for (Size size : sizes) {
             Log.d("Camera", "Checking size " + size.width + "w " + size.height
                     + "h\n");
 
-            debugPhoto.append("Ch.s " + size.width + "  w " + size.height + "h\n");
+//            debugPhoto.append("Ch.s " + size.width + "  w " + size.height + "h\n");
             double ratio = (double) size.width / size.height;
             Log.d("Camera", "Ch.s " + (Math.abs(ratio - targetRatio)));
-            debugPhoto.append("Ch.s " + (Math.abs(ratio - targetRatio)) + "\n");
+//            debugPhoto.append("Ch.s " + (Math.abs(ratio - targetRatio)) + "\n");
             if (Math.abs(ratio - targetRatio) > ASPECT_TOLERANCE)
                 continue;
             if (Math.abs(size.height - targetHeight) < minDiff) {
                 optimalSize = size;
                 Log.d("Camera", " Opt.s " + optimalSize.width + " " + optimalSize.height);
-                debugPhoto.append(" Opt.s " + optimalSize.width + " " + optimalSize.height + "\n");
+//                debugPhoto.append(" Opt.s " + optimalSize.width + " " + optimalSize.height + "\n");
                 minDiff = Math.abs(size.height - targetHeight);
             }
         }
@@ -368,6 +378,24 @@ public class PhotoActivity extends AppCompatActivity {
 //        }
 //
 //    }
+
+    public void saveFile2(byte[] data) {
+        Single.just(data).
+                map(d -> {
+                    File piideoFolder = new File(Recorder.HOME_PATH);
+                    if (!piideoFolder.exists()) {
+                        piideoFolder.mkdir();
+                    }
+                    File photoFile = new File(piideoFolder, mPiideoName + ".jpg");
+                    FileOutputStream outStream = new FileOutputStream(photoFile);
+                    outStream.write(data);
+                    outStream.flush();
+                    outStream.close();
+                    return 0;
+                }).subscribeOn(Schedulers.io())
+                .subscribe();
+
+    }
 
 
     public void saveFile(Bitmap forSave) {

@@ -111,7 +111,7 @@ public class SearchHelpersFragment extends ButterFragment implements SendRequest
             throw new IllegalStateException("Search mSubject can't be null or empty");
         }
         Statement subject = new Statement();
-        subject.setStatement(Request.FIND_QUESTION_TARGET);
+        subject.setStatement(Request.FIND_QUESTION_TARGET_1);
         Parameters parameters = new Parameters();
         parameters.getProps().put(Request.Var.PHONE, mMember.getPhoneNumber());
         parameters.getProps().put(Request.Var.NAME, searchSubject);

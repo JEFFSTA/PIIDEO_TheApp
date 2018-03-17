@@ -1,5 +1,6 @@
 package ru.crew.motley.piideo.chat.fragment;
 
+import android.annotation.TargetApi;
 import android.app.AlarmManager;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -7,6 +8,10 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.hardware.camera2.CameraAccessException;
+import android.hardware.camera2.CameraCharacteristics;
+import android.hardware.camera2.CameraManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Parcelable;
@@ -39,7 +44,6 @@ import org.parceler.Parcels;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -73,6 +77,7 @@ import ru.crew.motley.piideo.network.neo.Request;
 import ru.crew.motley.piideo.network.neo.Statement;
 import ru.crew.motley.piideo.network.neo.Statements;
 import ru.crew.motley.piideo.piideo.activity.PhotoActivity;
+import ru.crew.motley.piideo.piideo.activity.PhotoActivity2;
 import ru.crew.motley.piideo.search.Events;
 import ru.crew.motley.piideo.splash.SplashActivity;
 import ru.crew.motley.piideo.util.Utils;
@@ -82,6 +87,8 @@ import static android.Manifest.permission.RECORD_AUDIO;
 import static android.content.Context.NOTIFICATION_SERVICE;
 import static android.content.pm.PackageManager.PERMISSION_DENIED;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.hardware.camera2.CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL;
+import static android.hardware.camera2.CameraMetadata.INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED;
 import static ru.crew.motley.piideo.fcm.AcknowledgeService.REQUEST_CODE_IDLE_STOPPER;
 import static ru.crew.motley.piideo.fcm.MessagingService.ACK;
 import static ru.crew.motley.piideo.fcm.MessagingService.MSG_ID;
@@ -101,7 +108,7 @@ public class ChatFragment extends ButterFragment
     }
 
     private static final String TAG = ChatFragment.class.getSimpleName();
-    public static final long CHAT_TIMEOUT = 60L;
+    public static final long CHAT_TIMEOUT = 10 * 60L;
     private static final String ARG_DB_MESSAGE_ID = "local_db_id";
     private static final int REQUEST_MEDIA = 23;
 
@@ -177,10 +184,11 @@ public class ChatFragment extends ButterFragment
         @Override
         public void run() {
             if (seconds < 0) {
+                watchText.setText("00:00");
                 handler.removeCallbacks(mTimer);
                 showRateView();
 //                deleteUselessFiles();
-                makeMeFree();
+//                makeMeFree();
                 return;
             }
             if (watchText != null && seconds >= 0) {
@@ -256,14 +264,29 @@ public class ChatFragment extends ButterFragment
         disposables = new CompositeDisposable();
         mMessageId = getArguments().getString(ARG_DB_MESSAGE_ID);
         ChatLab lab = ChatLab.get(getActivity().getApplicationContext());
-        mFcmMessage = lab.getReducedFcmMessage(mMessageId);
         mDatabase = FirebaseDatabase.getInstance().getReference();
+        if (mMessageId == null) {
+            SharedPrefs.saveChatIdleStartTime(-1, getContext());
+            Intent i = SplashActivity.getIntent(getContext());
+            startActivity(i);
+            getActivity().finish();
+            return;
+        }
+        mFcmMessage = lab.getReducedFcmMessage(mMessageId);
+        if (mFcmMessage == null) {
+            SharedPrefs.saveChatIdleStartTime(-1, getContext());
+            Intent i = SplashActivity.getIntent(getContext());
+            startActivity(i);
+            getActivity().finish();
+            return;
+        }
     }
 
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+
         fragmentLayout = R.layout.fragment_chat;
         View v;
         if (getView() != null) {
@@ -271,9 +294,12 @@ public class ChatFragment extends ButterFragment
         } else {
             v = super.onCreateView(inflater, container, savedInstanceState);
         }
+        if (mMessageId == null || mFcmMessage == null) {
+            return v;
+        }
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         layoutManager.setReverseLayout(true);
-        layoutManager.setStackFromEnd(true);
+//        layoutManager.setStackFromEnd(true);
         mChatRecycler.setLayoutManager(layoutManager);
         attachRecyclerAdapter();
         attachTextWatcher();
@@ -289,13 +315,43 @@ public class ChatFragment extends ButterFragment
     @OnClick(R.id.piideo)
     public void makePiideo() {
         List<String> permissions = requiredPermissions();
+        Parcelable message = Parcels.wrap(mFcmMessage);
+        Intent i = null;
         if (!requiredPermissions().isEmpty()) {
             requestPermissions(permissions.toArray(new String[0]), REQUEST_MEDIA);
         } else {
-            Parcelable message = Parcels.wrap(mFcmMessage);
-            Intent i = PhotoActivity.getIntent(mMessageId, message, getActivity());
-            startActivity(i);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                if (newCameraApiAvailable()) {
+                    i = PhotoActivity2.getIntent(mMessageId, message, getActivity());
+                } else {
+                    Log.w(TAG, "INFO_SUPPORTED_HARDWARE_LEVEL - Lollipop but api is unavailable");
+                    i = PhotoActivity.getIntent(mMessageId, message, getActivity());
+                }
+            } else {
+                Log.w(TAG, "INFO_SUPPORTED_HARDWARE_LEVEL - Old version api");
+                i = PhotoActivity.getIntent(mMessageId, message, getActivity());
+            }
         }
+        startActivity(i);
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    private boolean newCameraApiAvailable() {
+        try {
+            CameraManager manager = (CameraManager) getContext().getSystemService(Context.CAMERA_SERVICE);
+            for (String cameraId : manager.getCameraIdList()) {
+                CameraCharacteristics characteristics
+                        = manager.getCameraCharacteristics(cameraId);
+                Log.d("Img", "INFO_SUPPORTED_HARDWARE_LEVEL " + cameraId + " " + characteristics.get(INFO_SUPPORTED_HARDWARE_LEVEL));
+                if (characteristics.get(INFO_SUPPORTED_HARDWARE_LEVEL) <= INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED) {
+                    return false;
+                }
+            }
+            return true;
+        } catch (CameraAccessException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     private List<String> requiredPermissions() {
@@ -605,21 +661,24 @@ public class ChatFragment extends ButterFragment
         }
     }
 
-    private Statement createBusyRequest(long startChatTime) {
+    public static long BUSY_TIMEOUT = TimeUnit.DAYS.toMillis(1);
+
+    private Statement createBusyRequest(long startBusyTime) {
         ChatLab lab = ChatLab.get(getActivity());
         Member member = lab.getMember();
         Statement statement = new Statement();
         statement.setStatement(Request.MAKE_ME_BUSY);
         Parameters parameters = new Parameters();
+        long endBusyTime = BUSY_TIMEOUT + startBusyTime;
         parameters.getProps().put(Request.Var.PHONE, member.getPhoneNumber());
-        parameters.getProps().put(Request.Var.DLG_TIME, startChatTime);
+        parameters.getProps().put(Request.Var.DLG_TIME, endBusyTime);
         statement.setParameters(parameters);
         return statement;
     }
 
-    private void makeMeBusy(long startChatTime) {
+    private void makeMeBusy(long startBusyTime) {
         Statements statements = new Statements();
-        statements.getValues().add(createBusyRequest(startChatTime));
+        statements.getValues().add(createBusyRequest(startBusyTime));
         NeoApi api = NeoApiSingleton.getInstance();
         api.executeStatement(statements).subscribe();
     }
@@ -652,8 +711,7 @@ public class ChatFragment extends ButterFragment
                 startActivity(i);
             } else {
                 Toast.makeText(getActivity(),
-                        "This is a key permission. " +
-                                "You can't use this app without it.",
+                        R.string.perm_warning,
                         Toast.LENGTH_SHORT)
                         .show();
             }
