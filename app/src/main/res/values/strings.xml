@@ -68,6 +68,8 @@
     <string name="nty_message">You got MESSAGE</string>
 
     <string name="sch_menu_caption">Settings</string>
+    <string name="sch_menu_policy">Privacy Policy</string>
+
     <string name="usl_hint">search…</string>
     <string name="usl_sub_hint">You have a question in what subject?</string>
 
@@ -84,6 +86,9 @@
     <string name="nhlp_num_subjects">10+</string>
     <string name="nhlp_subjects">Subjects</string>
     <string name="nhlp_students">Students</string>
+
+    <string name="sbj_dlg_header">Select a subject</string>
+    <string name="sbj_dlg_hint">"or add a new one</string>
 
     <string name="opt_hint">Subject</string>
 

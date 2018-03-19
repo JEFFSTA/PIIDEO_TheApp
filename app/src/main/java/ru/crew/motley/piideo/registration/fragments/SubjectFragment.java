@@ -148,11 +148,11 @@ public class SubjectFragment extends ButterFragment implements SubjectDialogList
     }
 
     private void prepareAndCreateNewMember() {
-//        if (mMember.getSubject() == null) {
-//            createNewSubjectAndMember();
-//        } else {
-        createNewMember();
-//        }
+        if (mMember.getSubject().getId() == null) {
+            createNewSubjectAndMember();
+        } else {
+            createNewMember();
+        }
     }
 
     private void createNewMember() {
@@ -194,7 +194,7 @@ public class SubjectFragment extends ButterFragment implements SubjectDialogList
 //        NeoApi api = NeoApiSingleton.getInstance();
 //        Statements statements1 = contactsRequests();
 //        if (statements1.getValues().isEmpty()) {
-            mRegistrationListener.onComplete(mMember);
+        mRegistrationListener.onComplete(mMember);
 //        } else {
 //            api.executeStatement(statements1)
 //                    .observeOn(AndroidSchedulers.mainThread())
@@ -264,6 +264,42 @@ public class SubjectFragment extends ButterFragment implements SubjectDialogList
         for (String phone : phones) {
             mPhones.add(phone.replaceAll("\\D", ""));
         }
+    }
+
+    private void createNewSubjectAndMember() {
+        Statements statements = new Statements();
+        statements.getValues().add(subjectRequest());
+        NeoApi api = NeoApiSingleton.getInstance();
+        api.executeStatement(statements)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(transaction -> {
+                            Subject subject = Subject.fromJson(
+                                    transaction.getResults()
+                                            .get(0)
+                                            .getData()
+                                            .get(0)
+                                            .getRow()
+                                            .get(0)
+                                            .getValue());
+                            subject.setId(
+                                    (long) transaction.getResults()
+                                            .get(0)
+                                            .getData()
+                                            .get(0)
+                                            .getMeta()
+                                            .get(0)
+                                            .getId());
+                            mMember.setSubject(subject);
+                            createNewMember();
+                        },
+                        error -> {
+                            Log.e(TAG, "Neo Request exception", error);
+                            Toast.makeText(getActivity(), R.string.ex_network, Toast.LENGTH_SHORT)
+                                    .show();
+                            if (!(error instanceof SocketTimeoutException)) {
+                                throw new RuntimeException(error);
+                            }
+                        });
     }
 
 //    @Override
@@ -367,13 +403,13 @@ public class SubjectFragment extends ButterFragment implements SubjectDialogList
         Statement request = new Statement();
         if (!TextUtils.isEmpty(mMember.getCountryCode()) && !TextUtils.isEmpty(mMember.getPhonePrefix())) {
             request.setStatement(Request.ME_WITH_CC_AND_PREFIX);
-            Toast.makeText(getActivity(), "WITH CC AND 0" + " " + mMember.getPhoneNumber(), Toast.LENGTH_LONG).show();
+//            Toast.makeText(getActivity(), "WITH CC AND 0" + " " + mMember.getPhoneNumber(), Toast.LENGTH_LONG).show();
         } else if (!TextUtils.isEmpty(mMember.getCountryCode())) {
             request.setStatement(Request.ME_WITH_CC);
-            Toast.makeText(getActivity(), "WITH CC " + " " + mMember.getPhoneNumber(), Toast.LENGTH_LONG).show();
+//            Toast.makeText(getActivity(), "WITH CC " + " " + mMember.getPhoneNumber(), Toast.LENGTH_LONG).show();
         } else if (!TextUtils.isEmpty(mMember.getPhonePrefix())) {
             request.setStatement(Request.ME_WITH_PREFIX);
-            Toast.makeText(getActivity(), "WITH 0" + " " + mMember.getPhoneNumber(), Toast.LENGTH_LONG).show();
+//            Toast.makeText(getActivity(), "WITH 0" + " " + mMember.getPhoneNumber(), Toast.LENGTH_LONG).show();
         } else {
             throw new RuntimeException("Illegal Full Phone Number Format");
         }
@@ -409,5 +445,15 @@ public class SubjectFragment extends ButterFragment implements SubjectDialogList
         parameters.getProps().put(Request.Var.PHONE, mMember.getPhoneNumber());
         statement.setParameters(parameters);
         return statement;
+    }
+
+    private Statement subjectRequest() {
+        Statement subject = new Statement();
+        subject.setStatement(Request.NEW_SUBJECT);
+        Parameters parameters = new Parameters();
+        parameters.getProps().put(Request.Var.NAME, mSubject.getText().toString().trim());
+        parameters.getProps().put(Request.Var.NAME_2, mMember.getSchool().getName());
+        subject.setParameters(parameters);
+        return subject;
     }
 }

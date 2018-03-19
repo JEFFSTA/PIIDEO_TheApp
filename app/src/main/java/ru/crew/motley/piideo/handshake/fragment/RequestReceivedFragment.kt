@@ -109,7 +109,7 @@ class RequestReceivedFragment : Fragment() {
     }
 
     fun sendOwnStubMessage() {
-        val content = resources.getString(R.string.chat_message_stub)
+        val content = resources.getString(R.string.chat_message_stub_text)
         val message = createFcmMessage(message.from!!, ownerId, content, MessagingService.MSG)
         database.child("messages")
                 .child(ownerId)

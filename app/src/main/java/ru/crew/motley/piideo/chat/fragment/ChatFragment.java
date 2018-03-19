@@ -316,10 +316,10 @@ public class ChatFragment extends ButterFragment
     public void makePiideo() {
         List<String> permissions = requiredPermissions();
         Parcelable message = Parcels.wrap(mFcmMessage);
-        Intent i = null;
         if (!requiredPermissions().isEmpty()) {
             requestPermissions(permissions.toArray(new String[0]), REQUEST_MEDIA);
         } else {
+            Intent i;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 if (newCameraApiAvailable()) {
                     i = PhotoActivity2.getIntent(mMessageId, message, getActivity());
@@ -331,8 +331,8 @@ public class ChatFragment extends ButterFragment
                 Log.w(TAG, "INFO_SUPPORTED_HARDWARE_LEVEL - Old version api");
                 i = PhotoActivity.getIntent(mMessageId, message, getActivity());
             }
+            startActivity(i);
         }
-        startActivity(i);
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)

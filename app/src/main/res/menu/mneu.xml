@@ -8,13 +8,17 @@
         app:showAsAction="never" />
 
     <item
-        android:id="@+id/logout"
-        android:title="Log out"
-        app:showAsAction="never" />
+        android:id="@+id/privacy_policy"
+        android:title="@string/sch_menu_policy" />
 
-    <item
-        android:id="@+id/dump"
-        android:title="Dump"
-        app:showAsAction="never" />
+    <!--<item-->
+        <!--android:id="@+id/logout"-->
+        <!--android:title="Log out"-->
+        <!--app:showAsAction="never" />-->
+
+    <!--<item-->
+        <!--android:id="@+id/dump"-->
+        <!--android:title="Dump"-->
+        <!--app:showAsAction="never" />-->
 
 </menu>

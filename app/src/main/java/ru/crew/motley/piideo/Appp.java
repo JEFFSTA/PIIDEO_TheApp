@@ -1,8 +1,10 @@
 package ru.crew.motley.piideo;
 
 import android.app.Activity;
-import android.app.Application;
 import android.app.Service;
+import android.content.Context;
+import android.content.res.Configuration;
+import android.support.multidex.MultiDexApplication;
 
 import com.crashlytics.android.Crashlytics;
 import com.google.firebase.database.FirebaseDatabase;
@@ -15,9 +17,10 @@ import dagger.android.HasActivityInjector;
 import dagger.android.HasServiceInjector;
 import io.fabric.sdk.android.Fabric;
 import ru.crew.motley.piideo.di.DaggerMainComponent;
+import ru.crew.motley.piideo.util.Utils;
 
 
-public class Appp extends Application implements HasActivityInjector, HasServiceInjector {
+public class Appp extends MultiDexApplication implements HasActivityInjector, HasServiceInjector {
 
     @Inject
     DispatchingAndroidInjector<Activity> mActivityInjector;
@@ -85,5 +88,17 @@ public class Appp extends Application implements HasActivityInjector, HasService
     @Override
     public AndroidInjector<Service> serviceInjector() {
         return mServiceInjector;
+    }
+
+    @Override
+    protected void attachBaseContext(Context base) {
+        Utils.Companion.invalidateCurrentLocale(base);
+        super.attachBaseContext(base);
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        Utils.Companion.invalidateCurrentLocale(this);
     }
 }

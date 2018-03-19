@@ -8,16 +8,17 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Select a subject"
+        android:text="@string/sbj_dlg_header"
         android:textColor="@color/colorBlack"
         android:textSize="@dimen/text_size_primary_big" />
 
     <EditText
+        android:imeOptions="actionDone"
         android:id="@+id/subject_name"
         android:layout_width="match_parent"
         android:inputType="textCapSentences"
         android:layout_height="wrap_content"
-        android:hint="Search..." />
+        android:hint="@string/sbj_dlg_hint" />
 
     <android.support.v7.widget.RecyclerView
         android:scrollbars="vertical"

@@ -6,22 +6,16 @@ import android.os.Parcelable;
 import android.provider.ContactsContract;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
-
-import com.crashlytics.android.answers.Answers;
-import com.crashlytics.android.answers.CustomEvent;
 
 import org.json.JSONObject;
 import org.parceler.Parcels;
 
-import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -48,6 +42,9 @@ import ru.crew.motley.piideo.search.adapter.SubjectAdapter;
 
 import static android.content.ContentValues.TAG;
 import static ru.crew.motley.piideo.registration.fragments.PhoneFragment.MOROCCO_LENGTH;
+
+//import com.crashlytics.android.answers.Answers;
+//import com.crashlytics.android.answers.CustomEvent;
 
 public class SearchSubjectFragment extends ButterFragment implements SubjectAdapter.SubjectListener {
 
@@ -198,11 +195,11 @@ public class SearchSubjectFragment extends ButterFragment implements SubjectAdap
         api.executeStatement(statements)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(transaction -> {
-                            long subjectsLoadingTime = System.currentTimeMillis() - subjectsLoadingStart;
-                            Answers.getInstance()
-                                    .logCustom(
-                                            new CustomEvent("Loading search subjects")
-                                                    .putCustomAttribute("Subjects loading time", subjectsLoadingTime));
+//                            long subjectsLoadingTime = System.currentTimeMillis() - subjectsLoadingStart;
+//                            Answers.getInstance()
+//                                    .logCustom(
+//                                            new CustomEvent("Loading search subjects")
+//                                                    .putCustomAttribute("Subjects loading time", subjectsLoadingTime));
                             mSubjectAdapter.notifyDataSetChanged();
                             mSubjects.clear();
                             Log.d(TAG, "" + transaction.toString());

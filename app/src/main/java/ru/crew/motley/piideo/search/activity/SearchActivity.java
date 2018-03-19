@@ -118,28 +118,31 @@ public class SearchActivity extends RequestListenerActivity
                 Intent ii = SettingsActivity.getIntent(this);
                 startActivity(ii);
                 break;
-            case R.id.logout:
-                FirebaseAuth.getInstance().signOut();
-                ChatLab lab = ChatLab.get(this);
-                lab.deleteMember();
-                Intent i = UserSetupActivity.getIntent(this);
-                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                finish();
-                break;
-
-            case R.id.dump:
-                File logFile = generateLog();
-                Intent intent = new Intent(Intent.ACTION_SEND);
-                intent.putExtra(Intent.EXTRA_EMAIL, new String[]{"tabaqui.vn@gmail.com"});
-                intent.putExtra(Intent.EXTRA_SUBJECT, "Log file");
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                Uri logUri = FileProvider.getUriForFile(
-                        this,
-                        /*getApplicationContext().getPackageName() + */"ru.crew.motley.piideo.fileprovider",
-                        logFile);
-                intent.putExtra(Intent.EXTRA_STREAM, logUri);
-                intent.setType("multipart/");
-                startActivity(intent);
+            case R.id.privacy_policy:
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/JEFFSTA/PIIDEO_Privacy-_Policy/wiki/Privacy-policy"));
+                        startActivity(browserIntent);
+//            case R.id.logout:
+//                FirebaseAuth.getInstance().signOut();
+//                ChatLab lab = ChatLab.get(this);
+//                lab.deleteMember();
+//                Intent i = UserSetupActivity.getIntent(this);
+//                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+//                finish();
+//                break;
+//
+//            case R.id.dump:
+//                File logFile = generateLog();
+//                Intent intent = new Intent(Intent.ACTION_SEND);
+//                intent.putExtra(Intent.EXTRA_EMAIL, new String[]{"tabaqui.vn@gmail.com"});
+//                intent.putExtra(Intent.EXTRA_SUBJECT, "Log file");
+//                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//                Uri logUri = FileProvider.getUriForFile(
+//                        this,
+//                        /*getApplicationContext().getPackageName() + */"ru.crew.motley.piideo.fileprovider",
+//                        logFile);
+//                intent.putExtra(Intent.EXTRA_STREAM, logUri);
+//                intent.setType("multipart/");
+//                startActivity(intent);
             default:
                 return super.onOptionsItemSelected(item);
         }

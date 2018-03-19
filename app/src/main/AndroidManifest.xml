@@ -104,7 +104,8 @@
             </intent-filter>
         </service>
 
-        <service android:name=".fcm.MessagingService">
+        <service android:name=".fcm.MessagingService"
+            android:stopWithTask="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>

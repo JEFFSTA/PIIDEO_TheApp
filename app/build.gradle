@@ -18,6 +18,11 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'io.fabric'
 
+def keystorePropertiesFile = rootProject.file("keystore/properties.properties")
+def keystoreFile = rootProject.file("keysotre/keystore.jks")
+def keystoreProperties = new Properties()
+keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+
 
 android {
     compileSdkVersion 27
@@ -25,12 +30,19 @@ android {
         applicationId "ru.crew.motley.piideo"
         minSdkVersion 16
         targetSdkVersion 27
-        versionCode 6
-        versionName "0.6"
+        versionCode 7
+        versionName "0.7"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
-//        multiDexEnabled true
 //        multiDexKeepFile file('multidex-config.txt')
+    }
+    signingConfigs {
+        release {
+            storeFile project.KEYSTORE_STORE_FILE
+            storePassword project.KEYSTORE_STORE_PASSWORD
+            keyAlias project.KEYSTORE_KEY_ALIAS
+            keyPassword project.KEYSTORE_KEY_PASSWORD
+        }
     }
     buildTypes {
         debug {
@@ -42,6 +54,8 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+            multiDexEnabled true
         }
     }
     compileOptions {
@@ -95,6 +109,9 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
     implementation 'me.zhanghai.android.materialprogressbar:library:1.4.2'
+
+    compile 'com.android.support:multidex:1.0.3'
+
 }
 
 apply plugin: 'com.google.gms.google-services'

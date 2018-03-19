@@ -1,5 +1,6 @@
 package ru.crew.motley.piideo.registration.fragments;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -9,11 +10,15 @@ import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.net.SocketTimeoutException;
@@ -113,7 +118,32 @@ public class SubjectDialog extends DialogFragment implements SubjectAdapterListe
         if (getDialog() != null && getDialog().getWindow() != null) {
             getDialog().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
         }
+        subjectName.setOnEditorActionListener((v, actionId, event) -> {
+            String newSubjectName = subjectName.getText().toString();
+            if (actionId == EditorInfo.IME_ACTION_DONE && !newSubjectName.isEmpty()) {
+                Subject newSubject = findOrCreateSubject(newSubjectName);
+                onSubjectSelected(newSubject);
+                InputMethodManager imm = (InputMethodManager) v.getContext().
+                        getSystemService(Context.INPUT_METHOD_SERVICE);
+                if (imm != null)
+                    imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                return true;
+            }
+            return false;
+
+        });
         return view;
+    }
+
+    private Subject findOrCreateSubject(String subjectName) {
+        for (Subject subject : mSubjects) {
+            if (subject.getName().toLowerCase().equals(subjectName.toLowerCase())) {
+                return subject;
+            }
+        }
+        Subject newSubject = new Subject();
+        newSubject.setName(subjectName);
+        return newSubject;
     }
 
     @Override

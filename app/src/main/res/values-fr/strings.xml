@@ -1,7 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name">PIIDEO</string>
 
+    <string name="next_btn_caption">Enter</string>
+
+    <string name="reg_subject_title">Hey,\nQuick question:</string>
+    <string name="reg_subject_hint">e.g: calculus2, anatomy…</string>
+    <string name="reg_phone_format">Make sure entered phone correctly formatted.</string>
+
+    <string name="chat_message_stub_text">Hello, avez vous une minute?</string>
     <string name="chat_message_stub">Hello, avez vous une minute?</string>
+    <string name="chat_bar_hint">Type message here</string>
+    <string name="req_dlg_empty_warn">Enter brief explanation</string>
+
+    <string name="hsh_time_up"><b>Time Up!</b></string>
+    <string name="hsh_oops">oops</string>
+    <string name="hsh_help_another_time">You can help another\ntime.</string>
+
+    <string name="nty_request">New Request</string>
+    <string name="nty_accepted">Request Accepted</string>
+    <string name="nty_rejected">Request Rejected</string>
+    <string name="nty_piideo">You got PIIDEO</string>
+    <string name="nty_message">You got MESSAGE</string>
 
     <string name="reg_owl_info">Le réseau le plus pratique pour l’étudiant</string>
     <string name="reg_welcome">BIENVENUE</string>
@@ -28,25 +48,67 @@
     <string name="req_i_have">J’ai une</string>
     <string name="req_question_on">question en</string>
 
+    <string name="sbj_violation">Subject is empty.</string>
+    <string name="sch_subject_violation">Question subject is empty.</string>
+    <string name="sch_no_result">Nobody can answer you.</string>
+
+    <string name="ph_take_picture">Photo</string>
+
+    <string name="ex_network">Something went wrong while connecting to the Internet.</string>
+
+    <string name="resToastText">New bug\'s been found</string>
+
     <string name="sch_hello_title">Bonjour</string>
     <string name="usl_hint">recherchez…</string>
     <string name="usl_sub_hint">Vous avez une question dans quelle matière?</string>
+
     <string name="sch_menu_caption">Paramètres</string>
+    <string name="sch_menu_policy">Privacy Policy</string>
 
     <string name="no_title">ÉLARGIS TON RÉSEAU</string>
     <string name="no_info">Désolé,\nPersonne dans ton\nRéseau ne maitrise bien\ncette matière.</string>
 
+    <string name="no_btn">OK</string>
     <string name="nhlp_info">Informes</string>
     <string name="nhlp_classmate">1 Camarade</string>
     <string name="nhlp_more">de plus</string>
+    <string name="nhlp_num_students">50</string>
+    <string name="nhlp_num_subjects">10+</string>
     <string name="nhlp_network">Elargit ton réseau par</string>
     <string name="nhlp_mastered">maitrisant</string>
     <string name="nhlp_students">Etudiants</string>
     <string name="nhlp_subjects">Matières</string>
 
+    <string name="sbj_dlg_header">"Choisissez une matièr</string>
+    <string name="sbj_dlg_hint">"ou ajoutez une nouvelle…</string>
+
     <string name="opt_hint">Matière</string>
     <string name="perm_warning">PIIDEO ne peut pas fonctionner sans ces autorisations.</string>
     <string name="opt_info">Choisissez votre préférée ce\nsemestre/trimestre</string>
     <string name="hlp_hint">CHOISISSEZ UN RECEPTEUR</string>
+
+    <string name="err_offline">you are offline check your\nconnection</string>
+
+    <string name="picture">Picture</string>
+    <string name="description_info">Info</string>
+    <string name="request_permission">This sample needs camera permission.</string>
+    <string name="camera_error">This device doesn\'t support Camera2 API.</string>
+
+
+    <string name="intro_message">
+        <![CDATA[
+
+
+            This sample demonstrates the basic use of Camera2 API. Check the source code to see how
+            you can display camera preview and take pictures.
+
+
+        ]]>
+    </string>
+
+    <string name="vrfy_caption">Please enter below the code You just received.</string>
+    <string name="vrfy_hint">…</string>
+
+    <string name="placeholder">Placeholder</string>
 
 </resources>

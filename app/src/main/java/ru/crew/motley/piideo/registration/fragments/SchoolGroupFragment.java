@@ -1,6 +1,5 @@
 package ru.crew.motley.piideo.registration.fragments;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
@@ -8,13 +7,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 
 import org.parceler.Parcels;
 
-import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,8 +30,6 @@ import ru.crew.motley.piideo.network.neo.Statement;
 import ru.crew.motley.piideo.network.neo.Statements;
 import ru.crew.motley.piideo.network.neo.transaction.Data;
 import ru.crew.motley.piideo.network.neo.transaction.Result;
-import ru.crew.motley.piideo.network.neo.transaction.Row;
-import ru.crew.motley.piideo.network.neo.transaction.RowMeta;
 import ru.crew.motley.piideo.network.neo.transaction.TransactionResponse;
 import ru.crew.motley.piideo.registration.RegistrationListener;
 

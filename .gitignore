@@ -11,3 +11,5 @@
 /captures
 .externalNativeBuild
 *.pem
+/keystore
+**/release

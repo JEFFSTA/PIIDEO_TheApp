@@ -146,10 +146,50 @@ public class SubjectSettingsFragment extends ButterFragment implements SubjectDi
         api.executeStatement(statements)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(transaction -> {
-                            connectWithNewSubject();
+                    if (mMember.getSubject().getId() != null) {
+                        connectWithNewSubject();
+                    } else {
+                        createNewSubjectAndConnect();
+                    }
                         },
                         error -> {
                             Log.e(TAG, "Deleteion old subjects problem occured", error);
+                            Toast.makeText(getActivity(), R.string.ex_network, Toast.LENGTH_SHORT)
+                                    .show();
+                            if (!(error instanceof SocketTimeoutException)) {
+                                throw new RuntimeException(error);
+                            }
+                        });
+    }
+
+    private void createNewSubjectAndConnect() {
+        Statements statements = new Statements();
+        statements.getValues().add(subjectRequest());
+        NeoApi api = NeoApiSingleton.getInstance();
+        api.executeStatement(statements)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(transaction -> {
+                            Subject subject = Subject.fromJson(
+                                    transaction.getResults()
+                                            .get(0)
+                                            .getData()
+                                            .get(0)
+                                            .getRow()
+                                            .get(0)
+                                            .getValue());
+                            subject.setId(
+                                    (long) transaction.getResults()
+                                            .get(0)
+                                            .getData()
+                                            .get(0)
+                                            .getMeta()
+                                            .get(0)
+                                            .getId());
+                            mMember.setSubject(subject);
+                            connectWithNewSubject();
+                        },
+                        error -> {
+                            Log.e(TAG, "Neo Request exception", error);
                             Toast.makeText(getActivity(), R.string.ex_network, Toast.LENGTH_SHORT)
                                     .show();
                             if (!(error instanceof SocketTimeoutException)) {
@@ -176,5 +216,15 @@ public class SubjectSettingsFragment extends ButterFragment implements SubjectDi
         parameters.getProps().put(Request.Var.PHONE, mMember.getPhoneNumber());
         statement.setParameters(parameters);
         return statement;
+    }
+
+    private Statement subjectRequest() {
+        Statement subject = new Statement();
+        subject.setStatement(Request.NEW_SUBJECT);
+        Parameters parameters = new Parameters();
+        parameters.getProps().put(Request.Var.NAME, mMember.getSubject().getName().trim());
+        parameters.getProps().put(Request.Var.NAME_2, mMember.getSchool().getName());
+        subject.setParameters(parameters);
+        return subject;
     }
 }

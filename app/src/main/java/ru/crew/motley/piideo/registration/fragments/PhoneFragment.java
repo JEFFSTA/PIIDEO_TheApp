@@ -214,7 +214,7 @@ public class PhoneFragment extends ButterFragment {
             }
             // TODO: swap next 2 strings commented/uncommented
 //            mRegistrationListener.onNextStep(mMember);
-            Toast.makeText(getActivity(), mMember.getPhoneNumber(), Toast.LENGTH_LONG).show();
+//            Toast.makeText(getActivity(), mMember.getPhoneNumber(), Toast.LENGTH_LONG).show();
             login(fullNumber);
 //            signIn();
 //            mRegistrationListener.onNextStep(mMember);
