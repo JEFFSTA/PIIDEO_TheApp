@@ -24,17 +24,17 @@ abstract class RequestListenerActivity : ConnectionErrorActivity() {
         (application as Appp).searchActivityResumed()
         val filter = IntentFilter(ShowDialogReceiver.BROADCAST_ACTION)
         registerReceiver(fbNotificationReceiver, filter)
-        contentResolver.registerContentObserver(
-                ContactsContract.Contacts.CONTENT_URI,
-                false,
-                contactsListener)
+//        contentResolver.registerContentObserver(
+//                ContactsContract.Contacts.CONTENT_URI,
+//                false,
+//                contactsListener)
     }
 
     override fun onPause() {
         super.onPause()
         unregisterReceiver(fbNotificationReceiver)
         (application as Appp).searchActivityPaused()
-        contentResolver.unregisterContentObserver(contactsListener)
+//        contentResolver.unregisterContentObserver(contactsListener)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

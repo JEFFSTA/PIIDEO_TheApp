@@ -97,6 +97,9 @@ public class SchoolGroupFragment extends ButterFragment {
 
     @OnClick(R.id.high_school)
     public void chooseHighSchool() {
+        if (mSchoolGroups == null) {
+            return;
+        }
         for (School school : mSchoolGroups) {
             if (school.getName().equals("High School")) {
                 mMember.setSchool(school);
@@ -109,6 +112,9 @@ public class SchoolGroupFragment extends ButterFragment {
 
     @OnClick(R.id.prep_classes)
     public void choosePreparatory() {
+        if (mSchoolGroups == null) {
+            return;
+        }
         for (School school : mSchoolGroups) {
             if (school.getName().equals("Preparatory Classes")) {
                 mMember.setSchool(school);
@@ -121,6 +127,9 @@ public class SchoolGroupFragment extends ButterFragment {
 
     @OnClick(R.id.engin_school)
     public void chooseEngineeringSchool() {
+        if (mSchoolGroups == null) {
+            return;
+        }
         for (School school : mSchoolGroups) {
             if (school.getName().equals("Engineering School")) {
                 mMember.setSchool(school);

@@ -481,7 +481,7 @@ public class ChatFragment extends ButterFragment
         long startChatTime = SharedPrefs.loadChatStartTime(getActivity());
         if (mFcmMessage.getType().equals(ACK) && startChatTime == -1) {
             startChatTime = startTime;
-            makeMeBusy(startChatTime);
+//            makeMeBusy(startChatTime);
             SharedPrefs.saveChatStartTime(startChatTime, getActivity());
             SharedPrefs.saveChatMessageId(mMessageId, getActivity());
             long chatTimeout = CHAT_TIMEOUT - (int) TimeUnit.MILLISECONDS.toSeconds(

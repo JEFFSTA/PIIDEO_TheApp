@@ -3,6 +3,7 @@ package ru.crew.motley.piideo.settings.fragment;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -76,6 +77,11 @@ public class SubjectSettingsFragment extends ButterFragment implements SubjectDi
     @Override
     public void onSubjectSelected(Subject subject) {
         mMember.setSubject(subject);
+        if (mMember.getSubject() == null || TextUtils.isEmpty(mMember.getSubject().getName())) {
+            Toast.makeText(getActivity(), R.string.sch_subject_violation, Toast.LENGTH_SHORT)
+                    .show();
+            return;
+        }
         String firstCapitalized = subject.getName()
                 .substring(0, 1)
                 .toUpperCase();
@@ -85,6 +91,11 @@ public class SubjectSettingsFragment extends ButterFragment implements SubjectDi
 
     @OnClick(R.id.save_btn)
     public void saveNewSubject() {
+        if (mMember.getSubject() == null || TextUtils.isEmpty(mMember.getSubject().getName())) {
+            Toast.makeText(getActivity(), R.string.sch_subject_violation, Toast.LENGTH_SHORT)
+                    .show();
+            return;
+        }
         setEnabledUI(false);
         deleteOldSubjectAndCreateNew();
     }

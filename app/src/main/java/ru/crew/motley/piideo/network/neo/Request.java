@@ -187,7 +187,7 @@ public class Request {
                     " where s.name =  {props}." + Var.NAME +
                     " and g.name = {props}." + Var.NAME_2 +
                     " and p.phoneNumber <> {props}." + Var.PHONE +
-                    " and (p.dialogTime > timestamp() " +
+                    " and (p.dialogTime < timestamp() " +
                     " or not exists(p.dialogTime)) " +
                     " match path = shortestPath((p)-[" + KnowsRelation.LABEL + "*1..10]->(me" + PersonNode.LABEL + ")) " +
                     " where me.phoneNumber = {props}." + Var.PHONE +

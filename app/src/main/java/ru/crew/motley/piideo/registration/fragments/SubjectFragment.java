@@ -137,7 +137,7 @@ public class SubjectFragment extends ButterFragment implements SubjectDialogList
 //            return;
 //        }
 
-        if (mMember.getSubject() == null) {
+        if (mMember.getSubject() == null || TextUtils.isEmpty(mMember.getSubject().getName())) {
             Toast.makeText(getActivity(), R.string.sch_subject_violation, Toast.LENGTH_SHORT)
                     .show();
             return;

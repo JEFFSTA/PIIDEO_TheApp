@@ -136,6 +136,7 @@ public class SearchHelpersFragment extends ButterFragment implements SendRequest
         }
         mMembers.remove(target);
         mMembers.add(0, target);
+        ChatLab.get(getContext()).clearQueue();
         ChatLab.get(getContext()).enqueue(mMembers);
 //        RequestService.setMembers(mMembers);
 //        RequestService.moveToFirstPosition(receiverId);

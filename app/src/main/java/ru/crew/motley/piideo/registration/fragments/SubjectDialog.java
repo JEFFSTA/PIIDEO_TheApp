@@ -119,7 +119,7 @@ public class SubjectDialog extends DialogFragment implements SubjectAdapterListe
             getDialog().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
         }
         subjectName.setOnEditorActionListener((v, actionId, event) -> {
-            String newSubjectName = subjectName.getText().toString();
+            String newSubjectName = subjectName.getText().toString().trim();
             if (actionId == EditorInfo.IME_ACTION_DONE && !newSubjectName.isEmpty()) {
                 Subject newSubject = findOrCreateSubject(newSubjectName);
                 onSubjectSelected(newSubject);
