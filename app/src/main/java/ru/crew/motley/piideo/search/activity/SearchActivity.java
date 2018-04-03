@@ -234,9 +234,9 @@ public class SearchActivity extends RequestListenerActivity
             case Page.REJECT:
                 fragment = NoHelpFragment.newInstance(this);
                 break;
-            case Page.NO_HELPERS:
-                fragment = NoCanHelpFragment2.newInstance();
-                break;
+//            case Page.NO_HELPERS:
+//                fragment = NoCanHelpFragment2.newInstance();
+//                break;
             case Page.COMPLETE:
                 // do nothing
                 return;

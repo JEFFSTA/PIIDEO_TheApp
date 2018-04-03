@@ -7,7 +7,9 @@ import android.os.Parcelable;
 import android.support.annotation.IntDef;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -31,19 +33,19 @@ import ru.crew.motley.piideo.search.activity.SearchActivity;
  * Created by vas on 12/17/17.
  */
 
-public class UserSetupActivity extends ConnectionErrorActivity implements RegistrationListener, NetworkErrorCallback {
+public class UserSetupActivity extends ConnectionErrorActivity
+        implements RegistrationListener, NetworkErrorCallback {
 
     private static final String TAG = UserSetupActivity.class.getSimpleName();
-
 
     /**
      * Page order
      */
-    @IntDef({Page.SUBJECT_PAGE, Page.PHONE_PAGE, Page.VERIFY_PAGE, Page.SCHOOL_PAGE, Page.COMPLETE})
+    @IntDef({Page.SUBJECT_PAGE,/* Page.PHONE_PAGE, Page.VERIFY_PAGE,*/ Page.SCHOOL_PAGE, Page.COMPLETE})
     private @interface Page {
-        int PHONE_PAGE = 0;
+//        int PHONE_PAGE = 0;
         int SUBJECT_PAGE = 1;
-        int VERIFY_PAGE = 2;
+//        int VERIFY_PAGE = 2;
         int SCHOOL_PAGE = 3;
         int COMPLETE = 10;
     }
@@ -66,12 +68,7 @@ public class UserSetupActivity extends ConnectionErrorActivity implements Regist
         if (mMember == null) {
             mMember = new Member();
         }
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-//        if (user == null) {
-        currentStep = Page.PHONE_PAGE;
-//        } else {
-//            currentStep = Page.SCHOOL_PAGE;
-//        }
+        currentStep = Page.SCHOOL_PAGE;
         showNextStep();
     }
 
@@ -98,24 +95,22 @@ public class UserSetupActivity extends ConnectionErrorActivity implements Regist
 
     private void nextStep() {
         switch (currentStep) {
-            case Page.PHONE_PAGE:
-                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-                if (user == null) {
-                    currentStep = Page.VERIFY_PAGE;
-                } else {
-                    currentStep = Page.SCHOOL_PAGE;
-                }
-                break;
-            case Page.VERIFY_PAGE:
-                currentStep = Page.SCHOOL_PAGE;
-                break;
+//            case Page.PHONE_PAGE:
+//                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+//                if (user == null) {
+//                    currentStep = Page.VERIFY_PAGE;
+//                } else {
+//                    currentStep = Page.SCHOOL_PAGE;
+//                }
+//                break;
+//            case Page.VERIFY_PAGE:
+//                currentStep = Page.SCHOOL_PAGE;
+//                break;
             case Page.SCHOOL_PAGE:
                 currentStep = Page.SUBJECT_PAGE;
                 break;
             case Page.SUBJECT_PAGE:
                 throw new IllegalStateException("Page you want to go out is final, just use onComplete.");
-//                currentStep = Page.COMPLETE;
-//                return;
             default:
                 throw new IllegalStateException("Page you want to showChat is unsupported. Current step is " + currentStep);
         }
@@ -124,15 +119,15 @@ public class UserSetupActivity extends ConnectionErrorActivity implements Regist
 
     private void showNextStep() {
         switch (currentStep) {
-            case Page.PHONE_PAGE:
-                Fragment phone = PhoneFragment.newInstance(this, this);
-                showFragment(phone);
-                break;
-            case Page.VERIFY_PAGE:
-                Parcelable memberForVerification = Parcels.wrap(mMember);
-                Fragment verify = PhoneVerifyFragment.newInstance(memberForVerification, this, this);
-                showFragment(verify);
-                break;
+//            case Page.PHONE_PAGE:
+//                Fragment phone = PhoneFragment.newInstance(this, this);
+//                showFragment(phone);
+//                break;
+//            case Page.VERIFY_PAGE:
+//                Parcelable memberForVerification = Parcels.wrap(mMember);
+//                Fragment verify = PhoneVerifyFragment.newInstance(memberForVerification, this, this);
+//                showFragment(verify);
+//                break;
             case Page.SCHOOL_PAGE:
                 Parcelable memberForSchool = Parcels.wrap(mMember);
                 Fragment school = SchoolGroupFragment.newInstance(memberForSchool, this, this);
@@ -145,11 +140,6 @@ public class UserSetupActivity extends ConnectionErrorActivity implements Regist
                 break;
             case Page.COMPLETE:
                 // do nothing
-//                if (!mMember.isRegistered()) {
-//                    createNewMember();
-//                } else {
-//                    showSearch();
-//                }
             default:
                 throw new IllegalStateException("Page you want to showChat is unsupported");
         }

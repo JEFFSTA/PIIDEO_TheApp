@@ -221,7 +221,7 @@ class MessagingService : FirebaseMessagingService() {
         statement.statement = Request.MAKE_ME_BUSY
         val parameters = Parameters()
         val endBusyTime = BUSY_TIMEOUT + busyStartTime
-        parameters.props[Request.Var.PHONE] = member.phoneNumber
+        parameters.props[Request.Var.CHAT_ID] = member.chatId
         parameters.props[Request.Var.DLG_TIME] = endBusyTime
         statement.parameters = parameters
         return statement

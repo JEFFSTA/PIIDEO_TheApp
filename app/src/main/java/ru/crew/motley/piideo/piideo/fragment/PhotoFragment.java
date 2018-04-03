@@ -188,7 +188,6 @@ public class PhotoFragment extends Fragment
      */
 
 
-
     private final CameraDevice.StateCallback mStateCallback = new CameraDevice.StateCallback() {
 
         @Override
@@ -373,7 +372,7 @@ public class PhotoFragment extends Fragment
     }
 
     public static PhotoFragment newInstance(Parcelable message, String messageId) {
-        PhotoFragment fragment =  new PhotoFragment();
+        PhotoFragment fragment = new PhotoFragment();
         Bundle args = new Bundle();
         args.putParcelable(ARG_MESSAGE, message);
         args.putString(ARG_MESSAGE_ID, messageId);
@@ -769,7 +768,7 @@ public class PhotoFragment extends Fragment
                                                @NonNull TotalCaptureResult result) {
 //                    showToast("Saved: " + mFile);
 //                    Log.d(TAG, mFile.toString());
-                    unlockFocus();
+                    unlockFocus(session);
                 }
             };
 
@@ -799,18 +798,20 @@ public class PhotoFragment extends Fragment
      * Unlock the focus. This method should be called when still image capture sequence is
      * finished.
      */
-    private void unlockFocus() {
+    private void unlockFocus(CameraCaptureSession session) {
         try {
             // Reset the auto-focus trigger
             mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER,
                     CameraMetadata.CONTROL_AF_TRIGGER_CANCEL);
             setAutoFlash(mPreviewRequestBuilder);
-            mCaptureSession.capture(mPreviewRequestBuilder.build(), mCaptureCallback,
-                    mBackgroundHandler);
+            if (mCaptureSession != null)
+                mCaptureSession.capture(mPreviewRequestBuilder.build(), mCaptureCallback,
+                        mBackgroundHandler);
             // After this, the camera will go back to the normal state of preview.
             mState = STATE_PREVIEW;
-            mCaptureSession.setRepeatingRequest(mPreviewRequest, mCaptureCallback,
-                    mBackgroundHandler);
+            if (mCaptureSession != null)
+                mCaptureSession.setRepeatingRequest(mPreviewRequest, mCaptureCallback,
+                        mBackgroundHandler);
         } catch (CameraAccessException e) {
             e.printStackTrace();
         }

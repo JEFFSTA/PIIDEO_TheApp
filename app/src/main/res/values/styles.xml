@@ -16,7 +16,7 @@
 
     <style name="AppTheme" parent="AppTheme.Base" />
 
-    <style name="AppTheme.Base.NoActionBar" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="AppTheme.Base.NoActionBar" parent="AppTheme.Base.NoActionBar">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>

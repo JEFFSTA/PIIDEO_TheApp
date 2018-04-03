@@ -22,13 +22,23 @@ import android.provider.ContactsContract
 import android.provider.BaseColumns
 import android.net.Uri
 import android.os.Build
+import android.util.Log
+import io.reactivex.Single
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.fragment_request_received_0.view.*
+import kotlinx.android.synthetic.main.fragment_request_received_1.*
 import ru.crew.motley.piideo.SharedPrefs
 import ru.crew.motley.piideo.fcm.AcknowledgeService.CHAT_IDLE_TIMEOUT
 import ru.crew.motley.piideo.fcm.AcknowledgeService.REQUEST_CODE_IDLE_STOPPER
 import ru.crew.motley.piideo.network.NetworkErrorCallback
 import ru.crew.motley.piideo.registration.fragments.PhoneFragment.FRENCH_PREFIX
+import ru.crew.motley.piideo.search.Country
 import ru.crew.motley.piideo.search.Events
+import java.io.BufferedReader
+import java.io.IOException
+import java.io.InputStreamReader
+import java.util.ArrayList
 import java.util.concurrent.TimeUnit
 
 
@@ -38,6 +48,8 @@ import java.util.concurrent.TimeUnit
 class RequestReceivedFragment : Fragment() {
 
     companion object {
+        private val TAG = RequestReceivedFragment::class.java.simpleName
+
         private const val ARG_DB_MESSAGE_ID = "local_db_id"
         fun newInstance(dbMessageId: String, errorCallback: NetworkErrorCallback) = RequestReceivedFragment().apply {
             arguments = Bundle().apply { putString(ARG_DB_MESSAGE_ID, dbMessageId) }
@@ -46,10 +58,15 @@ class RequestReceivedFragment : Fragment() {
     }
 
     lateinit var errorCallback: NetworkErrorCallback
+    val countries = mutableListOf<Country>()
     val messageId: String by lazy { arguments!!.getString(ARG_DB_MESSAGE_ID) }
     val message: FcmMessage by lazy { ChatLab.get(activity).getReducedFcmMessage(messageId) }
     val ownerId by lazy { FirebaseAuth.getInstance().currentUser!!.uid }
     val database by lazy { FirebaseDatabase.getInstance().reference }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val friendNumber = message.content!!
@@ -69,14 +86,14 @@ class RequestReceivedFragment : Fragment() {
             activity?.finish()
         }
         v.rejectRequest.setOnClickListener {
-
             cancelAlarm()
             sendReject()
             SharedPrefs.clearHandshakeStartTime(context)
             activity?.finish()
         }
         if (friendNumber.startsWith("++")) {
-            setMeFriendText(v, friendNumber.substring(2).split("||")[0])
+            loadCountriesAndShowFlag(friendNumber.substring(2).split("||")[0])
+//            setMeFriendText(v, friendNumber.substring(2).split("||")[0])
             v.subject.text = friendNumber.substring(2).split("||")[1].split("|")[0]
             v.explanation.text = friendNumber.substring(2).split("||")[1].split("|")[1]
         } else {
@@ -85,6 +102,24 @@ class RequestReceivedFragment : Fragment() {
             v.explanation.text = message.content!!.split("||")[1].split("|")[1]
         }
         return v
+    }
+
+    fun loadCountriesAndShowFlag(countryCode: String) {
+        loadCountries().observeOn(AndroidSchedulers.mainThread())
+                .subscribe { result ->
+                    val country = result.filter { it.countryCodeStr == countryCode }[0]
+                    showFlag(country.fileName)
+                    meFriend.text = country.countryName
+                }
+    }
+
+    private fun showFlag(fileName: String) {
+//        val context = itemView.getContext()
+        context?.resources
+                ?.getIdentifier(fileName, "drawable", context?.packageName)
+                ?.let { flagImage.setImageResource(it) }
+
+//        mFlag.setImageResource(resId)
     }
 
     fun clearPreviousChat() {
@@ -141,32 +176,32 @@ class RequestReceivedFragment : Fragment() {
     }
 
     private fun setMeFriendText(v: View, friendNumber: String) {
-        var contactName = findContactName(friendNumber)
-        if (contactName.isBlank()) {
-            contactName = findContactName(FRENCH_PREFIX + friendNumber)
-        }
-        v.meFriend.text = contactName
+//        var contactName = findContactName(friendNumber)
+//        if (contactName.isBlank()) {
+//            contactName = findContactName(FRENCH_PREFIX + friendNumber)
+//        }
+//        v.meFriend.text = contactName
     }
 
-    private fun findContactName(friendNumber: String): String {
-        val uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(friendNumber))
-        String
-        activity?.contentResolver
-                ?.query(
-                        uri,
-                        arrayOf(BaseColumns._ID, ContactsContract.PhoneLookup.DISPLAY_NAME),
-                        null,
-                        null,
-                        null)
-                .use { contacts ->
-                    if (contacts != null && contacts.count > 0) {
-                        contacts.moveToNext()
-                        val index = contacts.getColumnIndex(ContactsContract.Data.DISPLAY_NAME)
-                        return contacts.getString(index)
-                    }
-                    return ""
-                }
-    }
+//    private fun findContactName(friendNumber: String): String {
+//        val uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(friendNumber))
+//        String
+//        activity?.contentResolver
+//                ?.query(
+//                        uri,
+//                        arrayOf(BaseColumns._ID, ContactsContract.PhoneLookup.DISPLAY_NAME),
+//                        null,
+//                        null,
+//                        null)
+//                .use { contacts ->
+//                    if (contacts != null && contacts.count > 0) {
+//                        contacts.moveToNext()
+//                        val index = contacts.getColumnIndex(ContactsContract.Data.DISPLAY_NAME)
+//                        return contacts.getString(index)
+//                    }
+//                    return ""
+//                }
+//    }
 
     private fun initChatIdle() {
         val alarmManager = context?.getSystemService(Context.ALARM_SERVICE) as AlarmManager
@@ -194,5 +229,43 @@ class RequestReceivedFragment : Fragment() {
                     pendingIntent)
         }
         SharedPrefs.saveChatIdleStartTime(System.currentTimeMillis(), context)
+    }
+
+    private fun loadCountries(): Single<List<Country>> {
+        return Single.fromCallable<List<Country>> {
+            val data = ArrayList<Country>(233)
+            var reader: BufferedReader? = null
+//            try {
+            val countriesStream = context!!
+                    .assets
+                    .open("countries.dat")
+            reader = BufferedReader(InputStreamReader(countriesStream, "UTF-8"))
+            reader.useLines { lines ->
+                lines.forEachIndexed { index, line ->
+                    data.add(Country(line, index))
+                }
+            }
+
+//            var line: String
+//            var i = 0
+//                while ((line = reader.readLine()) != null) {
+//                    val c = Country(line, i)
+//                    data.add(c)
+//                    i++
+//                }
+//            } catch (e: IOException) {
+//                Log.e(TAG, "Error countries file reading", e)
+//            } finally {
+//                if (reader != null) {
+//                    try {
+//                        reader.close()
+//                    } catch (e: IOException) {
+//                        Log.e(TAG, "Error countries reader closing", e)
+//                    }
+//
+//                }
+//            }
+            data
+        }.subscribeOn(Schedulers.io())
     }
 }

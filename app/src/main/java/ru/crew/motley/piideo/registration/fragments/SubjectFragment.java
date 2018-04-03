@@ -20,6 +20,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.hbb20.CountryCodePicker;
 
 import org.parceler.Parcels;
 
@@ -60,7 +61,7 @@ public class SubjectFragment extends ButterFragment implements SubjectDialogList
     private static final String TAG = SubjectFragment.class.getSimpleName();
 
     private static final String ARGS_MEMBER = "member";
-    private static final int REQUEST_CONTACTS = 2;
+//    private static final int REQUEST_CONTACTS = 2;
 
     @BindView(R.id.next_btn)
     Button next;
@@ -68,6 +69,8 @@ public class SubjectFragment extends ButterFragment implements SubjectDialogList
     TextView mSubject;
     @BindView(R.id.textView2)
     TextView infoQuestionText;
+    @BindView(R.id.phone_code)
+    CountryCodePicker mCCP;
 
     private Member mMember;
     private Set<String> mPhones;
@@ -91,7 +94,7 @@ public class SubjectFragment extends ButterFragment implements SubjectDialogList
         super.onCreate(savedInstanceState);
         mMember = Parcels.unwrap(getArguments().getParcelable(ARGS_MEMBER));
         mPhones = new HashSet<>();
-        requestPermissionAndLoad();
+//        requestPermissionAndLoad();
 //        loadSubjects();
     }
 
@@ -101,7 +104,6 @@ public class SubjectFragment extends ButterFragment implements SubjectDialogList
         fragmentLayout = R.layout.fragment_subject;
         View v = super.onCreateView(inflater, container, savedInstanceState);
         next.setEnabled(true);
-
         Resources res = getResources();
         String subText;
         if (mMember.getSchool().getName().equals("High School")) {
@@ -111,6 +113,7 @@ public class SubjectFragment extends ButterFragment implements SubjectDialogList
         }
         String text = res.getString(R.string.reg_subject_caption, subText);
         infoQuestionText.setText(text);
+
         return v;
     }
 
@@ -143,11 +146,12 @@ public class SubjectFragment extends ButterFragment implements SubjectDialogList
             return;
         }
         next.setEnabled(false);
-//        setSubjectIfExist();
-        deleteOldSubjectRelationAndCreateNewMember();
+//        deleteOldSubjectRelationAndCreateNewMember();
+        prepareAndCreateNewMember();
     }
 
     private void prepareAndCreateNewMember() {
+        mMember.setCountryCode(mCCP.getSelectedCountryCode());
         if (mMember.getSubject().getId() == null) {
             createNewSubjectAndMember();
         } else {
@@ -211,24 +215,24 @@ public class SubjectFragment extends ButterFragment implements SubjectDialogList
 //        }
     }
 
-    private void deleteOldSubjectRelationAndCreateNewMember() {
-        Statements statements = new Statements();
-        statements.getValues().add(noSubjectRequest());
-        NeoApi api = NeoApiSingleton.getInstance();
-        api.executeStatement(statements)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(transaction -> {
-                            prepareAndCreateNewMember();
-                        },
-                        error -> {
-                            Log.e(TAG, "Deleteion old subjects problem occured", error);
-                            Toast.makeText(getActivity(), R.string.ex_network, Toast.LENGTH_SHORT)
-                                    .show();
-                            mErrorCallback.onError();
-                        });
-    }
+//    private void deleteOldSubjectRelationAndCreateNewMember() {
+//        Statements statements = new Statements();
+//        statements.getValues().add(noSubjectRequest());
+//        NeoApi api = NeoApiSingleton.getInstance();
+//        api.executeStatement(statements)
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe(transaction -> {
+//                            prepareAndCreateNewMember();
+//                        },
+//                        error -> {
+//                            Log.e(TAG, "Deleteion old subjects problem occured", error);
+//                            Toast.makeText(getActivity(), R.string.ex_network, Toast.LENGTH_SHORT)
+//                                    .show();
+//                            mErrorCallback.onError();
+//                        });
+//    }
 
-    private void requestPermissionAndLoad() {
+//    private void requestPermissionAndLoad() {
 //        int permissionCheck = ContextCompat.checkSelfPermission(
 //                getActivity(),
 //                Manifest.permission.READ_CONTACTS);
@@ -236,35 +240,35 @@ public class SubjectFragment extends ButterFragment implements SubjectDialogList
 //            loadContactsPhones();
 //        else
 //            requestPermissions(new String[]{Manifest.permission.READ_CONTACTS}, REQUEST_CONTACTS);
-    }
+//    }
 
-    private void loadContactsPhones() {
-        Cursor managedCursor = getActivity().getContentResolver()
-                .query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
-                        new String[]{
-                                ContactsContract.CommonDataKinds.Phone._ID,
-                                ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
-                                ContactsContract.CommonDataKinds.Phone.NUMBER},
-                        null,
-                        null,
-                        ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " ASC");
-        List<String> phones = new ArrayList<>();
-        try {
-            if (managedCursor != null && managedCursor.getCount() > 0) {
-                managedCursor.moveToFirst();
-                while (!managedCursor.isAfterLast()) {
-                    String phone = managedCursor.getString(managedCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
-                    phones.add(phone);
-                    managedCursor.moveToNext();
-                }
-            }
-        } finally {
-            managedCursor.close();
-        }
-        for (String phone : phones) {
-            mPhones.add(phone.replaceAll("\\D", ""));
-        }
-    }
+//    private void loadContactsPhones() {
+//        Cursor managedCursor = getActivity().getContentResolver()
+//                .query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+//                        new String[]{
+//                                ContactsContract.CommonDataKinds.Phone._ID,
+//                                ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
+//                                ContactsContract.CommonDataKinds.Phone.NUMBER},
+//                        null,
+//                        null,
+//                        ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " ASC");
+//        List<String> phones = new ArrayList<>();
+//        try {
+//            if (managedCursor != null && managedCursor.getCount() > 0) {
+//                managedCursor.moveToFirst();
+//                while (!managedCursor.isAfterLast()) {
+//                    String phone = managedCursor.getString(managedCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+//                    phones.add(phone);
+//                    managedCursor.moveToNext();
+//                }
+//            }
+//        } finally {
+//            managedCursor.close();
+//        }
+//        for (String phone : phones) {
+//            mPhones.add(phone.replaceAll("\\D", ""));
+//        }
+//    }
 
     private void createNewSubjectAndMember() {
         Statements statements = new Statements();
@@ -302,150 +306,56 @@ public class SubjectFragment extends ButterFragment implements SubjectDialogList
                         });
     }
 
-//    @Override
-//    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-//        switch (requestCode) {
-//            case REQUEST_CONTACTS:
-//                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
-//                    loadContactsPhones();
-//                else {
-//                    Toast.makeText(getActivity(),
-//                            "This is a key permission. " +
-//                                    "You can't use this app without it.",
-//                            Toast.LENGTH_SHORT)
-//                            .show();
-//                }
-//                break;
-//            default:
-//                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-//                break;
-//        }
-//    }
-
-//    private Statements contactsRequests() {
-//        Statements statements = new Statements();
-//        for (String phone : mPhones) {
-//            statements.getValues().add(contactRequest(phone));
-//            statements.getValues().add(knowsRequest(phone));
-//        }
-//        return statements;
-//    }
-
-//    private Statement contactRequest(String phone) {
-//        Statement request = new Statement();
-//        if (phone.length() == FRENCH_LENGTH && phone.startsWith(FRENCH_PREFIX)) {
-//            request.setStatement(Request.NEW_CONTACT_WITH_PHONE_PREFIX);
-//        } else if (phone.length() == MOROCCO_LENGTH && phone.startsWith(MOROCCO_PREFIX)) {
-//            request.setStatement(Request.NEW_CONTACT_WITH_PHONE_PREFIX);
-//        } else if (phone.length() == NIGERIA_LENGTH && phone.startsWith(NIGERIA_PREFIX)) {
-//            request.setStatement(Request.NEW_CONTACT_WITH_PHONE_PREFIX);
-//        } else if (phone.length() > 10) {
-//            request.setStatement(Request.NEW_CONTACT_WITH_COUNTRY_CODE);
-//        } else {
-//            request.setStatement(Request.NEW_CONTACT);
-//        }
-//        Parameters parameters = new Parameters();
-//        if (phone.length() == FRENCH_LENGTH && phone.startsWith(FRENCH_PREFIX)) {
-//            parameters.getProps().put(Request.Var.PH_PREFIX, phone.substring(0, 1));
-//            parameters.getProps().put(Request.Var.PHONE, phone.substring(1, phone.length()));
-//        } else if (phone.length() == MOROCCO_LENGTH && phone.startsWith(MOROCCO_PREFIX)) {
-//            parameters.getProps().put(Request.Var.PH_PREFIX, phone.substring(0, 1));
-//            parameters.getProps().put(Request.Var.PHONE, phone.substring(1, phone.length()));
-//        } else if (phone.length() == NIGERIA_LENGTH && phone.startsWith(NIGERIA_PREFIX)) {
-//            parameters.getProps().put(Request.Var.PH_PREFIX, phone.substring(0, 1));
-//            parameters.getProps().put(Request.Var.PHONE, phone.substring(1, phone.length()));
-//        } else if (phone.startsWith("33")) {
-//            parameters.getProps().put(Request.Var.C_CODE, phone.substring(0, 2));
-//            parameters.getProps().put(Request.Var.PHONE, phone.substring(2, phone.length()));
-//        } else if (phone.startsWith("212") || phone.startsWith("213") || phone.startsWith("234")) {
-//            parameters.getProps().put(Request.Var.C_CODE, phone.substring(0, 3));
-//            parameters.getProps().put(Request.Var.PHONE, phone.substring(3, phone.length()));
-//        } else if (phone.length() > 10) {
-//            parameters.getProps().put(Request.Var.C_CODE, phone.substring(0, phone.length() - 10));
-//            parameters.getProps().put(Request.Var.PHONE, phone.substring(phone.length() - 10, phone.length()));
-//        } else {
-//            parameters.getProps().put(Request.Var.PHONE, phone);
-//        }
-//        request.setParameters(parameters);
-//        return request;
-//    }
-//
-//    private Statement knowsRequest(String phone) {
-//        Statement request = new Statement();
-//        String filteredPhone;
-//        if (phone.length() == FRENCH_LENGTH && phone.startsWith(FRENCH_PREFIX)) {
-//            filteredPhone = phone.substring(1, phone.length());
-//        } else if (phone.length() == MOROCCO_LENGTH && phone.startsWith(MOROCCO_PREFIX)) {
-//            filteredPhone = phone.substring(1, phone.length());
-//        } else if (phone.length() == NIGERIA_LENGTH && phone.startsWith(NIGERIA_PREFIX)) {
-//            filteredPhone = phone.substring(1, phone.length());
-//        } else if (phone.startsWith("33")) {
-//            filteredPhone = phone.substring(2, phone.length());
-//        } else if (phone.startsWith("212") || phone.startsWith("213") || phone.startsWith("234")) {
-//            filteredPhone = phone.substring(3, phone.length());
-//        } else if (phone.length() > 10) {
-//            filteredPhone = phone.substring(phone.length() - 10, phone.length());
-//        } else {
-//            filteredPhone = phone;
-//        }
-//        request.setStatement(Request.KNOWS);
-//        Parameters parameters = new Parameters();
-//
-//        parameters.getProps().put(Request.Var.PHONE + "From", mMember.getPhoneNumber());
-//        parameters.getProps().put(Request.Var.PHONE + "To", filteredPhone);
-//        request.setParameters(parameters);
-//        return request;
-//    }
-
     private Statement meRequest() {
         // TODO: 1/19/18 uncomment next
-        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        String userId = FirebaseAuth.getInstance().getUid();
         Statement request = new Statement();
-        if (!TextUtils.isEmpty(mMember.getCountryCode()) && !TextUtils.isEmpty(mMember.getPhonePrefix())) {
-            request.setStatement(Request.ME_WITH_CC_AND_PREFIX);
+//        if (!TextUtils.isEmpty(mMember.getCountryCode()) && !TextUtils.isEmpty(mMember.getPhonePrefix())) {
+//            request.setStatement(Request.ME_WITH_CC_AND_PREFIX);
 //            Toast.makeText(getActivity(), "WITH CC AND 0" + " " + mMember.getPhoneNumber(), Toast.LENGTH_LONG).show();
-        } else if (!TextUtils.isEmpty(mMember.getCountryCode())) {
+//        } else if (!TextUtils.isEmpty(mMember.getCountryCode())) {
             request.setStatement(Request.ME_WITH_CC);
 //            Toast.makeText(getActivity(), "WITH CC " + " " + mMember.getPhoneNumber(), Toast.LENGTH_LONG).show();
-        } else if (!TextUtils.isEmpty(mMember.getPhonePrefix())) {
-            request.setStatement(Request.ME_WITH_PREFIX);
+//        } else if (!TextUtils.isEmpty(mMember.getPhonePrefix())) {
+//            request.setStatement(Request.ME_WITH_PREFIX);
 //            Toast.makeText(getActivity(), "WITH 0" + " " + mMember.getPhoneNumber(), Toast.LENGTH_LONG).show();
-        } else {
-            throw new RuntimeException("Illegal Full Phone Number Format");
-        }
+//        } else {
+//            throw new RuntimeException("Illegal Full Phone Number Format");
+//        }
         Parameters parameters = new Parameters();
-        parameters.getProps().put(Request.Var.PHONE, mMember.getPhoneNumber());
+//        parameters.getProps().put(Request.Var.PHONE, mMember.getPhoneNumber());
         // TODO: 1/19/18 uncomment next
         parameters.getProps().put(Request.Var.CHAT_ID, userId);
         if (!TextUtils.isEmpty(mMember.getCountryCode())) {
             parameters.getProps().put(Request.Var.C_CODE, mMember.getCountryCode());
         }
-        if (!TextUtils.isEmpty(mMember.getPhonePrefix())) {
-            parameters.getProps().put(Request.Var.PH_PREFIX, mMember.getPhonePrefix());
-        }
+//        if (!TextUtils.isEmpty(mMember.getPhonePrefix())) {
+//            parameters.getProps().put(Request.Var.PH_PREFIX, mMember.getPhonePrefix());
+//        }
         request.setParameters(parameters);
         return request;
     }
 
     private Statement studiesRequest() {
+        String chatId = FirebaseAuth.getInstance().getUid();
         Statement studies = new Statement();
         studies.setStatement(Request.STUDIES);
         Parameters parameters = new Parameters();
-        parameters.getProps().put(Request.Var.PHONE, mMember.getPhoneNumber());
+        parameters.getProps().put(Request.Var.CHAT_ID, chatId);
         parameters.getProps().put(Request.Var.NAME, mMember.getSubject().getName());
         parameters.getProps().put(Request.Var.ID, mMember.getSubject().getId());
         studies.setParameters(parameters);
         return studies;
     }
 
-    private Statement noSubjectRequest() {
-        Statement statement = new Statement();
-        statement.setStatement(Request.STUDIES_NOTHING);
-        Parameters parameters = new Parameters();
-        parameters.getProps().put(Request.Var.PHONE, mMember.getPhoneNumber());
-        statement.setParameters(parameters);
-        return statement;
-    }
+//    private Statement noSubjectRequest() {
+//        Statement statement = new Statement();
+//        statement.setStatement(Request.STUDIES_NOTHING);
+//        Parameters parameters = new Parameters();
+//        parameters.getProps().put(Request.Var.PHONE, mMember.getPhoneNumber());
+//        statement.setParameters(parameters);
+//        return statement;
+//    }
 
     private Statement subjectRequest() {
         Statement subject = new Statement();

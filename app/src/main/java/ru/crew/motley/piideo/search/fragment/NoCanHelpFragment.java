@@ -45,6 +45,7 @@ public class NoCanHelpFragment extends ButterFragment {
     @OnClick(R.id.redirect)
     public void showSearchStart() {
         Log.d(TAG, " on next ");
-        mCallback.onNext();
+//        mCallback.onNext();
+        getActivity().onBackPressed();
     }
 }

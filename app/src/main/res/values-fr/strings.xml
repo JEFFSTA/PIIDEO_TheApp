@@ -65,8 +65,10 @@
     <string name="sch_menu_caption">Paramètres</string>
     <string name="sch_menu_policy">Privacy Policy</string>
 
-    <string name="no_title">ÉLARGIS TON RÉSEAU</string>
-    <string name="no_info">Désolé,\nPersonne dans ton\nRéseau ne maitrise bien\ncette matière.</string>
+    <string name="no_title">Désolé</string>
+    <!--<string name="no_title">ÉLARGIS TON RÉSEAU</string>-->
+    <!--<string name="no_info">Désolé,\nPersonne dans ton\nRéseau ne maitrise bien\ncette matière.</string>-->
+    <string name="no_info">Personne n\'est disponible maintenant.</string>
 
     <string name="no_btn">OK</string>
     <string name="nhlp_info">Informes</string>
@@ -79,8 +81,8 @@
     <string name="nhlp_students">Etudiants</string>
     <string name="nhlp_subjects">Matières</string>
 
-    <string name="sbj_dlg_header">"Choisissez une matièr</string>
-    <string name="sbj_dlg_hint">"ou ajoutez une nouvelle…</string>
+    <string name="sbj_dlg_header">Choisissez une matière</string>
+    <string name="sbj_dlg_hint">ou ajoutez une nouvelle…</string>
 
     <string name="opt_hint">Matière</string>
     <string name="perm_warning">PIIDEO ne peut pas fonctionner sans ces autorisations.</string>
@@ -110,5 +112,8 @@
     <string name="vrfy_hint">…</string>
 
     <string name="placeholder">Placeholder</string>
+
+    <string name="req_have_question_on">J’ai une question en:</string>
+    <string name="req_place_of_study">Lieu d’Etude</string>
 
 </resources>

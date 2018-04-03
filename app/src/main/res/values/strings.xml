@@ -73,8 +73,10 @@
     <string name="usl_hint">search…</string>
     <string name="usl_sub_hint">You have a question in what subject?</string>
 
-    <string name="no_title">EXPAND YOUR NETWORK</string>
-    <string name="no_info">Sorry,\nNo one in your network\nunderstands this subject.</string>
+    <string name="no_title">Sorry</string>
+    <!--<string name="no_title">EXPAND YOUR NETWORK</string>-->
+    <!--<string name="no_info">Sorry,\nNo one in your network\nunderstands this subject.</string>-->
+    <string name="no_info">No one is available now</string>
 
     <string name="no_btn">OK</string>
     <string name="nhlp_info">Inform</string>
@@ -113,5 +115,7 @@
 
         ]]>
     </string>
+    <string name="req_have_question_on">I have a question on:</string>
+    <string name="req_place_of_study">Place of Study</string>
 
 </resources>

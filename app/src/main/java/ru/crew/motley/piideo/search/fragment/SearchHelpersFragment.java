@@ -111,9 +111,9 @@ public class SearchHelpersFragment extends ButterFragment implements SendRequest
             throw new IllegalStateException("Search mSubject can't be null or empty");
         }
         Statement subject = new Statement();
-        subject.setStatement(Request.FIND_QUESTION_TARGET_1);
+        subject.setStatement(Request.FIND_QUESTION_TARGET_2);
         Parameters parameters = new Parameters();
-        parameters.getProps().put(Request.Var.PHONE, mMember.getPhoneNumber());
+        parameters.getProps().put(Request.Var.CHAT_ID, mMember.getChatId());
         parameters.getProps().put(Request.Var.NAME, searchSubject);
         parameters.getProps().put(Request.Var.NAME_2, mMember.getSchool().getName());
         subject.setParameters(parameters);
@@ -208,8 +208,24 @@ public class SearchHelpersFragment extends ButterFragment implements SendRequest
                 })*/,
                 countriesLoading,
                 ((members, countries) -> {
+//                    int ik = -1;
+//                    for (int i = 0; i < members.size(); i++) {
+//                        if (mMember.getCountryCode().equals(members.get(i).getCountryCode())) {
+//                            ik = i;
+//                            break;
+//                        }
+//                    }
+//                    if (ik != -1) {
+//                        Member first = members.get(ik);
+//                        Member replacement = members.get(0);
+//                        members.set(0, first);
+//                        members.set(ik, replacement);
+//                    }
+
+                    List<Member> filteredMembers = filterAndSortMembers(members);
+
                     mMembers.clear();
-                    mMembers.addAll(members);
+                    mMembers.addAll(filteredMembers);
                     mCountries.clear();
                     mCountries.addAll(countries);
                     return 0;
@@ -222,10 +238,81 @@ public class SearchHelpersFragment extends ButterFragment implements SendRequest
                                 mSearchAdapter.notifyDataSetChanged();
                             }
                         },
-                        error -> {
-                            mErrorCallback.onError();
-                        });
+                        error -> mErrorCallback.onError()
+                );
     }
 
+
+    /**
+     * Returns max 3 items with distinct country code.
+     * If list with distinct items less then 3 items list
+     * then it uses the rest items from input list to return 3 items list
+     * @param members
+     * @return
+     */
+    private List<Member> filterAndSortMembers(List<Member> members) {
+        List<Member> result = new ArrayList<>();
+        if (members.isEmpty()) {
+            return result;
+        }
+
+        Member first = null;
+        for (Member member : members) {
+            if (member.getCountryCode().equals(mMember.getCountryCode())) {
+                first = member;
+            }
+        }
+        if (first == null) {
+            first = members.get(0);
+            members.remove(first);
+        }
+        result.add(first);
+        if (members.isEmpty()) {
+            return result;
+        }
+
+        Member second = null;
+        for (Member member : members) {
+            if (!member.getCountryCode().equals(result.get(0).getCountryCode())) {
+                second = member;
+            }
+        }
+        if (second == null) {
+            result.addAll(members);
+            if (result.size() > 3) {
+                result.subList(3, result.size()).clear();
+            }
+            return result;
+        } else {
+            result.add(second);
+            members.remove(second);
+        }
+
+        Member third = null;
+        for (Member member : members) {
+            boolean coutryCodeIsInResult = false;
+            for (Member resultMember: result) {
+                if (resultMember.getCountryCode().equals(member.getCountryCode())) {
+                    coutryCodeIsInResult = true;
+                    break;
+                }
+            }
+            if (!coutryCodeIsInResult) {
+                third = member;
+                break;
+            }
+        }
+        if (third == null) {
+            result.addAll(members);
+            if (result.size() > 3) {
+                result.subList(3, result.size()).clear();
+            }
+            return result;
+        } else {
+            result.add(third);
+            members.remove(third);
+            return result;
+        }
+    }
 
 }

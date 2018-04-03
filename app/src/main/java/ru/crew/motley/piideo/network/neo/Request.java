@@ -59,14 +59,23 @@ public class Request {
                     "ON MATCH SET p.registered = TRUE, p.chatId = {props}.chat_id " +
                     "RETURN p";
 
+//    public static final String ME_WITH_CC =
+//            "MERGE (p" + PersonNode.LABEL +
+//                    " { " + PersonNode.PHONE + ": {props}." + Var.PHONE + "}) " +
+//                    "ON CREATE SET p.registered = TRUE," +
+//                    "     p.chatId = {props}.chat_id, " +
+//                    "     p.countryCode = {props}.country_code " +
+//                    "ON MATCH SET p.registered = TRUE," +
+//                    "     p.chatId = {props}.chat_id, " +
+//                    "     p.countryCode = {props}.country_code " +
+//                    "RETURN p";
+
     public static final String ME_WITH_CC =
             "MERGE (p" + PersonNode.LABEL +
-                    " { " + PersonNode.PHONE + ": {props}." + Var.PHONE + "}) " +
+                    " { " + PersonNode.CHAT_ID + ": {props}." + Var.CHAT_ID + "}) " +
                     "ON CREATE SET p.registered = TRUE," +
-                    "     p.chatId = {props}.chat_id, " +
                     "     p.countryCode = {props}.country_code " +
                     "ON MATCH SET p.registered = TRUE," +
-                    "     p.chatId = {props}.chat_id, " +
                     "     p.countryCode = {props}.country_code " +
                     "RETURN p";
 
@@ -100,13 +109,13 @@ public class Request {
                     "MERGE (from)-[" + KnowsRelation.LABEL + "]->(to)";
 
     public static final String STUDIES =
-            "MATCH (from" + PersonNode.LABEL + " {" + PersonNode.PHONE + ": {props}." + Var.PHONE + " }), " +
+            "MATCH (from" + PersonNode.LABEL + " {" + PersonNode.CHAT_ID + ": {props}." + Var.CHAT_ID + " }), " +
                     "(to" + SubjectNode.LABEL + " {" + SubjectNode.NAME + ": {props}." + Var.NAME + " }) " +
                     "WHERE id(to) = {props}." + Var.ID +
                     " MERGE (from)-[" + StudiesRelation.LABEL + "]->(to)";
 
     public static final String STUDIES_NOTHING =
-            "MATCH (from" + PersonNode.LABEL + " {" + PersonNode.PHONE + ": {props}." + Var.PHONE + " })" +
+            "MATCH (from" + PersonNode.LABEL + " {" + PersonNode.CHAT_ID + ": {props}." + Var.CHAT_ID + " })" +
                     "-[r" + StudiesRelation.LABEL + "]->" +
                     "(" + SubjectNode.LABEL + " ) " +
                     " DELETE r";
@@ -193,6 +202,22 @@ public class Request {
                     " where me.phoneNumber = {props}." + Var.PHONE +
                     " return head(nodes(path)) order by length(path) asc limit 6";
 
+    public static final String FIND_QUESTION_TARGET_2 =
+            "match (p" + PersonNode.LABEL + ")" +
+                    "-[" + StudiesRelation.LABEL + "]" +
+                    "->(s" + SubjectNode.LABEL + ")" +
+                    "-[" + ContainsRelation.LABEL + "]" +
+                    "->(g" + SchoolGroupNode.LABEL + ")" +
+                    " where s.name =  {props}." + Var.NAME +
+                    " and g.name = {props}." + Var.NAME_2 +
+                    " and p.chatId <> {props}." + Var.CHAT_ID +
+                    " and (p.dialogTime < timestamp() " +
+                    " or not exists(p.dialogTime)) " +
+//                    " match path = shortestPath((p)-[" + KnowsRelation.LABEL + "*1..10]->(me" + PersonNode.LABEL + ")) " +
+//                    " where me.phoneNumber = {props}." + Var.PHONE +
+//                    " return head(nodes(path)) order by length(path) asc limit 5";
+                    " return p limit 7";
+
     public static final String FIND_SUBJECTS_BY_SCHOOL =
             "MATCH (s" + SubjectNode.LABEL + ")" +
                     "-[r" + ContainsRelation.LABEL + "]" +
@@ -210,7 +235,7 @@ public class Request {
                     "RETURN g";
 
     public static final String MAKE_ME_BUSY =
-            "MERGE (me" + PersonNode.LABEL + " {" + PersonNode.PHONE + " : {props}." + Var.PHONE + " }) " +
+            "MERGE (me" + PersonNode.LABEL + " {" + PersonNode.CHAT_ID + " : {props}." + Var.CHAT_ID + " }) " +
                     " ON MATCH SET me.dialogTime = {props}." + Var.DLG_TIME;
 
     public static final String MAKE_ME_FREE =

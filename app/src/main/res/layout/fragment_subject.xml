@@ -129,6 +129,16 @@
 
     </FrameLayout>
 
+    <com.hbb20.CountryCodePicker
+        android:id="@+id/phone_code"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:gravity="center_horizontal"
+        app:ccp_autoDetectCountry="true"
+        android:visibility="gone"
+        app:ccp_textSize="16sp" />
+
     <android.support.constraint.Guideline
         android:id="@+id/guideline3"
         android:layout_width="wrap_content"

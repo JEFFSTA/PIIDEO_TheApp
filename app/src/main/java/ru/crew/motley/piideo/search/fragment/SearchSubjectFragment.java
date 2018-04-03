@@ -84,8 +84,8 @@ public class SearchSubjectFragment extends ButterFragment implements SubjectAdap
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mMember = Parcels.unwrap(getArguments().getParcelable(ARG_MEMBER));
-        loadContactsPhones();
-        syncContacts();
+//        loadContactsPhones();
+//        syncContacts();
 //        mDatabase = FirebaseDatabase.getInstance().getReference();
         mSubjectAdapter = new SubjectAdapter(mSubjects, this);
     }
@@ -102,96 +102,96 @@ public class SearchSubjectFragment extends ButterFragment implements SubjectAdap
         return v;
     }
 
-    private void loadContactsPhones() {
-        Cursor managedCursor = getActivity().getContentResolver()
-                .query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
-                        new String[]{
-                                ContactsContract.CommonDataKinds.Phone._ID,
-                                ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
-                                ContactsContract.CommonDataKinds.Phone.NUMBER},
-                        null,
-                        null,
-                        ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " ASC");
-        List<String> phones = new ArrayList<>();
-        try {
-            if (managedCursor != null && managedCursor.getCount() > 0) {
-
-                managedCursor.moveToFirst();
-                while (!managedCursor.isAfterLast()) {
-                    String phone = managedCursor.getString(managedCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
-                    phones.add(phone);
-                    managedCursor.moveToNext();
-                }
-            }
-
-        } finally {
-            managedCursor.close();
-        }
-        for (String phone : phones) {
-            phone = phone.replaceAll("\\D", "");
-            if (phone.startsWith("33")) {
-                phone = phone.replaceFirst("33", "");
-            } else if (phone.length() > MOROCCO_LENGTH &&
-                    (phone.startsWith("212") || phone.startsWith("213") || phone.startsWith("234"))) {
-                phone = phone.substring(3);
-            } else if (phone.startsWith("7")) {
-                phone = phone.replaceFirst("7", "");
-            } else if (phone.startsWith("8")) {
-                phone = phone.replaceFirst("8", "");
-            }
-            if (phone.startsWith("0")) {
-                phone = phone.replaceFirst("0", "");
-            }
-            mPhones.add(phone);
-        }
-//        if (!phones.isEmpty()) {
-//            mPhones.clear();
-//            mPhones.addAll(phones);
+//    private void loadContactsPhones() {
+//        Cursor managedCursor = getActivity().getContentResolver()
+//                .query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+//                        new String[]{
+//                                ContactsContract.CommonDataKinds.Phone._ID,
+//                                ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
+//                                ContactsContract.CommonDataKinds.Phone.NUMBER},
+//                        null,
+//                        null,
+//                        ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " ASC");
+//        List<String> phones = new ArrayList<>();
+//        try {
+//            if (managedCursor != null && managedCursor.getCount() > 0) {
+//
+//                managedCursor.moveToFirst();
+//                while (!managedCursor.isAfterLast()) {
+//                    String phone = managedCursor.getString(managedCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+//                    phones.add(phone);
+//                    managedCursor.moveToNext();
+//                }
+//            }
+//
+//        } finally {
+//            managedCursor.close();
 //        }
-    }
+//        for (String phone : phones) {
+//            phone = phone.replaceAll("\\D", "");
+//            if (phone.startsWith("33")) {
+//                phone = phone.replaceFirst("33", "");
+//            } else if (phone.length() > MOROCCO_LENGTH &&
+//                    (phone.startsWith("212") || phone.startsWith("213") || phone.startsWith("234"))) {
+//                phone = phone.substring(3);
+//            } else if (phone.startsWith("7")) {
+//                phone = phone.replaceFirst("7", "");
+//            } else if (phone.startsWith("8")) {
+//                phone = phone.replaceFirst("8", "");
+//            }
+//            if (phone.startsWith("0")) {
+//                phone = phone.replaceFirst("0", "");
+//            }
+//            mPhones.add(phone);
+//        }
+////        if (!phones.isEmpty()) {
+////            mPhones.clear();
+////            mPhones.addAll(phones);
+////        }
+//    }
 
-    private void syncContacts() {
-        String phoneNumber = mMember.getPhoneNumber();
-        Statement search = deleteContactsRequest(phoneNumber);
-        Statements statements = new Statements();
-        statements.getValues().add(search);
-        NeoApi api = NeoApiSingleton.getInstance();
-        api.executeStatement(statements)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(next -> {
-                        },
-                        error -> {
-                            Log.e(TAG, "Contacts deletion request execution problem", error);
-//                            Toast.makeText(getActivity(), R.string.ex_network, Toast.LENGTH_SHORT)
-//                                    .show();
-//                            if (!(error instanceof SocketTimeoutException)) {
-//                                throw new RuntimeException(error);
-//                            }
-                            mErrorCallback.onError();
-                        });
-    }
+//    private void syncContacts() {
+//        String phoneNumber = mMember.getPhoneNumber();
+//        Statement search = deleteContactsRequest(phoneNumber);
+//        Statements statements = new Statements();
+//        statements.getValues().add(search);
+//        NeoApi api = NeoApiSingleton.getInstance();
+//        api.executeStatement(statements)
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe(next -> {
+//                        },
+//                        error -> {
+//                            Log.e(TAG, "Contacts deletion request execution problem", error);
+////                            Toast.makeText(getActivity(), R.string.ex_network, Toast.LENGTH_SHORT)
+////                                    .show();
+////                            if (!(error instanceof SocketTimeoutException)) {
+////                                throw new RuntimeException(error);
+////                            }
+//                            mErrorCallback.onError();
+//                        });
+//    }
 
-    private Statement deleteContactsRequest(String phoneNumber) {
-        if (TextUtils.isEmpty(phoneNumber)) {
-            throw new IllegalArgumentException("Phone number can't be null or empty");
-        }
-        Statement subject = new Statement();
-        String nums = TextUtils.join("', '", mPhones);
-        nums = "'" + nums + "'";
-        String st = Request.DELETE_CONTACT + "[" + nums + "] delete rs";
-        subject.setStatement(st);
-        Parameters parameters = new Parameters();
-        parameters.getProps().put(Request.Var.PHONE, phoneNumber);
-        subject.setParameters(parameters);
-        return subject;
-    }
+//    private Statement deleteContactsRequest(String phoneNumber) {
+//        if (TextUtils.isEmpty(phoneNumber)) {
+//            throw new IllegalArgumentException("Phone number can't be null or empty");
+//        }
+//        Statement subject = new Statement();
+//        String nums = TextUtils.join("', '", mPhones);
+//        nums = "'" + nums + "'";
+//        String st = Request.DELETE_CONTACT + "[" + nums + "] delete rs";
+//        subject.setStatement(st);
+//        Parameters parameters = new Parameters();
+//        parameters.getProps().put(Request.Var.PHONE, phoneNumber);
+//        subject.setParameters(parameters);
+//        return subject;
+//    }
 
     private void loadUsedSubjects() {
         Statement search = subjectRequest();
         Statements statements = new Statements();
         statements.getValues().add(search);
         NeoApi api = NeoApiSingleton.getInstance();
-        final long subjectsLoadingStart = System.currentTimeMillis();
+//        final long subjectsLoadingStart = System.currentTimeMillis();
         api.executeStatement(statements)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(transaction -> {

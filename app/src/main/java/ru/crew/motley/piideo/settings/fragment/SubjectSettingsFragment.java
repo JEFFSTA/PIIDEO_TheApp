@@ -213,7 +213,7 @@ public class SubjectSettingsFragment extends ButterFragment implements SubjectDi
         Statement studies = new Statement();
         studies.setStatement(Request.STUDIES);
         Parameters parameters = new Parameters();
-        parameters.getProps().put(Request.Var.PHONE, mMember.getPhoneNumber());
+        parameters.getProps().put(Request.Var.CHAT_ID, mMember.getChatId());
         parameters.getProps().put(Request.Var.NAME, mMember.getSubject().getName());
         parameters.getProps().put(Request.Var.ID, mMember.getSubject().getId());
         studies.setParameters(parameters);
@@ -224,7 +224,7 @@ public class SubjectSettingsFragment extends ButterFragment implements SubjectDi
         Statement statement = new Statement();
         statement.setStatement(Request.STUDIES_NOTHING);
         Parameters parameters = new Parameters();
-        parameters.getProps().put(Request.Var.PHONE, mMember.getPhoneNumber());
+        parameters.getProps().put(Request.Var.CHAT_ID, mMember.getChatId());
         statement.setParameters(parameters);
         return statement;
     }

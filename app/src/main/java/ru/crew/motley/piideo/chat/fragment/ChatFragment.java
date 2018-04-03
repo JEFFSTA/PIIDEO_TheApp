@@ -83,7 +83,9 @@ import ru.crew.motley.piideo.splash.SplashActivity;
 import ru.crew.motley.piideo.util.Utils;
 
 import static android.Manifest.permission.CAMERA;
+import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.RECORD_AUDIO;
+import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static android.content.Context.NOTIFICATION_SERVICE;
 import static android.content.pm.PackageManager.PERMISSION_DENIED;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
@@ -357,6 +359,8 @@ public class ChatFragment extends ButterFragment
     private List<String> requiredPermissions() {
         int cameraCheck = ContextCompat.checkSelfPermission(getContext(), CAMERA);
         int recordCheck = ContextCompat.checkSelfPermission(getContext(), RECORD_AUDIO);
+        int writePermission = ContextCompat.checkSelfPermission(getContext(), WRITE_EXTERNAL_STORAGE);
+        int readPermission = ContextCompat.checkSelfPermission(getContext(), READ_EXTERNAL_STORAGE);
         List<String> result = new ArrayList<>();
         if (cameraCheck != PERMISSION_GRANTED) {
             result.add(CAMERA);
@@ -364,6 +368,10 @@ public class ChatFragment extends ButterFragment
         if (recordCheck != PERMISSION_GRANTED) {
             result.add(RECORD_AUDIO);
         }
+        if (writePermission != PERMISSION_GRANTED)
+            result.add(WRITE_EXTERNAL_STORAGE);
+        if (readPermission != PERMISSION_GRANTED)
+            result.add(READ_EXTERNAL_STORAGE);
         return result;
     }
 
@@ -422,59 +430,67 @@ public class ChatFragment extends ButterFragment
     @OnClick(R.id.sendMessage)
     public void sendMessage() {
         // 1 because there's stub hello message
-        sendAcknowledge();
-        cancelRejectTimeout();
-        long timestamp = Utils.Companion.gmtTimeInMillis();
-        startTimer(timestamp);
-        long dayTimestamp = Utils.Companion.gmtDayTimestamp(timestamp);
-        Calendar cal = Calendar.getInstance(Locale.getDefault());
-        cal.setTimeInMillis(timestamp);
-        String body = mMessageInput.getText().toString().trim();
-        FcmMessage message = new FcmMessage(
-                timestamp,
-                -timestamp - TimeUnit.MINUTES.toMillis(10),
-                dayTimestamp,
-                mFcmMessage.getTo(),
-                mFcmMessage.getFrom(),
-                body,
-                "message",
-                mFcmMessage.getFrom() + "_" + mFcmMessage.getFrom()
-                , false);
-        // 1 because there's stub hello message
-        if (mChatRecycler.getAdapter().getItemCount() > 1 ||
-                mChatRecycler.getAdapter().getItemViewType(0) != MessagesAdapter.VIEW_TYPE_HELLO) {
-            mDatabase
-                    .child("notifications")
-                    .child("messages")
-                    .push()
-                    .setValue(message)
-                    .addOnFailureListener(failure -> {
-                        mErrorCallback.onError();
-                    });
-        }
-        mDatabase
-                .child("messages")
-                .child(mFcmMessage.getFrom())
-                .child(mFcmMessage.getTo())
-                .push()
-                .setValue(message, (e, ref) -> {
-                    ref.child("negatedTimestamp").setValue(-new Date().getTime());
-//                    mChatRecycler.postDelayed(() -> mChatRecycler.smoothScrollToPosition(0), 70);
-//                    mChatRecycler.smoothScrollToPosition(0);
-                });
-        if (!mFcmMessage.getFrom().equals(mFcmMessage.getTo())) {
+        List<String> permissions = requiredPermissions();
+
+        if (!requiredPermissions().isEmpty()) {
+            requestPermissions(permissions.toArray(new String[0]), REQUEST_MEDIA);
+        } else {
+
+//            Parcelable message = Parcels.wrap(mFcmMessage);
+            sendAcknowledge();
+            cancelRejectTimeout();
+            long timestamp = Utils.Companion.gmtTimeInMillis();
+            startTimer(timestamp);
+            long dayTimestamp = Utils.Companion.gmtDayTimestamp(timestamp);
+            Calendar cal = Calendar.getInstance(Locale.getDefault());
+            cal.setTimeInMillis(timestamp);
+            String body = mMessageInput.getText().toString().trim();
+            FcmMessage message = new FcmMessage(
+                    timestamp,
+                    -timestamp - TimeUnit.MINUTES.toMillis(10),
+                    dayTimestamp,
+                    mFcmMessage.getTo(),
+                    mFcmMessage.getFrom(),
+                    body,
+                    "message",
+                    mFcmMessage.getFrom() + "_" + mFcmMessage.getFrom()
+                    , false);
+            // 1 because there's stub hello message
+            if (mChatRecycler.getAdapter().getItemCount() > 1 ||
+                    mChatRecycler.getAdapter().getItemViewType(0) != MessagesAdapter.VIEW_TYPE_HELLO) {
+                mDatabase
+                        .child("notifications")
+                        .child("messages")
+                        .push()
+                        .setValue(message)
+                        .addOnFailureListener(failure -> {
+                            mErrorCallback.onError();
+                        });
+            }
             mDatabase
                     .child("messages")
-                    .child(mFcmMessage.getTo())
                     .child(mFcmMessage.getFrom())
+                    .child(mFcmMessage.getTo())
                     .push()
                     .setValue(message, (e, ref) -> {
                         ref.child("negatedTimestamp").setValue(-new Date().getTime());
+//                    mChatRecycler.postDelayed(() -> mChatRecycler.smoothScrollToPosition(0), 70);
+//                    mChatRecycler.smoothScrollToPosition(0);
+                    });
+            if (!mFcmMessage.getFrom().equals(mFcmMessage.getTo())) {
+                mDatabase
+                        .child("messages")
+                        .child(mFcmMessage.getTo())
+                        .child(mFcmMessage.getFrom())
+                        .push()
+                        .setValue(message, (e, ref) -> {
+                            ref.child("negatedTimestamp").setValue(-new Date().getTime());
 //                        mChatRecycler.postDelayed(() -> mChatRecycler.smoothScrollToPosition(0), 70);
 //                        mChatRecycler.smoothScrollToPosition(0);
-                    });
+                        });
+            }
+            mMessageInput.setText("");
         }
-        mMessageInput.setText("");
     }
 
     private void startTimer(long startTime) {
@@ -654,7 +670,9 @@ public class ChatFragment extends ButterFragment
     private void deleteUselessFiles() {
         File dir = new File(HOME_PATH);
         if (dir.isDirectory()) {
-            String[] children = dir.list((dir1, name) -> name.toLowerCase().endsWith("jpg") || name.toLowerCase().endsWith("mp4"));
+            String[] children = dir.list(
+                    (dir1, name) ->
+                            name.toLowerCase().endsWith("jpg") || name.toLowerCase().endsWith("mp4"));
             for (String aChildren : children) {
                 new File(dir, aChildren).delete();
             }
@@ -670,7 +688,7 @@ public class ChatFragment extends ButterFragment
         statement.setStatement(Request.MAKE_ME_BUSY);
         Parameters parameters = new Parameters();
         long endBusyTime = BUSY_TIMEOUT + startBusyTime;
-        parameters.getProps().put(Request.Var.PHONE, member.getPhoneNumber());
+        parameters.getProps().put(Request.Var.CHAT_ID, member.getChatId());
         parameters.getProps().put(Request.Var.DLG_TIME, endBusyTime);
         statement.setParameters(parameters);
         return statement;
@@ -683,32 +701,32 @@ public class ChatFragment extends ButterFragment
         api.executeStatement(statements).subscribe();
     }
 
-    private Statement createFreeRequest() {
-        ChatLab lab = ChatLab.get(getActivity());
-        Member member = lab.getMember();
-        Statement statement = new Statement();
-        statement.setStatement(Request.MAKE_ME_BUSY);
-        Parameters parameters = new Parameters();
-        parameters.getProps().put(Request.Var.PHONE, member.getPhoneNumber());
-        statement.setParameters(parameters);
-        return statement;
-    }
+//    private Statement createFreeRequest() {
+//        ChatLab lab = ChatLab.get(getActivity());
+//        Member member = lab.getMember();
+//        Statement statement = new Statement();
+//        statement.setStatement(Request.MAKE_ME_BUSY);
+//        Parameters parameters = new Parameters();
+//        parameters.getProps().put(Request.Var.PHONE, member.getPhoneNumber());
+//        statement.setParameters(parameters);
+//        return statement;
+//    }
 
-    private void makeMeFree() {
-        Statements statements = new Statements();
-        statements.getValues().add(createFreeRequest());
-        NeoApi api = NeoApiSingleton.getInstance();
-        api.executeStatement(statements).subscribe();
-    }
+//    private void makeMeFree() {
+//        Statements statements = new Statements();
+//        statements.getValues().add(createFreeRequest());
+//        NeoApi api = NeoApiSingleton.getInstance();
+//        api.executeStatement(statements).subscribe();
+//    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == REQUEST_MEDIA) {
             if (permissions.length > 0 && validate(grantResults)) {
-                Parcelable message = Parcels.wrap(mFcmMessage);
-                Intent i = PhotoActivity.getIntent(mMessageId, message, getActivity());
-                startActivity(i);
+//                Parcelable message = Parcels.wrap(mFcmMessage);
+//                Intent i = PhotoActivity.getIntent(mMessageId, message, getActivity());
+//                startActivity(i);
             } else {
                 Toast.makeText(getActivity(),
                         R.string.perm_warning,

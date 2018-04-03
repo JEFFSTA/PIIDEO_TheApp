@@ -28,6 +28,6 @@ public class ConnectionErrorActivity extends AppCompatActivity implements Networ
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.container, fragment)
                 .addToBackStack(null)
-                .commit();
+                .commitAllowingStateLoss();
     }
 }

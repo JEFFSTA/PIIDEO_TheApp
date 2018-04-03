@@ -9,6 +9,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -28,6 +29,8 @@ public class SplashActivity extends AppCompatActivity {
 
     private static final String TAG = SplashActivity.class.getSimpleName();
 
+    private Member mMember;
+
     public static Intent getIntent(Context context) {
         return new Intent(context, SplashActivity.class);
     }
@@ -40,15 +43,41 @@ public class SplashActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
         ChatLab lab = ChatLab.get(this);
-        Member member = lab.getMember();
+        mMember = lab.getMember();
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-
-        // TODO: 1/19/18 swap block comment/uncomment
-        if (user == null || member == null) {
+        if (user == null) {
+            signInAnonymously();
+        } else if (mMember == null) {
             new Handler().postDelayed(this::startRegistration, 2500);
         } else {
-            skipRegistration(member);
+            skipRegistration();
         }
+    }
+
+    private void signInAnonymously() {
+        FirebaseAuth.getInstance()
+                .signInAnonymously()
+                .addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
+                        Log.d(TAG, "signInAnonymously:success");
+                        final FirebaseUser user = task.getResult().getUser();
+                        if (user != null) {
+                            Log.d(TAG, "Member uid " + user.getUid());
+                            new Handler().postDelayed(this::startRegistration, 1500);
+                        } else {
+                            Toast.makeText(
+                                    this,
+                                    "Authentication failed",
+                                    Toast.LENGTH_SHORT)
+                                    .show();
+                        }
+                    } else {
+                        Log.w(TAG, "signInAnonymously:failure", task.getException());
+                    }
+                })
+                .addOnFailureListener(this, task -> {
+//                    mNetworkErrorCallback.onError();
+                });
     }
 
     private void startRegistration() {
@@ -57,8 +86,8 @@ public class SplashActivity extends AppCompatActivity {
         finish();
     }
 
-    private void skipRegistration(Member member) {
-        Parcelable byPass = Parcels.wrap(member);
+    private void skipRegistration() {
+        Parcelable byPass = Parcels.wrap(mMember);
         String chatMessageId = SharedPrefs.loadChatMessageId(this);
         Log.d(TAG, "chat msg " + chatMessageId);
         if (SharedPrefs.isSearching(this)) {

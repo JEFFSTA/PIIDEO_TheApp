@@ -45,7 +45,7 @@ public class RequestService extends IntentService {
 
     private DatabaseReference mDatabase;
     private Member mMember;
-;
+    ;
     private static volatile SendingRequestFragment mFragment;
 
 
@@ -90,7 +90,8 @@ public class RequestService extends IntentService {
             return;
         }
         restartService();
-        findReceiverFriendAndRequest(next);
+//        findReceiverFriendAndRequest(next);
+        sendRequest(next);
     }
 
     private void sendCompleteNotification() {
@@ -99,43 +100,43 @@ public class RequestService extends IntentService {
         this.sendOrderedBroadcast(broadcast, null);
     }
 
-    private void findReceiverFriendAndRequest(Member receiver) {
-        Statements statements = new Statements();
-        Statement statement = receiverFriendRequest(receiver);
-        statements.getValues().add(statement);
-        NeoApi api = NeoApiSingleton.getInstance();
-        api.executeStatement(statements)
-                .subscribeOn(Schedulers.io())
-                .map(transaction -> {
-                    List<Data> responseData = transaction.getResults().get(0).getData();
-                    String receiverFriendJson = responseData.get(0)
-                            .getRow()
-                            .get(0)
-                            .getValue();
-                    return Member.fromJson(receiverFriendJson);
-                })
-                .map(rf -> {
-                    receiver.setReceivedFrom(rf);
-//                    throw new ConnectException("OLOLO");
-                    return receiver;
-                }).observeOn(Schedulers.io())
-                .subscribe(
-                        o -> {
-                            Log.d(TAG, "OLOLO");
-                            sendRequest(o);
-                        },
-                        e -> Log.e(TAG, "OLOLO catched")
-                );
-    }
+//    private void findReceiverFriendAndRequest(Member receiver) {
+//        Statements statements = new Statements();
+//        Statement statement = receiverFriendRequest(receiver);
+//        statements.getValues().add(statement);
+//        NeoApi api = NeoApiSingleton.getInstance();
+//        api.executeStatement(statements)
+//                .subscribeOn(Schedulers.io())
+//                .map(transaction -> {
+//                    List<Data> responseData = transaction.getResults().get(0).getData();
+//                    String receiverFriendJson = responseData.get(0)
+//                            .getRow()
+//                            .get(0)
+//                            .getValue();
+//                    return Member.fromJson(receiverFriendJson);
+//                })
+//                .map(rf -> {
+//                    receiver.setReceivedFrom(rf);
+////                    throw new ConnectException("OLOLO");
+//                    return receiver;
+//                }).observeOn(Schedulers.io())
+//                .subscribe(
+//                        o -> {
+//                            Log.d(TAG, "OLOLO");
+//                            sendRequest(o);
+//                        },
+//                        e -> Log.e(TAG, "OLOLO catched")
+//                );
+//    }
 
     private void sendRequest(Member receiver) {
         long timestamp = Utils.Companion.gmtTimeInMillis();
         long dayTimestamp = Utils.Companion.gmtDayTimestamp(timestamp);
         String ownerId = mMember.getChatId();
-        String directRequestMarker = "";
-        if (receiver.getReceivedFrom().getChatId().equals(ownerId)) {
-            directRequestMarker = "++";
-        }
+        String directRequestMarker = "++" + mMember.getCountryCode();
+//        if (receiver.getReceivedFrom().getChatId().equals(ownerId)) {
+//            directRequestMarker = "++";
+//        }
 
         String subject = "||" + SharedPrefs.getSearchSubject(this);
         String explanation = "|" + SharedPrefs.getRequestMessage(this);
@@ -147,7 +148,7 @@ public class RequestService extends IntentService {
                         dayTimestamp,
                         ownerId,
                         receiver.getChatId(),
-                        directRequestMarker + receiver.getReceivedFrom().getPhoneNumber() + subject + explanation,
+                        directRequestMarker + subject + explanation,
                         MessagingService.SYN,
                         ownerId + "_" + receiver.getChatId(),
                         false);
@@ -158,15 +159,15 @@ public class RequestService extends IntentService {
                 .setValue(message);
     }
 
-    private Statement receiverFriendRequest(Member receiver) {
-        Statement request = new Statement();
-        request.setStatement(Request.FIND_TARGET_FRIEND);
-        Parameters parameters = new Parameters();
-        parameters.getProps().put(Request.Var.PHONE, mMember.getPhoneNumber());
-        parameters.getProps().put(Request.Var.F_PHONE, receiver.getPhoneNumber());
-        request.setParameters(parameters);
-        return request;
-    }
+//    private Statement receiverFriendRequest(Member receiver) {
+//        Statement request = new Statement();
+//        request.setStatement(Request.FIND_TARGET_FRIEND);
+//        Parameters parameters = new Parameters();
+//        parameters.getProps().put(Request.Var.PHONE, mMember.getPhoneNumber());
+//        parameters.getProps().put(Request.Var.F_PHONE, receiver.getPhoneNumber());
+//        request.setParameters(parameters);
+//        return request;
+//    }
 
     private void restartService() {
         AlarmManager alarmManager = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
